@@ -49,3 +49,20 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 4. Query di verifica: conteggi e assenza di duplicati (DoD).
 
 **Prossima sessione proposta:** scelta fonte dati e prima importazione reale (protocollo: spiega → guida → importa → verifica insieme).
+
+---
+
+## Sessione 3 — 2026-08-20 — Tema chiaro + perimetro dati approvato
+
+**Obiettivo dichiarato:** sostituire il tema "prato" con uno sfondo chiaro su toni di grigio; recepire le decisioni dello sviluppatore sul perimetro dei dati.
+
+**Fatto:**
+- **Tema chiaro**: sfondo grigio quasi bianco, pannelli bianchi, testo grigio scuro, un solo accento verde scuro usato con parsimonia (titoli, evidenze, voce attiva). Cura visuale fine rimandata di proposito a più avanti, come indicato dallo sviluppatore.
+- **Perimetro dati approvato e documentato in `docs/dati.md`**:
+  1. la strategia di combinazione fonti proposta è confermata;
+  2. rose dei **principali campionati europei** (top 5), non solo Serie A/B → la pipeline nasce multi-lega (si anticipa come requisito ciò che il piano collocava in M11; l'ordine di popolamento resta: prima l'Italia);
+  3. rose delle **nazionali aggiornate fino al Mondiale 2026** → richiederà una piccola estensione dello schema;
+  4. rose **Legends**: per i ritirati non esistono dataset aperti di attributi → restano curate a mano (M9), ma la pipeline prevede fin d'ora flag `legend` e import JSON.
+- Verificato: build pulita, screenshot delle schermate col nuovo tema.
+
+**Prossima sessione proposta:** verifica concreta di copertura e licenze delle fonti (openfootball, Kaggle, football-data.org) e primo script di importazione per l'Italia.

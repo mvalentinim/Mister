@@ -1,7 +1,8 @@
 /* index.css — stile globale dell'app.
-   Un file CSS descrive l'aspetto (colori, spazi, caratteri) degli elementi
-   HTML. Qui c'è lo stile della schermata titolo di M0: volutamente
-   semplice, verrà rifatto quando l'interfaccia crescerà. */
+   Tema chiaro su toni di grigio (scelta dello sviluppatore, sessione 3):
+   sfondo molto chiaro, testo grigio scuro, un solo colore d'accento usato
+   con parsimonia. La cura visuale vera arriverà più avanti: per ora conta
+   che sia pulito e leggibile. */
 
 /* Reset minimo: azzera i margini di default del browser */
 * {
@@ -11,24 +12,24 @@
 }
 
 :root {
-  /* Variabili CSS: definiamo i colori una volta sola e li riusiamo */
-  --verde-campo: #1a5c2e;
-  --verde-scuro: #0f3d1d;
-  --bianco: #f5f5f0;
-  --oro: #e8c547;
+  /* Variabili CSS: i colori del tema definiti una volta sola */
+  --sfondo: #f5f6f7;          /* grigio quasi bianco */
+  --superficie: #ffffff;      /* pannelli, tabelle, bottoni */
+  --bordo: #d9dce0;
+  --testo: #2b2f33;           /* grigio molto scuro */
+  --testo-attenuato: #6b7280; /* grigio medio per note e didascalie */
+  --accento: #1f6f43;         /* verde scuro, unico richiamo al calcio */
+  --accento-tenue: #e7f0ea;   /* sfondo per righe evidenziate */
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 body {
-  /* Sfondo a strisce verticali come un campo da calcio visto dall'alto */
-  background: repeating-linear-gradient(
-    90deg,
-    var(--verde-campo) 0 120px,
-    var(--verde-scuro) 120px 240px
-  );
-  color: var(--bianco);
+  background: var(--sfondo);
+  color: var(--testo);
   min-height: 100vh;
 }
+
+/* ---- Schermata titolo ---- */
 
 .schermata-titolo {
   min-height: 100vh;
@@ -46,13 +47,12 @@ body {
   letter-spacing: 0.35em;
   /* compensa lo spazio extra dopo l'ultima lettera */
   margin-right: -0.35em;
-  color: var(--oro);
-  text-shadow: 0 4px 0 rgb(0 0 0 / 35%);
+  color: var(--testo);
 }
 
 .sottotitolo {
   font-size: 1.1rem;
-  opacity: 0.85;
+  color: var(--testo-attenuato);
   margin-bottom: 2rem;
 }
 
@@ -68,18 +68,29 @@ body {
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.9rem 1.2rem;
-  border: 2px solid rgb(255 255 255 / 25%);
+  border: 1px solid var(--bordo);
   border-radius: 10px;
-  background: rgb(0 0 0 / 30%);
-  color: var(--bianco);
+  background: var(--superficie);
+  color: var(--testo);
   font: inherit;
   cursor: pointer;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 6%);
   transition: transform 0.1s ease, border-color 0.1s ease;
 }
 
 .voce-menu:hover {
   transform: translateY(-2px);
-  border-color: var(--oro);
+  border-color: var(--accento);
+}
+
+.voce-menu.attiva {
+  border-color: var(--accento);
+  background: var(--accento-tenue);
+}
+
+.voce-menu:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .voce-etichetta {
@@ -89,34 +100,22 @@ body {
 
 .voce-descrizione {
   font-size: 0.85rem;
-  opacity: 0.75;
+  color: var(--testo-attenuato);
 }
 
 .avviso {
   margin-top: 1.5rem;
   padding: 0.7rem 1.1rem;
   border-radius: 8px;
-  background: rgb(232 197 71 / 15%);
-  border: 1px solid var(--oro);
+  background: var(--superficie);
+  border: 1px solid var(--accento);
   max-width: 480px;
 }
 
 .versione {
   margin-top: 3rem;
   font-size: 0.8rem;
-  opacity: 0.6;
-}
-
-/* ---- Voce di menu attiva (Database) ---- */
-
-.voce-menu.attiva {
-  border-color: var(--oro);
-  background: rgb(232 197 71 / 12%);
-}
-
-.voce-menu:disabled {
-  opacity: 0.6;
-  cursor: wait;
+  color: var(--testo-attenuato);
 }
 
 /* ---- Schermate del database ---- */
@@ -128,7 +127,7 @@ body {
 }
 
 .schermata h2 {
-  color: var(--oro);
+  color: var(--accento);
   margin-bottom: 1rem;
 }
 
@@ -137,7 +136,7 @@ body {
 }
 
 .titolo-competizione {
-  border-bottom: 2px solid var(--oro);
+  border-bottom: 2px solid var(--accento);
   padding-bottom: 0.3rem;
 }
 
@@ -145,21 +144,23 @@ body {
   display: flex;
   gap: 0.5rem;
   padding: 0.8rem 1rem;
-  background: rgb(0 0 0 / 35%);
+  background: var(--superficie);
+  border-bottom: 1px solid var(--bordo);
 }
 
 .bottone-indietro {
   padding: 0.4rem 0.9rem;
-  border: 1px solid rgb(255 255 255 / 30%);
+  border: 1px solid var(--bordo);
   border-radius: 6px;
-  background: transparent;
-  color: var(--bianco);
+  background: var(--superficie);
+  color: var(--testo);
   font: inherit;
   cursor: pointer;
 }
 
 .bottone-indietro:hover {
-  border-color: var(--oro);
+  border-color: var(--accento);
+  color: var(--accento);
 }
 
 /* ---- Tabelle (squadre, rose) ---- */
@@ -167,24 +168,31 @@ body {
 .tabella {
   width: 100%;
   border-collapse: collapse;
-  background: rgb(0 0 0 / 30%);
+  background: var(--superficie);
+  border: 1px solid var(--bordo);
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 6%);
 }
 
 .tabella th,
 .tabella td {
   padding: 0.55rem 0.8rem;
   text-align: left;
-  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  border-bottom: 1px solid var(--bordo);
+}
+
+.tabella tr:last-child td {
+  border-bottom: none;
 }
 
 .tabella th {
-  background: rgb(0 0 0 / 40%);
+  background: var(--sfondo);
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  color: var(--testo-attenuato);
   user-select: none;
 }
 
@@ -193,7 +201,7 @@ body {
 }
 
 .tabella th.ordinabile:hover {
-  color: var(--oro);
+  color: var(--accento);
 }
 
 .riga-cliccabile {
@@ -201,7 +209,7 @@ body {
 }
 
 .riga-cliccabile:hover {
-  background: rgb(232 197 71 / 12%);
+  background: var(--accento-tenue);
 }
 
 .num {
@@ -214,13 +222,13 @@ body {
 }
 
 .evidenza {
-  color: var(--oro);
+  color: var(--accento);
   font-weight: 700;
 }
 
 .nota {
   font-size: 0.85rem;
-  opacity: 0.75;
+  color: var(--testo-attenuato);
 }
 
 /* ---- Scheda giocatore ---- */
@@ -233,8 +241,8 @@ body {
   display: inline-block;
   padding: 0.1rem 0.5rem;
   border-radius: 4px;
-  background: var(--oro);
-  color: var(--verde-scuro);
+  background: var(--accento);
+  color: #ffffff;
   font-weight: 700;
   font-size: 0.85rem;
 }
@@ -256,7 +264,7 @@ body {
 .attributo-barra {
   height: 0.6rem;
   border-radius: 3px;
-  background: rgb(0 0 0 / 40%);
+  background: #e5e7eb;
   overflow: hidden;
 }
 

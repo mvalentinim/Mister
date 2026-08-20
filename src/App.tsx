@@ -91,7 +91,7 @@ function App() {
 
         {messaggio && <p className="avviso">{messaggio}</p>}
 
-        <footer className="versione">M1 — Database · versione 0.0.2</footer>
+        <footer className="versione">M1 — Database · versione 0.0.3</footer>
       </main>
     )
   }
