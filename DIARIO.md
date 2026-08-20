@@ -233,3 +233,22 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 **DoD di M5:** partita guardata dall'inizio alla fine con cambio di velocità ✅, sostituzione all'intervallo ✅, telecronaca dei gol ✅, highlights e pagelle rileggibili a fine gara ✅ (schermata Partite). Verifica di persona dello sviluppatore in sospeso come sempre.
 
 **Prossima sessione proposta:** M6 — Mercato (trattative club-club, IA dei club, finestre).
+
+---
+
+## Sessione 13 — 2026-08-20 — M6: MERCATO (club↔club e IA dei club)
+
+**Obiettivo dichiarato:** finestre di mercato con trattative strutturate a 5 leve e club IA credibili (FRD §6.1-6.2).
+
+**Fatto:**
+- **Le rose vivono nella carriera**: fotografia di rose, contratti e budget alla creazione (`inizializzaMercato`); i trasferimenti le muovono; motore/Match Day/Tattica/Rosa leggono la rosa di carriera; cache squadre auto-invalidante. Salvataggi migrati a versioneSchema 4.
+- **Valore di mercato calcolato** (mai salvato, FRD §5.1): curva esponenziale su media, età (picco 22-27, premio giovani), sconto scadenza, fama club.
+- **IA dei club**: analisi rosa (ruoli scoperti, esuberi, giocatori chiave), personalità economica deterministica (propensione vendita, aggressività, valorizza giovani); ogni giorno di mercato 5-8 club comprano dove sono scoperti — le notizie ufficiali motivano ("serviva un rinforzo in attacco"); rumor per le trattative saltate; offerte all'utente (acquisto o prestito con diritto, più probabili per i cedibili).
+- **Trattativa a 5 leve** (max 3 round, rifiuti motivati): prezzo, bonus (valgono metà), scadenza (dentro il valore), prestito diritto/obbligo (titolari esclusi), contropartite (pesano se coprono un ruolo scoperto del venditore, altrimenti rifiuto motivato); "incedibile" per i top-3 delle botteghe care; controproposte con cifra.
+- **Finestre**: estiva 8 giorni a inizio stagione, invernale 5 a metà; campionato fermo a finestra aperta (semplificazione dichiarata); mercato deterministico (seminato).
+- **Contratti**: rinnovo semplice nel monte stipendi; fine stagione con risoluzione prestiti, rinnovi IA e **svincolati** ingaggiabili gratis.
+- **Schermata Mercato**: stato finestra e budget, avanzamento giorni, offerte ricevute, ricerca con trattativa, rosa con rinnovi/cedibili, svincolati, notiziario.
+- **Collaudo end-to-end**: campionato bloccato a mercato aperto ✓; trasferimenti IA motivati dai ruoli scoperti ✓; acquisto con contropartita riuscito ("Sarr è tuo", con Baldé come contropartita) ✓; offerta ricevuta di prestito con diritto (Cesena per Forson) visibile e accettabile ✓; chiusura finestra e campionato sbloccato ✓. Build e lint puliti; calibrazione non toccata.
+- Decisioni e semplificazioni in `docs/mercato.md` (la volontà del giocatore arriva in M7).
+
+**Prossima sessione proposta:** M7 — Trattativa conversazionale (cervello deterministico + LLM) e comportamento giocatori.

@@ -10,6 +10,8 @@ import { calcolaEta, mediaComplessiva, type GiocatoreRiga } from '../db/tipi.ts'
 interface Props {
   db: Database
   squadra: { tipo: 'club' | 'nazionale'; id: number }
+  /** rosa di carriera (M6): se presente, sostituisce quella del DB statico */
+  giocatoriIds?: number[]
   onApriGiocatore: (giocatoreId: number) => void
 }
 
@@ -29,7 +31,7 @@ type ChiaveColonna = (typeof COLONNE)[number]['chiave']
 // Ordine "naturale" dei ruoli nelle rose: portieri, difesa, centrocampo, attacco
 const ORDINE_RUOLI = ['POR', 'DC', 'TD', 'TS', 'MED', 'CC', 'TRQ', 'ED', 'ES', 'PC']
 
-function Rosa({ db, squadra, onApriGiocatore }: Props) {
+function Rosa({ db, squadra, giocatoriIds, onApriGiocatore }: Props) {
   const [colonnaOrdine, setColonnaOrdine] = useState<ChiaveColonna>('ruolo')
   const [discendente, setDiscendente] = useState(false)
 
@@ -40,7 +42,15 @@ function Rosa({ db, squadra, onApriGiocatore }: Props) {
       ? interrogaUna<{ nome: string }>(db, 'SELECT nome FROM club WHERE id = ?', [squadra.id])?.nome
       : interrogaUna<{ nome: string }>(db, 'SELECT nome FROM nazionale WHERE id = ?', [squadra.id])?.nome
   const giocatori =
-    squadra.tipo === 'club'
+    giocatoriIds
+      ? giocatoriIds.length > 0
+        ? interroga<GiocatoreRiga>(
+            db,
+            `SELECT * FROM giocatore WHERE id IN (${giocatoriIds.map(() => '?').join(',')})`,
+            giocatoriIds,
+          )
+        : []
+      : squadra.tipo === 'club'
       ? interroga<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE club_id = ?', [squadra.id])
       : interroga<GiocatoreRiga>(
           db,

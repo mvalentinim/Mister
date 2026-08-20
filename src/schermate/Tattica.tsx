@@ -42,9 +42,17 @@ function Tattica({ db, carriera, onModificata }: Props) {
   const tattica = carriera.tattica
   const slots = MODULI[tattica.modulo]
 
-  const rosa = interroga<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE club_id = ?', [
-    carriera.clubId,
-  ])
+  // la rosa DI CARRIERA (M6): i trasferimenti la cambiano
+  const idsRosa = carriera.rose?.[carriera.clubId]
+  const rosa = idsRosa
+    ? idsRosa.length > 0
+      ? interroga<GiocatoreRiga>(
+          db,
+          `SELECT * FROM giocatore WHERE id IN (${idsRosa.map(() => '?').join(',')})`,
+          idsRosa,
+        )
+      : []
+    : interroga<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE club_id = ?', [carriera.clubId])
   const perId = new Map(rosa.map((g) => [g.id, g]))
   const titolareDelloSlot = (i: number) => perId.get(tattica.titolari[i])
 

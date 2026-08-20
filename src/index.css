@@ -709,3 +709,105 @@ body {
 .idoneita.buona { background: #7cb342; }
 .idoneita.scarsa { background: #e0a800; }
 .idoneita.pessima { background: #c0392b; }
+
+/* ---- Mercato (M6) ---- */
+
+.mercato-testata {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--superficie);
+  border: 1px solid var(--bordo);
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.mercato h3 {
+  margin: 1.4rem 0 0.6rem;
+}
+
+.campo-ricerca {
+  flex: 1;
+  min-width: 220px;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--bordo);
+  border-radius: 6px;
+  font: inherit;
+  background: var(--superficie);
+  color: var(--testo);
+}
+
+.mercato select {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--bordo);
+  border-radius: 6px;
+  font: inherit;
+  background: var(--superficie);
+  color: var(--testo);
+}
+
+.pannello-trattativa {
+  background: var(--superficie);
+  border: 1px solid var(--accento);
+  border-radius: 10px;
+  padding: 1rem 1.3rem;
+  margin: 1rem 0;
+}
+
+.leve {
+  display: flex;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  align-items: end;
+  margin: 0.8rem 0;
+}
+
+.leve label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--testo-attenuato);
+}
+
+.leve input[type='number'] {
+  width: 8.5rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--bordo);
+  border-radius: 6px;
+  font: inherit;
+}
+
+.leva-spunta {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.4rem !important;
+}
+
+.storia-trattativa {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0.6rem 0;
+  font-size: 0.92rem;
+}
+
+.riga-scadenza {
+  background: #fff7e0;
+}
+
+.notiziario {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.notizia.ufficiale { font-weight: 600; }
+.notizia.rumor { color: var(--testo-attenuato); font-style: italic; }
+.notizia.avviso { color: var(--accento); font-weight: 700; }

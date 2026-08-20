@@ -53,6 +53,12 @@ function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: nu
     salvataggio.tattica = null as unknown as Carriera['tattica']
     caricato.versioneSchema = 3
   }
+  if (caricato.versioneSchema === 3) {
+    // v3 → v4 (M6): arrivano rose, contratti e mercato; anche qui la
+    // fotografia si costruisce al primo accesso (serve il DB)
+    salvataggio.rose = null as unknown as Carriera['rose']
+    caricato.versioneSchema = 4
+  }
   return salvataggio
 }
 

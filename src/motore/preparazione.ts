@@ -98,14 +98,25 @@ export function tatticaDefault(rosa: GiocatoreRiga[]): Tattica {
 /**
  * Prepara una squadra per il motore. Senza tattica esplicita usa il default
  * (4-4-2 col miglior undici): è l'assetto dei club controllati dall'IA.
+ * `giocatoriIds` è la rosa DI CARRIERA (M6): se assente si usa quella del
+ * DB statico (consultazione database, calibrazione).
  */
 export function preparaSquadra(
   db: Database,
   clubId: number,
   nomeClub: string,
   tattica?: Tattica,
+  giocatoriIds?: number[],
 ): SquadraMotore {
-  const rosa = interroga<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE club_id = ?', [clubId])
+  const rosa = giocatoriIds
+    ? giocatoriIds.length > 0
+      ? interroga<GiocatoreRiga>(
+          db,
+          `SELECT * FROM giocatore WHERE id IN (${giocatoriIds.map(() => '?').join(',')})`,
+          giocatoriIds,
+        )
+      : []
+    : interroga<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE club_id = ?', [clubId])
   const assetto = tattica ?? tatticaDefault(rosa)
   const slots = MODULI[assetto.modulo]
   const perId = new Map(rosa.map((g) => [g.id, g]))

@@ -15,7 +15,9 @@ import {
   DESCRIZIONE_OBIETTIVO, etichettaStagione, type Carriera, type CronacaPartita, type Partita,
 } from '../carriera/tipi.ts'
 import type { EventoPartita } from '../motore/tipi.ts'
+import { inizializzaMercato } from '../mercato/stato.ts'
 import MatchDay from './MatchDay.tsx'
+import Mercato from './Mercato.tsx'
 import Rosa from './Rosa.tsx'
 import Tattica from './Tattica.tsx'
 
@@ -77,7 +79,7 @@ interface Props {
   carriera: Carriera
 }
 
-type Linguetta = 'partite' | 'classifica' | 'tattica' | 'rosa'
+type Linguetta = 'partite' | 'classifica' | 'mercato' | 'tattica' | 'rosa'
 
 /** Riepilogo restituito da chiudiStagione, per la schermata di fine stagione. */
 type EsitoStagione = ReturnType<typeof chiudiStagione>
@@ -89,12 +91,29 @@ function SchermataCarriera({ db, carriera }: Props) {
   // contatore usato solo per forzare il ridisegno dopo aver mutato la carriera
   const [, setVersione] = useState(0)
 
-  // I salvataggi migrati da versioni vecchie non hanno la tattica:
-  // la costruiamo (e salviamo) al primo accesso alla carriera
+  // I salvataggi migrati da versioni vecchie non hanno tattica e/o mercato:
+  // li costruiamo (e salviamo) al primo accesso alla carriera
   useEffect(() => {
+    let cambiata = false
     if (!carriera.tattica) {
       const rosa = interroga<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE club_id = ?', [carriera.clubId])
       carriera.tattica = tatticaDefault(rosa)
+      cambiata = true
+    }
+    if (!carriera.rose) {
+      // v3 → v4 (M6): fotografa rose/contratti/budget; i club vecchi non
+      // hanno i campi budget → li leggiamo dal DB statico
+      for (const club of carriera.club) {
+        if (club.budgetMercato === undefined) {
+          const riga = interroga<{ b: number }>(db, 'SELECT budget_mercato AS b FROM club WHERE id = ?', [club.id])[0]
+          club.budgetMercato = riga?.b ?? 1_000_000
+          club.budgetMercatoIniziale = club.budgetMercato
+        }
+      }
+      inizializzaMercato(db, carriera, false) // senza aprire la finestra a metà stagione
+      cambiata = true
+    }
+    if (cambiata) {
       void salvaCarriera(carriera)
       setVersione((v) => v + 1)
     }
@@ -109,7 +128,8 @@ function SchermataCarriera({ db, carriera }: Props) {
   async function gioca(fineStagione: boolean) {
     do {
       avanzaGiornata(db, carriera)
-    } while (fineStagione && !stagioneFinita(carriera))
+      // la corsa si ferma se si apre il mercato invernale (M6)
+    } while (fineStagione && !stagioneFinita(carriera) && !carriera.mercato.aperto)
     await salvaCarriera(carriera)
     setVersione((v) => v + 1)
   }
@@ -179,20 +199,29 @@ function SchermataCarriera({ db, carriera }: Props) {
 
       {/* Linguette di navigazione interna */}
       <nav className="linguette">
-        {(['partite', 'classifica', 'tattica', 'rosa'] as const).map((l) => (
+        {(['partite', 'classifica', 'mercato', 'tattica', 'rosa'] as const).map((l) => (
           <button
             key={l}
             className={l === linguetta ? 'linguetta attiva' : 'linguetta'}
             onClick={() => setLinguetta(l)}
           >
-            {l === 'partite' ? 'Partite' : l === 'classifica' ? 'Classifica' : l === 'tattica' ? 'Tattica' : 'Rosa'}
+            {l === 'partite' ? 'Partite' : l === 'classifica' ? 'Classifica'
+              : l === 'mercato' ? (carriera.mercato?.aperto ? 'Mercato 🟢' : 'Mercato')
+              : l === 'tattica' ? 'Tattica' : 'Rosa'}
           </button>
         ))}
       </nav>
 
       {linguetta === 'partite' && (
         <>
-          {!finita && (
+          {!finita && carriera.mercato?.aperto && (
+            <p className="avviso">
+              🟢 Il mercato {carriera.mercato.finestra === 'estiva' ? 'estivo' : 'invernale'} è aperto
+              ({carriera.mercato.giorniRimasti} giorni): il campionato riprende alla chiusura.
+              Vai alla linguetta <strong>Mercato</strong> per operare o far scorrere i giorni.
+            </p>
+          )}
+          {!finita && !carriera.mercato?.aperto && (
             <div className="riga-bottoni">
               <button className="bottone-primario" onClick={() => setMatchDayAperto(true)}>
                 🎥 Match Day — giornata {carriera.giornata + 1}
@@ -278,12 +307,21 @@ function SchermataCarriera({ db, carriera }: Props) {
         </table>
       )}
 
+      {linguetta === 'mercato' && carriera.mercato && (
+        <Mercato db={db} carriera={carriera} onModificata={() => setVersione((v) => v + 1)} />
+      )}
+
       {linguetta === 'tattica' && carriera.tattica && (
         <Tattica db={db} carriera={carriera} onModificata={() => setVersione((v) => v + 1)} />
       )}
 
       {linguetta === 'rosa' && (
-        <Rosa db={db} squadra={{ tipo: 'club', id: carriera.clubId }} onApriGiocatore={() => {}} />
+        <Rosa
+          db={db}
+          squadra={{ tipo: 'club', id: carriera.clubId }}
+          giocatoriIds={carriera.rose?.[carriera.clubId]}
+          onApriGiocatore={() => {}}
+        />
       )}
     </section>
   )

@@ -15,6 +15,8 @@
 import type { Database } from 'sql.js'
 import { interroga } from '../db/query.ts'
 import { preparaSquadra, tatticaDefault } from '../motore/preparazione.ts'
+import { fineStagioneMercato, inizializzaMercato, aggiungiNotizia } from '../mercato/stato.ts'
+import { GIORNI_FINESTRA_INVERNALE } from '../mercato/stato.ts'
 import { simulaPartitaMotore } from '../motore/partita.ts'
 import type { SquadraMotore } from '../motore/tipi.ts'
 import { generaCalendario } from './calendario.ts'
@@ -22,22 +24,24 @@ import type {
   Carriera, ClubCarriera, Obiettivo, Offerta, ProfiloAllenatore, RigaClassifica,
 } from './tipi.ts'
 
-// Cache delle squadre preparate per il motore: il DB statico non cambia,
-// quindi la formazione di un club IA si calcola una volta sola per sessione.
-// La squadra dell'UTENTE invece si ricostruisce sempre: la sua tattica (M4)
+// Cache delle squadre preparate per il motore. Da M6 le rose vivono nella
+// CARRIERA (i trasferimenti le muovono): la cache si invalida da sola
+// quando la rosa di un club cambia (chiave = elenco degli id).
+// La squadra dell'UTENTE si ricostruisce sempre: la sua tattica (M4)
 // può cambiare in ogni momento.
-const cacheSquadre = new Map<number, SquadraMotore>()
+const cacheSquadre = new Map<number, { chiave: string; squadra: SquadraMotore }>()
 
 function squadraMotore(db: Database, carriera: Carriera, clubId: number): SquadraMotore {
   const club = carriera.club.find((c) => c.id === clubId)!
+  const ids = carriera.rose?.[clubId]
   if (clubId === carriera.clubId) {
-    return preparaSquadra(db, clubId, club.nome, carriera.tattica)
+    return preparaSquadra(db, clubId, club.nome, carriera.tattica, ids)
   }
-  let squadra = cacheSquadre.get(clubId)
-  if (!squadra) {
-    squadra = preparaSquadra(db, clubId, club.nome)
-    cacheSquadre.set(clubId, squadra)
-  }
+  const chiave = ids ? ids.join(',') : 'statico'
+  const inCache = cacheSquadre.get(clubId)
+  if (inCache && inCache.chiave === chiave) return inCache.squadra
+  const squadra = preparaSquadra(db, clubId, club.nome, undefined, ids)
+  cacheSquadre.set(clubId, { chiave, squadra })
   return squadra
 }
 
@@ -79,7 +83,8 @@ export function nazioniDisponibili(db: Database): Array<{ id: number; nome: stri
 function fotografaClub(db: Database, nazioneId: number): ClubCarriera[] {
   return interroga<ClubCarriera>(
     db,
-    `SELECT c.id, c.nome, c.fama AS forza, co.livello
+    `SELECT c.id, c.nome, c.fama AS forza, co.livello,
+            c.budget_mercato AS budgetMercato, c.budget_mercato AS budgetMercatoIniziale
      FROM club c JOIN competizione co ON co.id = c.competizione_id
      WHERE co.nazione_id = ? AND co.livello IN (1, 2)`,
     [nazioneId],
@@ -145,12 +150,22 @@ export function creaCarriera(
   const rosaMia = interroga<import('../db/tipi.ts').GiocatoreRiga>(
     db, 'SELECT * FROM giocatore WHERE club_id = ?', [offerta.clubId],
   )
-  return {
+  const carriera: Carriera = {
     id: `carriera-${Date.now()}`,
-    versioneSchema: 3,
+    versioneSchema: 4,
     seme: Math.floor(Math.random() * 2_147_483_647), // fissato alla creazione
     cronaca: null,
     tattica: tatticaDefault(rosaMia),
+    // il mercato (rose, contratti, budget) viene fotografato subito sotto
+    rose: {},
+    contratti: {},
+    svincolati: [],
+    prestiti: [],
+    budget: { mercato: 0, stipendi: 0 },
+    mercato: {
+      aperto: false, finestra: null, giorniRimasti: 0,
+      prossimaOffertaId: 1, offerteRicevute: [], notizie: [], cedibili: [],
+    },
     allenatore,
     nazione,
     competizioni: {
@@ -167,6 +182,11 @@ export function creaCarriera(
     storico: [],
     aggiornataIl: new Date().toISOString(),
   }
+  // fotografa rose, contratti e budget e apre la finestra estiva (M6)
+  inizializzaMercato(db, carriera)
+  carriera.budget.mercato = offerta.budgetMercato
+  carriera.budget.stipendi = Math.max(carriera.budget.stipendi, offerta.budgetStipendi)
+  return carriera
 }
 
 /** La divisione in cui gioca l'utente in questa stagione. */
@@ -215,6 +235,14 @@ export function avanzaGiornata(
     }
   }
   carriera.giornata++
+
+  // a metà campionato si apre la finestra invernale (M6, FRD §6.1)
+  if (carriera.giornata === Math.floor(carriera.calendario.length / 2)) {
+    carriera.mercato.aperto = true
+    carriera.mercato.finestra = 'invernale'
+    carriera.mercato.giorniRimasti = GIORNI_FINESTRA_INVERNALE
+    aggiungiNotizia(carriera, 'Si apre la finestra di mercato invernale!', 'avviso')
+  }
 }
 
 /** true quando tutte le giornate sono state giocate. */
@@ -327,10 +355,12 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
     retrocesso,
   })
 
-  // nuova stagione: stesso club, rose congelate, nuovo calendario
+  // nuova stagione: stesso club, nuovo calendario
   carriera.anno++
   carriera.giornata = 0
   carriera.cronaca = null
+  // prestiti, scadenze, svincoli e riapertura del mercato estivo (M6)
+  fineStagioneMercato(db, carriera)
   const nuovoLivello = livelloUtente(carriera) // ricalcolato dopo i movimenti
   carriera.calendario = generaCalendario(
     carriera.club.filter((c) => c.livello === nuovoLivello).map((c) => c.id),
