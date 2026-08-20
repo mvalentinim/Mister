@@ -352,3 +352,19 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Trasloco completo accettando** (solo a fine stagione): cambiano nazione, nomi delle divisioni, calendario (giornate corrette per taglia di lega: 34 in Bundesliga, 46 in Championship…) e tabellone di coppa; notizia dedicata. Dopo un esonero, invece, si resta nella propria divisione (a metà campionato il trasloco non avrebbe senso).
 - Le offerte mostrano il campionato di provenienza in tutte e tre le schermate (esonero, fine stagione, riquadro in Partite).
 - **Collaudo end-to-end**: carriera con fama alta → a fine stagione offerte da RB Leipzig (Bundesliga), Bournemouth (Premier League) e Marsiglia (Ligue 1) ✓; accettato il Lipsia → nazione Germania, Bundesliga/2. Bundesliga, calendario a 34 giornate, coppa tedesca a 32 squadre, prima giornata giocata con classifica a 18 ✓. Verificato anche che tutte le 10 leghe hanno squadre pari (calendario sempre generabile). Build, lint, tsc e calibrazione verdi.
+
+---
+
+## Sessione 18 — 2026-08-20 — M8 parte 2: Coppa Europa, contratto dell'allenatore, offerte con la fama
+
+**Obiettivo dichiarato:** competizioni continentali in forma semplificata + tre richieste esplicite: più fama → più offerte; sempre almeno un'offerta della propria nazione; contratti pluriennali dell'allenatore con costo in fama per chi li rompe.
+
+**Fatto:**
+- **Coppa Europa** (forma semplificata): i primi 4 della prima divisione si qualificano (+2 fama); l'anno dopo 32 top club dei 5 campionati, eliminazione diretta con turni sfalsati rispetto alla coppa nazionale (giornate 7/13/17/22/27), rigori seminati; vincerla vale trofeo e +10 fama. Esiste solo nelle stagioni in cui si è dentro; cambiando panchina a fine stagione il posto si perde (era del club). Il modulo coppa è stato generalizzato (un solo motore per entrambe le coppe, riquadri separati in Partite).
+- **Scudetto**: vincere la prima divisione ora vale trofeo in bacheca e +8 fama (mancava!).
+- **Contratto pluriennale dell'allenatore** (`contrattoAllenatore`, visibile in intestazione): le offerte arrivano anche a contratto in essere, ma romperlo costa **−3 fama** (registrato nel bilancio spiegabile); dopo un esonero nessun costo. Alla scadenza rinnovo automatico: 2 anni (+10% stipendio) con fiducia ≥ 35, 1 anno "di prova" altrimenti — mai vicoli ciechi.
+- **Offerte che crescono con la fama**: da 1-2 (sconosciuto) a 4-5 (fama 90+), con la **garanzia di almeno un'offerta della nazione in cui si lavora** quando esiste un club adatto.
+- Le coppe premiano la fama al momento della vittoria (spostato da fine stagione, niente doppi conteggi). Salvataggi a **versioneSchema 8** (migrazione automatica).
+- **Collaudo end-to-end**: fama 60 → a fine stagione 4 offerte (Torino e Inter italiane garantite, Mallorca e Real Sociedad estere) ✓; accettato il Mallorca a contratto vivo → "Contratto rotto col Monza" −3 fama, nuovo contratto ✓; La Liga vinta → trofeo Campionato, +8 fama, qualificazione Europa +2 ✓; stagione dopo con ENTRAMBE le coppe nei riquadri: sedicesimi di coppa di Spagna passati e sedicesimi europei giocati dopo la giornata 7 (Milan-Mallorca 3-1) ✓; rinnovo automatico del contratto fino al 2029 visibile in intestazione ✓. Build, lint, tsc e calibrazione verdi.
+
+**Resta per chiudere M8** (parte 3): le panchine delle NAZIONALI oltre soglia di fama alta, col ciclo qualificazioni/torneo — è una modalità di gioco a sé e merita la sua sessione.

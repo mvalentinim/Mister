@@ -165,11 +165,21 @@ export function offerteFineStagione(carriera: Carriera): Offerta[] {
   })
 
   const rng = creaRng(semeDaStringa(`offerte-${carriera.seme}-${carriera.anno}`))
-  const quante = Math.min(candidati.length, rng.intero(3) + (fama >= FASCE_FAMA.mediA ? 1 : 0)) // 0-3
-  return [...candidati]
-    .sort(() => rng.numero() - 0.5)
-    .slice(0, quante)
-    .map((c) => costruisciOfferta(c, obiettivoDelClub(carriera, c)))
+  // più fama → più telefonate: da 1-2 offerte per uno sconosciuto fino a
+  // 4-5 per un allenatore da 90+ (sempre nei limiti dei candidati veri)
+  const quante = Math.min(candidati.length, 1 + Math.floor(fama / 25) + rng.intero(2))
+  const mescolati = [...candidati].sort(() => rng.numero() - 0.5)
+
+  // garanzia: almeno UN'offerta della nazione in cui si lavora (se esiste),
+  // così restare nel proprio campionato è sempre possibile
+  const scelte: ClubCarriera[] = []
+  const diCasa = mescolati.find((c) => (c.nazioneId ?? carriera.nazione.id) === carriera.nazione.id)
+  if (diCasa) scelte.push(diCasa)
+  for (const c of mescolati) {
+    if (scelte.length >= quante) break
+    if (!scelte.includes(c)) scelte.push(c)
+  }
+  return scelte.map((c) => costruisciOfferta(c, obiettivoDelClub(carriera, c)))
 }
 
 function clubDellaNazione(carriera: Carriera): ClubCarriera[] {
@@ -184,10 +194,27 @@ function clubDellaNazione(carriera: Carriera): ClubCarriera[] {
     (non si possono più mantenere né tradire: non sono più i tuoi). */
 export function accettaOffertaPanchina(db: Database, carriera: Carriera, offerta: Offerta): void {
   const quando = carriera.offerteSpeciali?.contesto ?? 'fine-stagione'
+  const vecchioClub = carriera.club.find((c) => c.id === carriera.clubId)
+
+  // ── rompere un contratto in essere costa fama (M8 parte 2) ──
+  // Dopo un esonero no: è il club ad averti cacciato. A fine stagione sì,
+  // se il contratto copriva ancora la stagione che sta per iniziare.
+  if (quando === 'fine-stagione' && carriera.contrattoAllenatore &&
+      carriera.contrattoAllenatore.scadenza > carriera.anno) {
+    variaFama(carriera, -3, `Contratto rotto col ${vecchioClub?.nome ?? 'vecchio club'}`)
+  }
+
   carriera.clubId = offerta.clubId
   carriera.obiettivo = offerta.obiettivo
   carriera.fiducia = 55
   carriera.offerteSpeciali = null
+  // il nuovo contratto dell'allenatore
+  carriera.contrattoAllenatore = {
+    scadenza: carriera.anno + offerta.durataAnni,
+    stipendio: offerta.stipendioAllenatore,
+  }
+  // il posto in Coppa Europa era del vecchio club: cambiando, si perde
+  if (quando === 'fine-stagione') carriera.coppaEuropa = null
 
   // budget del nuovo club
   const club = carriera.club.find((c) => c.id === offerta.clubId)!
@@ -254,9 +281,7 @@ export function famaFineStagione(
   else variaFama(carriera, -4, 'Obiettivo stagionale fallito')
   if (esito.promosso) variaFama(carriera, 8, 'PROMOZIONE!')
   if (esito.retrocesso) variaFama(carriera, -6, 'Retrocessione')
-  if (carriera.coppa?.vincitriceId === carriera.clubId) {
-    variaFama(carriera, 6, 'Coppa nazionale vinta')
-  }
+  // (le coppe premiano la fama al momento della vittoria, in coppa.ts)
 
   // giovani valorizzati (FRD §4.3): U23 con tante presenze e buoni voti
   let giovani = 0

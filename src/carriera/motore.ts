@@ -16,8 +16,8 @@ import type { Database } from 'sql.js'
 import { interroga } from '../db/query.ts'
 import { preparaSquadra, tatticaDefault } from '../motore/preparazione.ts'
 import { estendiMercatoAlMondo, fineStagioneMercato, inizializzaMercato, aggiungiNotizia } from '../mercato/stato.ts'
-import { creaCoppa, giocaTurnoCoppaSeDovuto } from './coppa.ts'
-import { aggiornaFiducia, controllaEsonero, famaFineStagione, obiettivoDelClub, offerteFineStagione } from './fama.ts'
+import { creaCoppa, creaCoppaEuropa, giocaTurnoCoppaSeDovuto } from './coppa.ts'
+import { aggiornaFiducia, controllaEsonero, famaFineStagione, obiettivoDelClub, offerteFineStagione, variaFama } from './fama.ts'
 import { crescitaFineStagione, type NotaCrescita } from './crescita.ts'
 import { GIORNI_FINESTRA_INVERNALE } from '../mercato/stato.ts'
 import { aggiornaComportamento, verificaPromesseFineStagione } from '../comportamento/comportamento.ts'
@@ -165,13 +165,16 @@ export function creaCarriera(
   )
   const carriera: Carriera = {
     id: `carriera-${Date.now()}`,
-    versioneSchema: 7,
+    versioneSchema: 8,
     // ── M8: fama completa, fiducia, coppa, crescita ──
     fiducia: 60,
     crescita: {},
     coppa: null, // creata subito sotto, dopo la fotografia dei club
     eventiFama: [],
     trofei: [],
+    coppaEuropa: null, // la Coppa Europa si conquista sul campo
+    qualificatoEuropa: false,
+    contrattoAllenatore: { scadenza: ANNO_INIZIO_CARRIERA + offerta.durataAnni, stipendio: offerta.stipendioAllenatore },
     esoneri: 0,
     offerteSpeciali: null,
     morale: {},
@@ -409,6 +412,15 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
   // Entrambi PRIMA dell'azzeramento delle statistiche (che li alimentano).
   const famaPrima = carriera.famaAllenatore
   famaFineStagione(db, carriera, { posizione, obiettivoRaggiunto, promosso, retrocesso })
+
+  // ── M8 parte 2: scudetto e qualificazione europea ──
+  if (livello === 1 && posizione === 1) {
+    carriera.trofei.push({ anno: carriera.anno, nome: `Campionato (${carriera.competizioni[1]})` })
+    variaFama(carriera, 8, 'CAMPIONI! Titolo nazionale vinto')
+  }
+  // i primi 4 della prima divisione giocano la Coppa Europa l'anno dopo
+  carriera.qualificatoEuropa = livello === 1 && posizione <= 4
+  if (carriera.qualificatoEuropa) variaFama(carriera, 2, 'Qualificazione alla Coppa Europa')
   const crescita = crescitaFineStagione(db, carriera)
 
   // le promesse "di progetto" si verificano coi verdetti (M7, FRD §6.3)
@@ -426,6 +438,26 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
     clubNazione(carriera).filter((c) => c.livello === nuovoLivello).map((c) => c.id),
   )
   carriera.coppa = creaCoppa(carriera) // nuovo tabellone di coppa (M8)
+  // la Coppa Europa esiste solo se ci si è qualificati (M8 parte 2)
+  carriera.coppaEuropa = carriera.qualificatoEuropa ? creaCoppaEuropa(carriera) : null
+
+  // ── il contratto dell'allenatore (M8 parte 2): rinnovo alla scadenza ──
+  // La dirigenza rinnova sempre (niente vicoli ciechi), ma la durata dice
+  // quanto crede in te: 2 anni se la fiducia è buona, 1 se sei in bilico.
+  if (carriera.contrattoAllenatore.scadenza <= carriera.anno) {
+    const anni = carriera.fiducia >= 35 ? 2 : 1
+    carriera.contrattoAllenatore = {
+      scadenza: carriera.anno + anni,
+      stipendio: Math.round(carriera.contrattoAllenatore.stipendio * (carriera.fiducia >= 35 ? 1.1 : 1)),
+    }
+    aggiungiNotizia(
+      carriera,
+      anni === 2
+        ? `La dirigenza rinnova il tuo contratto fino al ${carriera.anno + anni}.`
+        : `Rinnovo di UN solo anno: la dirigenza non è convinta di te.`,
+      anni === 2 ? 'ufficiale' : 'avviso',
+    )
+  }
 
   // l'obiettivo si rinegozia a ogni stagione (M8): un club appena promosso
   // chiede la salvezza, non un'altra promozione
@@ -443,5 +475,6 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
     eventiFama, famaPrima, famaDopo: carriera.famaAllenatore,
     crescita: crescita as NotaCrescita[],
     coppaVinta: carriera.trofei.some((t) => t.anno === carriera.anno - 1),
+    qualificatoEuropa: carriera.qualificatoEuropa,
   }
 }

@@ -89,6 +89,14 @@ function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: nu
     salvataggio.offerteSpeciali = null
     caricato.versioneSchema = 7
   }
+  if (caricato.versioneSchema === 7) {
+    // v7 → v8 (M8 parte 2): coppa Europa e contratto dell'allenatore.
+    salvataggio.coppaEuropa = null
+    salvataggio.qualificatoEuropa = false
+    salvataggio.contrattoAllenatore = { scadenza: salvataggio.anno + 2, stipendio: 200_000 }
+    if (salvataggio.coppa && !salvataggio.coppa.nome) salvataggio.coppa.nome = 'Coppa nazionale'
+    caricato.versioneSchema = 8
+  }
   return salvataggio
 }
 

@@ -182,11 +182,20 @@ export interface TurnoCoppa {
   partite: PartitaCoppa[]
 }
 
-/** La coppa nazionale della stagione (32 squadre, eliminazione diretta). */
+/** Una coppa a eliminazione diretta (32 squadre): quella nazionale o
+    quella europea (M8 parte 2). */
 export interface CoppaStagione {
+  nome: string // "Coppa nazionale" o "Coppa Europa"
   turni: TurnoCoppa[]
   prossimoTurno: number // indice del prossimo turno da giocare
   vincitriceId: number | null
+}
+
+/** Il contratto dell'allenatore col suo club (M8 parte 2): è pluriennale,
+    e romperlo per accettare un'altra panchina costa fama. */
+export interface ContrattoAllenatore {
+  scadenza: number // l'anno in cui termina (come i contratti dei giocatori)
+  stipendio: number
 }
 
 /** Una voce del registro spiegabile della fama (FRD §12: si vede il perché). */
@@ -213,7 +222,7 @@ export interface OfferteSpeciali {
 /** Lo stato completo di una carriera. */
 export interface Carriera {
   id: string
-  versioneSchema: 7 // per le migrazioni dei salvataggi (FRD §11)
+  versioneSchema: 8 // per le migrazioni dei salvataggi (FRD §11)
   // ── M8: fama completa, fiducia, coppa, crescita ──
   /** fiducia della dirigenza (0-100): sotto la soglia scatta l'esonero */
   fiducia: number
@@ -221,6 +230,12 @@ export interface Carriera {
   crescita: Record<number, number>
   /** la coppa nazionale della stagione (null nei salvataggi migrati a metà stagione) */
   coppa: CoppaStagione | null
+  // ── M8 parte 2: Europa e contratto dell'allenatore ──
+  /** la coppa europea: esiste solo nelle stagioni in cui ci si è qualificati */
+  coppaEuropa: CoppaStagione | null
+  /** true se l'ULTIMA stagione chiusa vale la qualificazione europea */
+  qualificatoEuropa: boolean
+  contrattoAllenatore: ContrattoAllenatore
   /** registro spiegabile delle variazioni di fama */
   eventiFama: EventoFama[]
   trofei: Trofeo[]

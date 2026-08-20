@@ -57,10 +57,36 @@ nazione, nomi delle divisioni, calendario (con le giornate giuste: 34 in
 Bundesliga, 46 in Championship…) e tabellone di coppa diventano quelli
 nuovi. A stagione in corso (esonero) si resta nella propria divisione.
 
+**Più fama, più telefonate**: il numero di offerte cresce con la fama
+(1-2 per uno sconosciuto, fino a 4-5 per un allenatore da 90+), e tra le
+offerte c'è **sempre almeno una della nazione in cui si lavora** (se un
+club adatto esiste): restare nel proprio campionato è sempre possibile.
+
 L'**obiettivo si rinegozia a ogni stagione** in base al rango del club nella
 sua divisione: un club appena promosso chiede la salvezza, non un'altra
 promozione. Semplificazione dichiarata: le nazionali arrivano più avanti
-(M8 parte 2).
+(M8 parte 3).
+
+## Il contratto dell'allenatore
+
+Il contratto è **pluriennale** (`carriera.contrattoAllenatore`, sempre
+visibile nell'intestazione). Le offerte arrivano anche a contratto in
+essere, ma **romperlo per accettarne una costa 3 punti di fama**
+("Contratto rotto col …", nel registro). Dopo un esonero no: è il club ad
+averti cacciato. Alla scadenza la dirigenza rinnova sempre (niente vicoli
+ciechi): 2 anni con stipendio +10% se la fiducia è buona (≥35), 1 anno
+"di prova" se sei in bilico.
+
+## Scudetto e Coppa Europa (M8 parte 2)
+
+- **Vincere la prima divisione** vale un trofeo in bacheca e +8 fama.
+- I **primi 4** della prima divisione si qualificano alla **Coppa Europa**
+  (+2 fama): 32 top club dei 5 campionati, eliminazione diretta, turni
+  sfalsati rispetto alla coppa nazionale (dopo le giornate 7/13/17/22/27),
+  rigori seminati. Vincerla vale un trofeo e **+10 fama**.
+- La coppa europea esiste solo nelle stagioni in cui ci sei: se non sei
+  qualificato non viene simulata (semplificazione dichiarata). Il posto è
+  del club che l'ha conquistato: se a fine stagione cambi panchina, lo perdi.
 
 ## La coppa nazionale
 

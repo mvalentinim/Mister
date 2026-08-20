@@ -1,9 +1,11 @@
-// coppa.ts — la coppa nazionale (M8, FRD §4.2).
-//
-// Formato semplice e classico: 32 squadre a eliminazione diretta
-// (tutta la prima divisione + le migliori della seconda, l'utente sempre
-// incluso). I turni si giocano tra una giornata di campionato e l'altra;
-// in caso di pareggio decidono i rigori (estratti dal caso seminato).
+// coppa.ts — le coppe a eliminazione diretta (M8, FRD §4.2):
+// - la COPPA NAZIONALE: 32 squadre (tutta la prima divisione + le migliori
+//   della seconda, l'utente sempre incluso);
+// - la COPPA EUROPA (M8 parte 2, forma semplificata): 32 top club dei 5
+//   campionati; si gioca SOLO nelle stagioni in cui ci si è qualificati
+//   (primi 4 posti della prima divisione) — se non ci sei, non si simula.
+// I turni si giocano tra una giornata di campionato e l'altra; in caso di
+// pareggio decidono i rigori (estratti dal caso seminato).
 // Semplificazione dichiarata: anche la partita dell'utente è simulata
 // (niente Match Day in coppa, per ora); il risultato appare nel riquadro
 // coppa e nel notiziario.
@@ -12,14 +14,45 @@ import type { Database } from 'sql.js'
 import { creaRng, semeDaStringa } from '../motore/rng.ts'
 import { simulaPartitaMotore } from '../motore/partita.ts'
 import { aggiungiNotizia } from '../mercato/stato.ts'
-import type { Carriera, CoppaStagione, PartitaCoppa } from './tipi.ts'
+import type { Carriera, ClubCarriera, CoppaStagione, PartitaCoppa } from './tipi.ts'
+import { variaFama } from './fama.ts'
 import { clubNazione, semePartita, squadraMotore } from './motore.ts'
 
 const NOMI_TURNI = ['Sedicesimi di finale', 'Ottavi di finale', 'Quarti di finale', 'Semifinali', 'Finale']
-/** Dopo quali giornate di campionato si giocano i turni. */
-const GIORNATE_TURNI = [5, 10, 15, 20, 25]
+/** Dopo quali giornate di campionato si giocano i turni (le due coppe sono
+    sfalsate, così le settimane piene si alternano). */
+const GIORNATE_NAZIONALE = [5, 10, 15, 20, 25]
+const GIORNATE_EUROPA = [7, 13, 17, 22, 27]
 
-/** Crea il tabellone della coppa per la stagione corrente. */
+/** Costruisce un tabellone da 32 con sorteggio seminato. */
+function costruisciTabellone(
+  carriera: Carriera,
+  nome: string,
+  partecipanti: ClubCarriera[],
+  giornate: number[],
+): CoppaStagione {
+  const rng = creaRng(semeDaStringa(`${nome}-${carriera.seme}-${carriera.anno}`))
+  const mescolati = [...partecipanti].sort(() => rng.numero() - 0.5)
+  const primoTurno: PartitaCoppa[] = []
+  for (let i = 0; i + 1 < mescolati.length; i += 2) {
+    primoTurno.push({
+      casaId: mescolati[i].id, trasfertaId: mescolati[i + 1].id,
+      golCasa: null, golTrasferta: null, vincitriceId: null,
+    })
+  }
+  return {
+    nome,
+    turni: NOMI_TURNI.map((nomeTurno, i) => ({
+      nome: nomeTurno,
+      dopoGiornata: giornate[i],
+      partite: i === 0 ? primoTurno : [],
+    })),
+    prossimoTurno: 0,
+    vincitriceId: null,
+  }
+}
+
+/** Crea il tabellone della coppa nazionale per la stagione corrente. */
 export function creaCoppa(carriera: Carriera): CoppaStagione {
   const club = clubNazione(carriera)
   // 32 partecipanti: tutta la prima divisione + le migliori della seconda
@@ -32,45 +65,50 @@ export function creaCoppa(carriera: Carriera): CoppaStagione {
   if (!partecipanti.some((c) => c.id === carriera.clubId)) {
     partecipanti[partecipanti.length - 1] = club.find((c) => c.id === carriera.clubId)!
   }
-
-  // sorteggio seminato: stessa carriera, stesso tabellone
-  const rng = creaRng(semeDaStringa(`coppa-${carriera.seme}-${carriera.anno}`))
-  const mescolati = [...partecipanti].sort(() => rng.numero() - 0.5)
-
-  const primoTurno: PartitaCoppa[] = []
-  for (let i = 0; i < mescolati.length; i += 2) {
-    primoTurno.push({
-      casaId: mescolati[i].id, trasfertaId: mescolati[i + 1].id,
-      golCasa: null, golTrasferta: null, vincitriceId: null,
-    })
-  }
-  return {
-    turni: NOMI_TURNI.map((nome, i) => ({
-      nome,
-      dopoGiornata: GIORNATE_TURNI[i],
-      partite: i === 0 ? primoTurno : [],
-    })),
-    prossimoTurno: 0,
-    vincitriceId: null,
-  }
+  return costruisciTabellone(carriera, 'Coppa nazionale', partecipanti, GIORNATE_NAZIONALE)
 }
 
-/** Gioca il prossimo turno di coppa se il campionato lo ha raggiunto.
-    Chiamata dopo ogni giornata di campionato. */
-export function giocaTurnoCoppaSeDovuto(db: Database, carriera: Carriera): void {
-  const coppa = carriera.coppa
-  if (!coppa || coppa.vincitriceId !== null) return
-  if (coppa.prossimoTurno >= coppa.turni.length) return
+/** Crea il tabellone della Coppa Europa: i migliori club delle prime
+    divisioni dei 5 campionati (l'utente qualificato è sempre dentro). */
+export function creaCoppaEuropa(carriera: Carriera): CoppaStagione {
+  const primaDivisione = carriera.club.filter((c) => c.livello === 1)
+  // i top 6 di ogni nazione, poi i migliori restanti fino a 32
+  const perNazione = new Map<number, ClubCarriera[]>()
+  for (const c of primaDivisione) {
+    const chiave = c.nazioneId ?? -1
+    if (!perNazione.has(chiave)) perNazione.set(chiave, [])
+    perNazione.get(chiave)!.push(c)
+  }
+  const partecipanti: ClubCarriera[] = []
+  const rimasti: ClubCarriera[] = []
+  for (const lega of perNazione.values()) {
+    const ordinata = [...lega].sort((a, b) => b.forza - a.forza)
+    partecipanti.push(...ordinata.slice(0, 6))
+    rimasti.push(...ordinata.slice(6))
+  }
+  rimasti.sort((a, b) => b.forza - a.forza)
+  while (partecipanti.length < 32 && rimasti.length) partecipanti.push(rimasti.shift()!)
+  // l'utente qualificato entra al posto del più debole
+  if (!partecipanti.some((c) => c.id === carriera.clubId)) {
+    partecipanti.sort((a, b) => b.forza - a.forza)
+    partecipanti[partecipanti.length - 1] = carriera.club.find((c) => c.id === carriera.clubId)!
+  }
+  return costruisciTabellone(carriera, 'Coppa Europa', partecipanti.slice(0, 32), GIORNATE_EUROPA)
+}
+
+/** Gioca il prossimo turno di UNA coppa se il campionato lo ha raggiunto. */
+function giocaTurno(db: Database, carriera: Carriera, coppa: CoppaStagione, premioFama: number): void {
+  if (coppa.vincitriceId !== null || coppa.prossimoTurno >= coppa.turni.length) return
   const turno = coppa.turni[coppa.prossimoTurno]
   if (carriera.giornata < turno.dopoGiornata) return
 
-  const rng = creaRng(semeDaStringa(`coppa-turno-${carriera.seme}-${carriera.anno}-${coppa.prossimoTurno}`))
+  const rng = creaRng(semeDaStringa(`${coppa.nome}-turno-${carriera.seme}-${carriera.anno}-${coppa.prossimoTurno}`))
   const vincitrici: number[] = []
   for (const p of turno.partite) {
     const esito = simulaPartitaMotore(
       squadraMotore(db, carriera, p.casaId),
       squadraMotore(db, carriera, p.trasfertaId),
-      `${semePartita(carriera, 100 + coppa.prossimoTurno, p.casaId, p.trasfertaId)}-coppa`,
+      `${semePartita(carriera, 100 + coppa.prossimoTurno, p.casaId, p.trasfertaId)}-${coppa.nome}`,
     )
     p.golCasa = esito.golCasa
     p.golTrasferta = esito.golTrasferta
@@ -88,7 +126,7 @@ export function giocaTurnoCoppaSeDovuto(db: Database, carriera: Carriera): void 
       const passato = p.vincitriceId === carriera.clubId
       aggiungiNotizia(
         carriera,
-        `Coppa, ${turno.nome}: ${nome(p.casaId)} ${esito.golCasa}-${esito.golTrasferta} ${nome(p.trasfertaId)}${rigori}. ` +
+        `${coppa.nome}, ${turno.nome}: ${nome(p.casaId)} ${esito.golCasa}-${esito.golTrasferta} ${nome(p.trasfertaId)}${rigori}. ` +
           (passato ? 'Si va avanti!' : 'Eliminati.'),
         passato ? 'ufficiale' : 'avviso',
       )
@@ -99,8 +137,9 @@ export function giocaTurnoCoppaSeDovuto(db: Database, carriera: Carriera): void 
   if (vincitrici.length === 1) {
     coppa.vincitriceId = vincitrici[0]
     if (coppa.vincitriceId === carriera.clubId) {
-      carriera.trofei.push({ anno: carriera.anno, nome: 'Coppa nazionale' })
-      aggiungiNotizia(carriera, '🏆 LA COPPA È NOSTRA! Trionfo in finale!', 'ufficiale')
+      carriera.trofei.push({ anno: carriera.anno, nome: coppa.nome })
+      variaFama(carriera, premioFama, `${coppa.nome} vinta`)
+      aggiungiNotizia(carriera, `🏆 ${coppa.nome.toUpperCase()} NOSTRA! Trionfo in finale!`, 'ufficiale')
     }
   } else {
     const prossimo = coppa.turni[coppa.prossimoTurno + 1]
@@ -112,4 +151,11 @@ export function giocaTurnoCoppaSeDovuto(db: Database, carriera: Carriera): void 
     }
   }
   coppa.prossimoTurno++
+}
+
+/** Gioca i turni dovuti di TUTTE le coppe della stagione.
+    Chiamata dopo ogni giornata di campionato. */
+export function giocaTurnoCoppaSeDovuto(db: Database, carriera: Carriera): void {
+  if (carriera.coppa) giocaTurno(db, carriera, carriera.coppa, 6)
+  if (carriera.coppaEuropa) giocaTurno(db, carriera, carriera.coppaEuropa, 10)
 }

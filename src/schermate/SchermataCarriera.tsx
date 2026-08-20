@@ -230,7 +230,8 @@ function SchermataCarriera({ db, carriera }: Props) {
           </p>
           {esitoStagione.promosso && <p>🎉 <strong>PROMOZIONE!</strong> Si sale di categoria.</p>}
           {esitoStagione.retrocesso && <p>😞 <strong>Retrocessione.</strong> Si riparte dal basso.</p>}
-          {esitoStagione.coppaVinta && <p>🏆 <strong>COPPA NAZIONALE VINTA!</strong> Un trofeo in bacheca.</p>}
+          {esitoStagione.coppaVinta && <p>🏆 <strong>TROFEO IN BACHECA!</strong> Che stagione.</p>}
+          {esitoStagione.qualificatoEuropa && <p>🌍 <strong>Qualificati alla Coppa Europa!</strong> L'anno prossimo si gira il continente.</p>}
         </div>
 
         {/* il bilancio spiegabile della fama (M8, FRD §12) */}
@@ -299,7 +300,8 @@ function SchermataCarriera({ db, carriera }: Props) {
       <h2>{nomeClub} — {nomeCompetizione} {etichettaStagione(carriera.anno)}</h2>
       <p className="nota">
         Allenatore: {carriera.allenatore.nome} (fama {carriera.famaAllenatore ?? 20}
-        {' '}· fiducia {carriera.fiducia ?? 55})
+        {' '}· fiducia {carriera.fiducia ?? 55}
+        {carriera.contrattoAllenatore ? ` · contratto fino al ${carriera.contrattoAllenatore.scadenza}` : ''})
         {carriera.trofei && carriera.trofei.length > 0 && <> · 🏆 {carriera.trofei.length}</>} ·
         obiettivo: {DESCRIZIONE_OBIETTIVO[carriera.obiettivo]} ·
         giornata {Math.min(carriera.giornata + 1, carriera.calendario.length)} di {carriera.calendario.length}
@@ -369,9 +371,10 @@ function SchermataCarriera({ db, carriera }: Props) {
             </div>
           )}
 
-          {/* la coppa nazionale (M8): l'ultimo turno giocato e il prossimo */}
-          {carriera.coppa && (() => {
-            const coppa = carriera.coppa
+          {/* le coppe (M8): nazionale sempre, Europa solo se qualificati */}
+          {[carriera.coppa, carriera.coppaEuropa].map((coppa) => {
+            if (!coppa) return null
+            const europea = coppa.nome === 'Coppa Europa'
             const ultimoGiocato = [...coppa.turni].reverse()
               .find((t) => t.partite.some((p) => p.golCasa !== null))
             const miaUltima = ultimoGiocato?.partite.find(
@@ -381,8 +384,8 @@ function SchermataCarriera({ db, carriera }: Props) {
               : coppa.vincitriceId === carriera.clubId
             const prossimoTurno = coppa.turni[coppa.prossimoTurno]
             return (
-              <div className="riquadro-coppa">
-                <h3>🏆 Coppa nazionale</h3>
+              <div className="riquadro-coppa" key={coppa.nome}>
+                <h3>{europea ? '🌍' : '🏆'} {coppa.nome}</h3>
                 {coppa.vincitriceId !== null ? (
                   <p>{coppa.vincitriceId === carriera.clubId
                     ? <strong>COPPA VINTA! 🎉</strong>
@@ -406,7 +409,7 @@ function SchermataCarriera({ db, carriera }: Props) {
                 )}
               </div>
             )
-          })()}
+          })}
 
           {/* lo spogliatoio: le reazioni dei giocatori (M7, FRD §7) */}
           {carriera.messaggi && carriera.messaggi.length > 0 && (
