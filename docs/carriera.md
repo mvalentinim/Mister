@@ -43,6 +43,29 @@ visuale arriva in M5. Il motore è calibrato sulle distribuzioni reali:
 | Fama dell'allenatore non ancora calcolata (obiettivo solo valutato) | M8 |
 | Calendario generato, non quello reale | fonte calendari (docs/dati.md) |
 
+## Il Match Day "in diretta" (anticipo di M5)
+
+Su richiesta dello sviluppatore, la vista partita del FRD §9 è stata
+anticipata (in forma essenziale) rispetto all'ordine del piano:
+
+- **campo schematico** (SVG) con i gettoni nominali delle due squadre in
+  4-4-2 e la palla che scivola tra i giocatori della squadra in possesso;
+- **cronometro** con velocità 1x/2x/3x/5x + pausa (FRD §9.3);
+- **telecronaca testuale** generata a fianco del campo minuto per minuto:
+  frasi di riempimento nei momenti tranquilli e, sulle azioni importanti,
+  **il tempo rallenta** e il racconto si infittisce in più battute fino
+  all'esito (la "telecronaca ibrida" del FRD §9.4), con template procedurali
+  variati in italiano;
+- a fine partita: statistiche complete; le pagelle restano nella schermata
+  Partite.
+
+Grazie al determinismo del motore (M3), la partita mostrata è pre-calcolata
+con lo stesso seme del campionato: ciò che vedi è ciò che va in classifica
+(coerenza verificata da collaudo automatico). Restano per la M5 "piena":
+posizioni dei giocatori guidate dal motore (ora i movimenti sono scenici),
+cambi e regolazioni durante la partita, pagelle live, renderer Canvas/Pixi
+se servirà più fluidità.
+
 ## Flusso utente
 
 Menu → **Nuova carriera** → nazione (le 5 con seconda divisione) → profilo

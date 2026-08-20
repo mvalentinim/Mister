@@ -37,9 +37,25 @@ function squadraMotore(db: Database, carriera: Carriera, clubId: number): Squadr
 }
 
 /** Il seme di una singola partita: carriera + stagione + giornata + squadre.
-    Stessa carriera e stessa giornata → stessa partita (FRD §9.7). */
-function semePartita(carriera: Carriera, giornata: number, casaId: number, trasfertaId: number): string {
+    Stessa carriera e stessa giornata → stessa partita (FRD §9.7). È esportato
+    perché il Match Day visuale pre-calcola la stessa identica partita. */
+export function semePartita(carriera: Carriera, giornata: number, casaId: number, trasfertaId: number): string {
   return `${carriera.seme}-${carriera.anno}-${giornata}-${casaId}-${trasfertaId}`
+}
+
+/** La partita della squadra dell'utente nella prossima giornata (null a stagione finita). */
+export function partitaUtenteCorrente(carriera: Carriera) {
+  if (carriera.giornata >= carriera.calendario.length) return null
+  return (
+    carriera.calendario[carriera.giornata].find(
+      (p) => p.casaId === carriera.clubId || p.trasfertaId === carriera.clubId,
+    ) ?? null
+  )
+}
+
+/** Prepara (con cache) la squadra di un club per il motore — usato dal Match Day. */
+export function squadraPerMotore(db: Database, carriera: Carriera, clubId: number): SquadraMotore {
+  return squadraMotore(db, carriera, clubId)
 }
 
 export const ANNO_INIZIO_CARRIERA = 2025 // il DB fotografa la stagione 2025-26

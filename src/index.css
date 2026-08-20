@@ -439,3 +439,133 @@ body {
   white-space: nowrap;
   font-size: 0.9rem;
 }
+
+/* ---- Match Day (anticipo M5) ---- */
+
+.matchday {
+  max-width: 1100px;
+}
+
+.md-intestazione {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+}
+
+.md-intestazione h2 {
+  margin: 0;
+  color: var(--testo);
+}
+
+.md-punteggio {
+  color: var(--accento);
+  font-variant-numeric: tabular-nums;
+  padding: 0 0.3rem;
+}
+
+.md-controlli {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.md-minuto {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 3rem;
+  text-align: right;
+  margin-right: 0.5rem;
+}
+
+.md-bottone {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--bordo);
+  border-radius: 6px;
+  background: var(--superficie);
+  color: var(--testo);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.md-bottone.attivo {
+  background: var(--accento);
+  border-color: var(--accento);
+  color: #ffffff;
+}
+
+.md-corpo {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.md-campo {
+  flex: 1.4;
+  min-width: 0;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 15%);
+}
+
+/* la palla scivola tra una posizione e l'altra */
+.md-palla {
+  transition: cx 0.6s ease, cy 0.6s ease;
+}
+
+.gettone circle {
+  transition: r 0.3s ease;
+}
+
+.nome-gettone {
+  font-size: 2.3px;
+  fill: #eef3ef;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: rgb(0 0 0 / 45%);
+  stroke-width: 0.5px;
+}
+
+.md-telecronaca {
+  flex: 1;
+  min-width: 260px;
+  max-height: 460px;
+  overflow-y: auto;
+  background: var(--superficie);
+  border: 1px solid var(--bordo);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.md-riga {
+  font-size: 0.9rem;
+  animation: apparizione 0.25s ease;
+}
+
+.md-riga .minuto {
+  display: inline-block;
+  min-width: 2.2rem;
+  font-weight: 700;
+  color: var(--testo-attenuato);
+  font-variant-numeric: tabular-nums;
+}
+
+.md-riga.evidenza {
+  font-weight: 700;
+  color: var(--accento);
+}
+
+@keyframes apparizione {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 800px) {
+  .md-corpo { flex-direction: column; }
+}

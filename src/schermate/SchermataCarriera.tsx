@@ -12,6 +12,7 @@ import {
   DESCRIZIONE_OBIETTIVO, etichettaStagione, type Carriera, type CronacaPartita, type Partita,
 } from '../carriera/tipi.ts'
 import type { EventoPartita } from '../motore/tipi.ts'
+import MatchDay from './MatchDay.tsx'
 import Rosa from './Rosa.tsx'
 
 /** Trasforma un evento del motore in una riga di cronaca in italiano. */
@@ -80,6 +81,7 @@ type EsitoStagione = ReturnType<typeof chiudiStagione>
 function SchermataCarriera({ db, carriera }: Props) {
   const [linguetta, setLinguetta] = useState<Linguetta>('partite')
   const [esitoStagione, setEsitoStagione] = useState<EsitoStagione | null>(null)
+  const [matchDayAperto, setMatchDayAperto] = useState(false)
   // contatore usato solo per forzare il ridisegno dopo aver mutato la carriera
   const [, setVersione] = useState(0)
 
@@ -99,6 +101,22 @@ function SchermataCarriera({ db, carriera }: Props) {
   async function concludiStagione() {
     setEsitoStagione(chiudiStagione(db, carriera))
     await salvaCarriera(carriera)
+  }
+
+  // ── Match Day in corso: la vista partita prende tutto lo schermo ──
+  // A fine partita si avanza la giornata: per il determinismo (stesso seme)
+  // il risultato registrato è identico a quello appena visto in campo.
+  if (matchDayAperto) {
+    return (
+      <MatchDay
+        db={db}
+        carriera={carriera}
+        onFine={async () => {
+          await gioca(false)
+          setMatchDayAperto(false)
+        }}
+      />
+    )
   }
 
   // ── Riepilogo di fine stagione (dopo chiudiStagione) ──
@@ -157,8 +175,11 @@ function SchermataCarriera({ db, carriera }: Props) {
         <>
           {!finita && (
             <div className="riga-bottoni">
-              <button className="bottone-primario" onClick={() => gioca(false)}>
-                ▶ Gioca giornata {carriera.giornata + 1}
+              <button className="bottone-primario" onClick={() => setMatchDayAperto(true)}>
+                🎥 Match Day — giornata {carriera.giornata + 1}
+              </button>
+              <button className="bottone-secondario" onClick={() => gioca(false)}>
+                ▶ Simula giornata
               </button>
               <button className="bottone-secondario" onClick={() => gioca(true)}>
                 ⏩ Simula fino a fine stagione

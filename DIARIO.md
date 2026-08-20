@@ -176,3 +176,22 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 **DoD di M3:** risultati credibili ✅ (calibrazione), stesso seed = stessa partita ✅ (test automatico), test lanciabile e leggibile ✅ (`npm run calibra`). Verifica di persona dello sviluppatore in sospeso come per le milestone precedenti.
 
 **Prossima sessione proposta:** M4 — Tattiche e movimenti prevalenti (schermata tattica, moduli, vocabolario movimenti per ruolo, effetti misurabili sul motore).
+
+---
+
+## Sessione 10 — 2026-08-20 — Match Day "in diretta" (anticipo di M5)
+
+**Obiettivo dichiarato (richiesta dello sviluppatore):** vedere la partita scorrere — minuti, campo schematico con segnaposto che si muovono, telecronaca testuale generata a fianco, rallentamento e cronaca fitta sulle azioni da highlights.
+
+**Deroga all'ordine del piano (annotata):** si anticipa in forma essenziale la vista partita di M5 prima delle tattiche di M4, su indicazione dello sviluppatore.
+
+**Fatto:**
+- **`MatchDay.tsx`**: campo SVG con gettoni nominali (4-4-2), palla che scivola tra i giocatori col possesso guidato dal confronto dei centrocampi, cronometro con velocità **1x/2x/3x/5x + pausa** (FRD §9.3).
+- **Telecronaca ibrida (FRD §9.4)**: righe di riempimento procedurali nei minuti tranquilli; sugli eventi del motore il tempo **rallenta** (passi da ~1,4s anche alle velocità alte) e l'azione viene espansa in più battute — costruzione → tiro → esito — con template variati in italiano; gol con assist raccontato, parate col portiere evidenziato (anello dorato), cartellini, espulsioni, infortuni, intervallo.
+- **Coerenza garantita dal determinismo di M3**: il Match Day pre-calcola la partita con lo stesso seme del campionato; al fischio finale la giornata avanza e il risultato registrato è identico a quello visto. **Verificato con collaudo automatico** (Match Day "Monza 0-1 Spezia" = cronaca registrata "Monza 0-1 Spezia").
+- Schermata Partite: nuovo bottone primario "🎥 Match Day" accanto a "Simula giornata" e "Simula fino a fine stagione".
+- Collaudo completo nel browser: partita intera guardata a 5x, screenshot in gioco/highlight/fine. Build e lint puliti.
+
+**Resta per la M5 "piena":** posizioni dei giocatori guidate dal motore (ora i movimenti sono scenici), cambi e tattica durante la partita, pagelle live, eventuale renderer Canvas/Pixi.
+
+**Prossima sessione proposta:** M4 — Tattiche e movimenti prevalenti.
