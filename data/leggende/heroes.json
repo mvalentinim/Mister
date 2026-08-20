@@ -1,0 +1,1542 @@
+{
+  "categoria": "hero",
+  "giocatori": [
+    {
+      "nome": "",
+      "cognome": "Lucio",
+      "data_nascita": "1979-07-01",
+      "nazionalita": "Brazil",
+      "ruolo": "DC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 89,
+      "attributi": {
+        "velocita": 82,
+        "resistenza": 87,
+        "tecnica": 82,
+        "passaggio": 83,
+        "tiro": 72,
+        "dribbling": 77,
+        "colpo_testa": 92,
+        "marcatura": 91,
+        "contrasto": 91,
+        "posizionamento": 69,
+        "visione": 63,
+        "calci_piazzati": 81
+      }
+    },
+    {
+      "nome": "Abedi",
+      "cognome": "Pele",
+      "data_nascita": "1965-07-01",
+      "nazionalita": "Ghana",
+      "ruolo": "TRQ",
+      "ruoli_secondari": [
+        "ES",
+        "PC"
+      ],
+      "piede": "sinistro",
+      "potenziale": 89,
+      "attributi": {
+        "velocita": 91,
+        "resistenza": 83,
+        "tecnica": 92,
+        "passaggio": 88,
+        "tiro": 83,
+        "dribbling": 91,
+        "colpo_testa": 79,
+        "marcatura": 47,
+        "contrasto": 44,
+        "posizionamento": 83,
+        "visione": 90,
+        "calci_piazzati": 83
+      }
+    },
+    {
+      "nome": "Jean-Pierre",
+      "cognome": "Papin",
+      "data_nascita": "1964-07-01",
+      "nazionalita": "France",
+      "ruolo": "PC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 89,
+      "attributi": {
+        "velocita": 83,
+        "resistenza": 82,
+        "tecnica": 84,
+        "passaggio": 77,
+        "tiro": 93,
+        "dribbling": 83,
+        "colpo_testa": 89,
+        "marcatura": 38,
+        "contrasto": 42,
+        "posizionamento": 94,
+        "visione": 75,
+        "calci_piazzati": 64
+      }
+    },
+    {
+      "nome": "Jurgen",
+      "cognome": "Kohler",
+      "data_nascita": "1966-07-01",
+      "nazionalita": "Germany",
+      "ruolo": "DC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 89,
+      "attributi": {
+        "velocita": 71,
+        "resistenza": 86,
+        "tecnica": 64,
+        "passaggio": 74,
+        "tiro": 51,
+        "dribbling": 62,
+        "colpo_testa": 88,
+        "marcatura": 93,
+        "contrasto": 91,
+        "posizionamento": 49,
+        "visione": 52,
+        "calci_piazzati": 38
+      }
+    },
+    {
+      "nome": "Rudi",
+      "cognome": "Voller",
+      "data_nascita": "1961-07-01",
+      "nazionalita": "Germany",
+      "ruolo": "PC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 89,
+      "attributi": {
+        "velocita": 89,
+        "resistenza": 91,
+        "tecnica": 87,
+        "passaggio": 77,
+        "tiro": 90,
+        "dribbling": 86,
+        "colpo_testa": 93,
+        "marcatura": 41,
+        "contrasto": 43,
+        "posizionamento": 88,
+        "visione": 82,
+        "calci_piazzati": 76
+      }
+    },
+    {
+      "nome": "Nadine",
+      "cognome": "Kessler",
+      "data_nascita": "1989-07-01",
+      "nazionalita": "Germany",
+      "ruolo": "CC",
+      "ruoli_secondari": [
+        "TRQ"
+      ],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 81,
+        "resistenza": 81,
+        "tecnica": 91,
+        "passaggio": 91,
+        "tiro": 85,
+        "dribbling": 86,
+        "colpo_testa": 76,
+        "marcatura": 74,
+        "contrasto": 82,
+        "posizionamento": 87,
+        "visione": 91,
+        "calci_piazzati": 80
+      }
+    },
+    {
+      "nome": "Gianluca",
+      "cognome": "Vialli",
+      "data_nascita": "1965-07-01",
+      "nazionalita": "Italy",
+      "ruolo": "PC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 89,
+      "attributi": {
+        "velocita": 86,
+        "resistenza": 90,
+        "tecnica": 84,
+        "passaggio": 81,
+        "tiro": 89,
+        "dribbling": 83,
+        "colpo_testa": 89,
+        "marcatura": 48,
+        "contrasto": 31,
+        "posizionamento": 90,
+        "visione": 75,
+        "calci_piazzati": 58
+      }
+    },
+    {
+      "nome": "Enzo",
+      "cognome": "Francescoli",
+      "data_nascita": "1962-07-01",
+      "nazionalita": "Uruguay",
+      "ruolo": "PC",
+      "ruoli_secondari": [
+        "TRQ"
+      ],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 86,
+        "resistenza": 82,
+        "tecnica": 91,
+        "passaggio": 85,
+        "tiro": 88,
+        "dribbling": 90,
+        "colpo_testa": 84,
+        "marcatura": 41,
+        "contrasto": 40,
+        "posizionamento": 86,
+        "visione": 86,
+        "calci_piazzati": 88
+      }
+    },
+    {
+      "nome": "Carlos",
+      "cognome": "Tevez",
+      "data_nascita": "1984-07-01",
+      "nazionalita": "Argentina",
+      "ruolo": "PC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 85,
+        "resistenza": 93,
+        "tecnica": 86,
+        "passaggio": 85,
+        "tiro": 89,
+        "dribbling": 86,
+        "colpo_testa": 78,
+        "marcatura": 51,
+        "contrasto": 39,
+        "posizionamento": 88,
+        "visione": 84,
+        "calci_piazzati": 85
+      }
+    },
+    {
+      "nome": "Wesley",
+      "cognome": "Sneijder",
+      "data_nascita": "1985-07-01",
+      "nazionalita": "Netherlands",
+      "ruolo": "TRQ",
+      "ruoli_secondari": [
+        "CC",
+        "ES"
+      ],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 81,
+        "resistenza": 81,
+        "tecnica": 89,
+        "passaggio": 89,
+        "tiro": 84,
+        "dribbling": 86,
+        "colpo_testa": 60,
+        "marcatura": 45,
+        "contrasto": 54,
+        "posizionamento": 83,
+        "visione": 93,
+        "calci_piazzati": 91
+      }
+    },
+    {
+      "nome": "Vincent",
+      "cognome": "Kompany",
+      "data_nascita": "1987-07-01",
+      "nazionalita": "Belgium",
+      "ruolo": "DC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 80,
+        "resistenza": 76,
+        "tecnica": 73,
+        "passaggio": 76,
+        "tiro": 60,
+        "dribbling": 70,
+        "colpo_testa": 87,
+        "marcatura": 91,
+        "contrasto": 92,
+        "posizionamento": 38,
+        "visione": 61,
+        "calci_piazzati": 53
+      }
+    },
+    {
+      "nome": "Diego",
+      "cognome": "Forlan",
+      "data_nascita": "1980-07-01",
+      "nazionalita": "Uruguay",
+      "ruolo": "PC",
+      "ruoli_secondari": [
+        "ES"
+      ],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 86,
+        "resistenza": 84,
+        "tecnica": 88,
+        "passaggio": 84,
+        "tiro": 90,
+        "dribbling": 85,
+        "colpo_testa": 82,
+        "marcatura": 58,
+        "contrasto": 49,
+        "posizionamento": 89,
+        "visione": 86,
+        "calci_piazzati": 85
+      }
+    },
+    {
+      "nome": "Fernando",
+      "cognome": "Morientes",
+      "data_nascita": "1977-07-01",
+      "nazionalita": "Spain",
+      "ruolo": "PC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 89,
+      "attributi": {
+        "velocita": 84,
+        "resistenza": 85,
+        "tecnica": 84,
+        "passaggio": 81,
+        "tiro": 90,
+        "dribbling": 83,
+        "colpo_testa": 96,
+        "marcatura": 36,
+        "contrasto": 42,
+        "posizionamento": 92,
+        "visione": 83,
+        "calci_piazzati": 76
+      }
+    },
+    {
+      "nome": "Javier",
+      "cognome": "Mascherano",
+      "data_nascita": "1985-07-01",
+      "nazionalita": "Argentina",
+      "ruolo": "DC",
+      "ruoli_secondari": [
+        "MED"
+      ],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 76,
+        "resistenza": 88,
+        "tecnica": 84,
+        "passaggio": 86,
+        "tiro": 55,
+        "dribbling": 75,
+        "colpo_testa": 76,
+        "marcatura": 90,
+        "contrasto": 91,
+        "posizionamento": 56,
+        "visione": 70,
+        "calci_piazzati": 52
+      }
+    },
+    {
+      "nome": "Diego",
+      "cognome": "Milito",
+      "data_nascita": "1980-07-01",
+      "nazionalita": "Argentina",
+      "ruolo": "PC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 83,
+        "resistenza": 81,
+        "tecnica": 88,
+        "passaggio": 81,
+        "tiro": 89,
+        "dribbling": 84,
+        "colpo_testa": 88,
+        "marcatura": 38,
+        "contrasto": 34,
+        "posizionamento": 92,
+        "visione": 74,
+        "calci_piazzati": 75
+      }
+    },
+    {
+      "nome": "David",
+      "cognome": "Ginola",
+      "data_nascita": "1967-07-01",
+      "nazionalita": "France",
+      "ruolo": "ES",
+      "ruoli_secondari": [
+        "TRQ",
+        "PC"
+      ],
+      "piede": "destro",
+      "potenziale": 89,
+      "attributi": {
+        "velocita": 90,
+        "resistenza": 82,
+        "tecnica": 92,
+        "passaggio": 85,
+        "tiro": 88,
+        "dribbling": 91,
+        "colpo_testa": 86,
+        "marcatura": 53,
+        "contrasto": 49,
+        "posizionamento": 84,
+        "visione": 92,
+        "calci_piazzati": 82
+      }
+    },
+    {
+      "nome": "Antonio",
+      "cognome": "Di Natale",
+      "data_nascita": "1978-07-01",
+      "nazionalita": "Italy",
+      "ruolo": "PC",
+      "ruoli_secondari": [
+        "ES"
+      ],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 90,
+        "resistenza": 81,
+        "tecnica": 91,
+        "passaggio": 86,
+        "tiro": 91,
+        "dribbling": 90,
+        "colpo_testa": 74,
+        "marcatura": 51,
+        "contrasto": 37,
+        "posizionamento": 93,
+        "visione": 85,
+        "calci_piazzati": 86
+      }
+    },
+    {
+      "nome": "Paulo",
+      "cognome": "Futre",
+      "data_nascita": "1967-07-01",
+      "nazionalita": "Portugal",
+      "ruolo": "ES",
+      "ruoli_secondari": [
+        "ED",
+        "PC"
+      ],
+      "piede": "sinistro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 93,
+        "resistenza": 72,
+        "tecnica": 92,
+        "passaggio": 81,
+        "tiro": 81,
+        "dribbling": 93,
+        "colpo_testa": 72,
+        "marcatura": 35,
+        "contrasto": 33,
+        "posizionamento": 82,
+        "visione": 78,
+        "calci_piazzati": 84
+      }
+    },
+    {
+      "nome": "Jay-Jay",
+      "cognome": "Okocha",
+      "data_nascita": "1974-07-01",
+      "nazionalita": "Nigeria",
+      "ruolo": "TRQ",
+      "ruoli_secondari": [
+        "ED",
+        "PC"
+      ],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 87,
+        "resistenza": 72,
+        "tecnica": 92,
+        "passaggio": 82,
+        "tiro": 83,
+        "dribbling": 93,
+        "colpo_testa": 61,
+        "marcatura": 33,
+        "contrasto": 39,
+        "posizionamento": 87,
+        "visione": 86,
+        "calci_piazzati": 93
+      }
+    },
+    {
+      "nome": "Rafael",
+      "cognome": "Marquez",
+      "data_nascita": "1979-07-01",
+      "nazionalita": "Mexico",
+      "ruolo": "DC",
+      "ruoli_secondari": [
+        "MED"
+      ],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 74,
+        "resistenza": 84,
+        "tecnica": 79,
+        "passaggio": 81,
+        "tiro": 65,
+        "dribbling": 74,
+        "colpo_testa": 88,
+        "marcatura": 91,
+        "contrasto": 89,
+        "posizionamento": 49,
+        "visione": 64,
+        "calci_piazzati": 82
+      }
+    },
+    {
+      "nome": "Steve",
+      "cognome": "McManaman",
+      "data_nascita": "1972-07-01",
+      "nazionalita": "England",
+      "ruolo": "ED",
+      "ruoli_secondari": [
+        "ES",
+        "TRQ"
+      ],
+      "piede": "destro",
+      "potenziale": 87,
+      "attributi": {
+        "velocita": 89,
+        "resistenza": 91,
+        "tecnica": 87,
+        "passaggio": 86,
+        "tiro": 77,
+        "dribbling": 87,
+        "colpo_testa": 66,
+        "marcatura": 38,
+        "contrasto": 51,
+        "posizionamento": 86,
+        "visione": 87,
+        "calci_piazzati": 73
+      }
+    },
+    {
+      "nome": "Jari",
+      "cognome": "Litmanen",
+      "data_nascita": "1971-07-01",
+      "nazionalita": "Finland",
+      "ruolo": "TRQ",
+      "ruoli_secondari": [
+        "CC"
+      ],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 82,
+        "resistenza": 85,
+        "tecnica": 90,
+        "passaggio": 87,
+        "tiro": 87,
+        "dribbling": 83,
+        "colpo_testa": 70,
+        "marcatura": 31,
+        "contrasto": 25,
+        "posizionamento": 93,
+        "visione": 87,
+        "calci_piazzati": 80
+      }
+    },
+    {
+      "nome": "Bixente",
+      "cognome": "Lizarazu",
+      "data_nascita": "1970-07-01",
+      "nazionalita": "France",
+      "ruolo": "TS",
+      "ruoli_secondari": [],
+      "piede": "sinistro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 87,
+        "resistenza": 89,
+        "tecnica": 86,
+        "passaggio": 84,
+        "tiro": 59,
+        "dribbling": 82,
+        "colpo_testa": 69,
+        "marcatura": 85,
+        "contrasto": 83,
+        "posizionamento": 77,
+        "visione": 72,
+        "calci_piazzati": 51
+      }
+    },
+    {
+      "nome": "Harry",
+      "cognome": "Kewell",
+      "data_nascita": "1979-07-01",
+      "nazionalita": "Australia",
+      "ruolo": "ES",
+      "ruoli_secondari": [
+        "TRQ"
+      ],
+      "piede": "sinistro",
+      "potenziale": 87,
+      "attributi": {
+        "velocita": 90,
+        "resistenza": 78,
+        "tecnica": 87,
+        "passaggio": 85,
+        "tiro": 85,
+        "dribbling": 88,
+        "colpo_testa": 68,
+        "marcatura": 49,
+        "contrasto": 54,
+        "posizionamento": 80,
+        "visione": 91,
+        "calci_piazzati": 78
+      }
+    },
+    {
+      "nome": "Tomas",
+      "cognome": "Brolin",
+      "data_nascita": "1970-07-01",
+      "nazionalita": "Sweden",
+      "ruolo": "PC",
+      "ruoli_secondari": [
+        "TRQ",
+        "ED"
+      ],
+      "piede": "destro",
+      "potenziale": 87,
+      "attributi": {
+        "velocita": 87,
+        "resistenza": 79,
+        "tecnica": 91,
+        "passaggio": 86,
+        "tiro": 88,
+        "dribbling": 90,
+        "colpo_testa": 83,
+        "marcatura": 58,
+        "contrasto": 56,
+        "posizionamento": 86,
+        "visione": 86,
+        "calci_piazzati": 80
+      }
+    },
+    {
+      "nome": "Ricardo",
+      "cognome": "Carvalho",
+      "data_nascita": "1979-07-01",
+      "nazionalita": "Portugal",
+      "ruolo": "DC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 77,
+        "resistenza": 84,
+        "tecnica": 79,
+        "passaggio": 82,
+        "tiro": 56,
+        "dribbling": 73,
+        "colpo_testa": 89,
+        "marcatura": 93,
+        "contrasto": 91,
+        "posizionamento": 48,
+        "visione": 63,
+        "calci_piazzati": 48
+      }
+    },
+    {
+      "nome": "Mario",
+      "cognome": "Gomez",
+      "data_nascita": "1986-07-01",
+      "nazionalita": "Germany",
+      "ruolo": "PC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 88,
+      "attributi": {
+        "velocita": 83,
+        "resistenza": 80,
+        "tecnica": 84,
+        "passaggio": 77,
+        "tiro": 90,
+        "dribbling": 82,
+        "colpo_testa": 91,
+        "marcatura": 40,
+        "contrasto": 35,
+        "posizionamento": 93,
+        "visione": 75,
+        "calci_piazzati": 45
+      }
+    },
+    {
+      "nome": "Jorge",
+      "cognome": "Campos",
+      "data_nascita": "1967-07-01",
+      "nazionalita": "Mexico",
+      "ruolo": "POR",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 87,
+      "attributi": {
+        "riflessi": 90,
+        "presa": 83,
+        "uscite": 80,
+        "rinvio": 81,
+        "velocita": 79,
+        "resistenza": 67
+      }
+    },
+    {
+      "nome": "Dimitar",
+      "cognome": "Berbatov",
+      "data_nascita": "1981-07-01",
+      "nazionalita": "Bulgaria",
+      "ruolo": "PC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 87,
+      "attributi": {
+        "velocita": 80,
+        "resistenza": 76,
+        "tecnica": 93,
+        "passaggio": 84,
+        "tiro": 85,
+        "dribbling": 87,
+        "colpo_testa": 83,
+        "marcatura": 34,
+        "contrasto": 27,
+        "posizionamento": 88,
+        "visione": 85,
+        "calci_piazzati": 81
+      }
+    },
+    {
+      "nome": "Yaya",
+      "cognome": "Toure",
+      "data_nascita": "1984-07-01",
+      "nazionalita": "Ivory Coast",
+      "ruolo": "MED",
+      "ruoli_secondari": [
+        "CC",
+        "TRQ"
+      ],
+      "piede": "destro",
+      "potenziale": 87,
+      "attributi": {
+        "velocita": 78,
+        "resistenza": 94,
+        "tecnica": 89,
+        "passaggio": 91,
+        "tiro": 83,
+        "dribbling": 84,
+        "colpo_testa": 71,
+        "marcatura": 77,
+        "contrasto": 86,
+        "posizionamento": 84,
+        "visione": 90,
+        "calci_piazzati": 84
+      }
+    },
+    {
+      "nome": "Hidetoshi",
+      "cognome": "Nakata",
+      "data_nascita": "1977-07-01",
+      "nazionalita": "Japan",
+      "ruolo": "TRQ",
+      "ruoli_secondari": [
+        "CC"
+      ],
+      "piede": "destro",
+      "potenziale": 87,
+      "attributi": {
+        "velocita": 85,
+        "resistenza": 84,
+        "tecnica": 89,
+        "passaggio": 87,
+        "tiro": 84,
+        "dribbling": 86,
+        "colpo_testa": 70,
+        "marcatura": 51,
+        "contrasto": 64,
+        "posizionamento": 78,
+        "visione": 91,
+        "calci_piazzati": 84
+      }
+    },
+    {
+      "nome": "Park",
+      "cognome": "Ji Sung",
+      "data_nascita": "1981-07-01",
+      "nazionalita": "Korea Republic",
+      "ruolo": "ES",
+      "ruoli_secondari": [
+        "ED"
+      ],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 85,
+        "resistenza": 95,
+        "tecnica": 86,
+        "passaggio": 86,
+        "tiro": 80,
+        "dribbling": 85,
+        "colpo_testa": 65,
+        "marcatura": 86,
+        "contrasto": 75,
+        "posizionamento": 84,
+        "visione": 86,
+        "calci_piazzati": 78
+      }
+    },
+    {
+      "nome": "Ivan",
+      "cognome": "Cordoba",
+      "data_nascita": "1977-07-01",
+      "nazionalita": "Colombia",
+      "ruolo": "DC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 87,
+      "attributi": {
+        "velocita": 86,
+        "resistenza": 88,
+        "tecnica": 71,
+        "passaggio": 78,
+        "tiro": 63,
+        "dribbling": 68,
+        "colpo_testa": 92,
+        "marcatura": 88,
+        "contrasto": 90,
+        "posizionamento": 62,
+        "visione": 46,
+        "calci_piazzati": 38
+      }
+    },
+    {
+      "nome": "Rui",
+      "cognome": "Costa",
+      "data_nascita": "1973-07-01",
+      "nazionalita": "Portugal",
+      "ruolo": "TRQ",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 87,
+      "attributi": {
+        "velocita": 83,
+        "resistenza": 86,
+        "tecnica": 89,
+        "passaggio": 88,
+        "tiro": 80,
+        "dribbling": 85,
+        "colpo_testa": 49,
+        "marcatura": 32,
+        "contrasto": 38,
+        "posizionamento": 86,
+        "visione": 87,
+        "calci_piazzati": 92
+      }
+    },
+    {
+      "nome": "Joe",
+      "cognome": "Cole",
+      "data_nascita": "1982-07-01",
+      "nazionalita": "England",
+      "ruolo": "ED",
+      "ruoli_secondari": [
+        "TRQ",
+        "ES"
+      ],
+      "piede": "destro",
+      "potenziale": 87,
+      "attributi": {
+        "velocita": 88,
+        "resistenza": 82,
+        "tecnica": 91,
+        "passaggio": 87,
+        "tiro": 84,
+        "dribbling": 90,
+        "colpo_testa": 59,
+        "marcatura": 55,
+        "contrasto": 46,
+        "posizionamento": 80,
+        "visione": 89,
+        "calci_piazzati": 86
+      }
+    },
+    {
+      "nome": "",
+      "cognome": "Ramires",
+      "data_nascita": "1988-07-01",
+      "nazionalita": "Brazil",
+      "ruolo": "MED",
+      "ruoli_secondari": [
+        "ED"
+      ],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 88,
+        "resistenza": 92,
+        "tecnica": 83,
+        "passaggio": 84,
+        "tiro": 78,
+        "dribbling": 81,
+        "colpo_testa": 72,
+        "marcatura": 86,
+        "contrasto": 85,
+        "posizionamento": 77,
+        "visione": 79,
+        "calci_piazzati": 61
+      }
+    },
+    {
+      "nome": "Sonia",
+      "cognome": "Bompastor",
+      "data_nascita": "1981-07-01",
+      "nazionalita": "France",
+      "ruolo": "TS",
+      "ruoli_secondari": [
+        "ES"
+      ],
+      "piede": "sinistro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 87,
+        "resistenza": 89,
+        "tecnica": 88,
+        "passaggio": 87,
+        "tiro": 80,
+        "dribbling": 85,
+        "colpo_testa": 69,
+        "marcatura": 81,
+        "contrasto": 86,
+        "posizionamento": 80,
+        "visione": 83,
+        "calci_piazzati": 87
+      }
+    },
+    {
+      "nome": "John",
+      "cognome": "Arne Riise",
+      "data_nascita": "1981-07-01",
+      "nazionalita": "Norway",
+      "ruolo": "TS",
+      "ruoli_secondari": [
+        "ES"
+      ],
+      "piede": "sinistro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 83,
+        "resistenza": 94,
+        "tecnica": 84,
+        "passaggio": 84,
+        "tiro": 81,
+        "dribbling": 80,
+        "colpo_testa": 76,
+        "marcatura": 80,
+        "contrasto": 84,
+        "posizionamento": 77,
+        "visione": 71,
+        "calci_piazzati": 87
+      }
+    },
+    {
+      "nome": "Claudio",
+      "cognome": "Marchisio",
+      "data_nascita": "1986-07-01",
+      "nazionalita": "Italy",
+      "ruolo": "CC",
+      "ruoli_secondari": [
+        "MED",
+        "ES"
+      ],
+      "piede": "destro",
+      "potenziale": 87,
+      "attributi": {
+        "velocita": 82,
+        "resistenza": 88,
+        "tecnica": 88,
+        "passaggio": 89,
+        "tiro": 81,
+        "dribbling": 86,
+        "colpo_testa": 69,
+        "marcatura": 79,
+        "contrasto": 82,
+        "posizionamento": 81,
+        "visione": 87,
+        "calci_piazzati": 79
+      }
+    },
+    {
+      "nome": "Wlodzimierz",
+      "cognome": "Smolarek",
+      "data_nascita": "1958-07-01",
+      "nazionalita": "Poland",
+      "ruolo": "PC",
+      "ruoli_secondari": [
+        "ES"
+      ],
+      "piede": "sinistro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 91,
+        "resistenza": 80,
+        "tecnica": 89,
+        "passaggio": 81,
+        "tiro": 85,
+        "dribbling": 90,
+        "colpo_testa": 81,
+        "marcatura": 25,
+        "contrasto": 43,
+        "posizionamento": 87,
+        "visione": 75,
+        "calci_piazzati": 73
+      }
+    },
+    {
+      "nome": "Sami",
+      "cognome": "Al Jaber",
+      "data_nascita": "1973-07-01",
+      "nazionalita": "Saudi Arabia",
+      "ruolo": "PC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 88,
+        "resistenza": 84,
+        "tecnica": 81,
+        "passaggio": 78,
+        "tiro": 86,
+        "dribbling": 83,
+        "colpo_testa": 86,
+        "marcatura": 39,
+        "contrasto": 34,
+        "posizionamento": 88,
+        "visione": 75,
+        "calci_piazzati": 79
+      }
+    },
+    {
+      "nome": "Freddie",
+      "cognome": "Ljungberg",
+      "data_nascita": "1978-07-01",
+      "nazionalita": "Sweden",
+      "ruolo": "ES",
+      "ruoli_secondari": [
+        "ED"
+      ],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 87,
+        "resistenza": 86,
+        "tecnica": 86,
+        "passaggio": 84,
+        "tiro": 81,
+        "dribbling": 86,
+        "colpo_testa": 58,
+        "marcatura": 48,
+        "contrasto": 42,
+        "posizionamento": 84,
+        "visione": 83,
+        "calci_piazzati": 78
+      }
+    },
+    {
+      "nome": "Ledley",
+      "cognome": "King",
+      "data_nascita": "1981-07-01",
+      "nazionalita": "England",
+      "ruolo": "DC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 80,
+        "resistenza": 70,
+        "tecnica": 80,
+        "passaggio": 80,
+        "tiro": 55,
+        "dribbling": 72,
+        "colpo_testa": 84,
+        "marcatura": 91,
+        "contrasto": 91,
+        "posizionamento": 48,
+        "visione": 63,
+        "calci_piazzati": 51
+      }
+    },
+    {
+      "nome": "Nwankwo",
+      "cognome": "Kanu",
+      "data_nascita": "1977-07-01",
+      "nazionalita": "Nigeria",
+      "ruolo": "PC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 79,
+        "resistenza": 77,
+        "tecnica": 89,
+        "passaggio": 86,
+        "tiro": 85,
+        "dribbling": 87,
+        "colpo_testa": 78,
+        "marcatura": 40,
+        "contrasto": 33,
+        "posizionamento": 88,
+        "visione": 87,
+        "calci_piazzati": 68
+      }
+    },
+    {
+      "nome": "Ole",
+      "cognome": "Gunnar Solskjaer",
+      "data_nascita": "1973-07-01",
+      "nazionalita": "Norway",
+      "ruolo": "PC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 85,
+        "resistenza": 75,
+        "tecnica": 86,
+        "passaggio": 75,
+        "tiro": 88,
+        "dribbling": 84,
+        "colpo_testa": 84,
+        "marcatura": 44,
+        "contrasto": 37,
+        "posizionamento": 92,
+        "visione": 81,
+        "calci_piazzati": 64
+      }
+    },
+    {
+      "nome": "Jerzy",
+      "cognome": "Dudek",
+      "data_nascita": "1974-07-01",
+      "nazionalita": "Poland",
+      "ruolo": "POR",
+      "ruoli_secondari": [],
+      "piede": "sinistro",
+      "potenziale": 86,
+      "attributi": {
+        "riflessi": 90,
+        "presa": 83,
+        "uscite": 85,
+        "rinvio": 78,
+        "velocita": 56,
+        "resistenza": 44
+      }
+    },
+    {
+      "nome": "Ludovic",
+      "cognome": "Giuly",
+      "data_nascita": "1977-07-01",
+      "nazionalita": "France",
+      "ruolo": "ED",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 88,
+        "resistenza": 85,
+        "tecnica": 85,
+        "passaggio": 84,
+        "tiro": 83,
+        "dribbling": 85,
+        "colpo_testa": 63,
+        "marcatura": 54,
+        "contrasto": 45,
+        "posizionamento": 80,
+        "visione": 82,
+        "calci_piazzati": 72
+      }
+    },
+    {
+      "nome": "Robbie",
+      "cognome": "Keane",
+      "data_nascita": "1981-07-01",
+      "nazionalita": "Republic of Ireland",
+      "ruolo": "PC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 87,
+        "resistenza": 88,
+        "tecnica": 89,
+        "passaggio": 81,
+        "tiro": 88,
+        "dribbling": 88,
+        "colpo_testa": 72,
+        "marcatura": 50,
+        "contrasto": 41,
+        "posizionamento": 90,
+        "visione": 81,
+        "calci_piazzati": 61
+      }
+    },
+    {
+      "nome": "Sidney",
+      "cognome": "Govou",
+      "data_nascita": "1980-07-01",
+      "nazionalita": "France",
+      "ruolo": "PC",
+      "ruoli_secondari": [
+        "ED"
+      ],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 89,
+        "resistenza": 80,
+        "tecnica": 89,
+        "passaggio": 82,
+        "tiro": 89,
+        "dribbling": 88,
+        "colpo_testa": 72,
+        "marcatura": 56,
+        "contrasto": 57,
+        "posizionamento": 86,
+        "visione": 83,
+        "calci_piazzati": 69
+      }
+    },
+    {
+      "nome": "Joan",
+      "cognome": "Capdevilla",
+      "data_nascita": "1978-07-01",
+      "nazionalita": "Spain",
+      "ruolo": "TS",
+      "ruoli_secondari": [],
+      "piede": "sinistro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 84,
+        "resistenza": 86,
+        "tecnica": 83,
+        "passaggio": 83,
+        "tiro": 76,
+        "dribbling": 79,
+        "colpo_testa": 80,
+        "marcatura": 85,
+        "contrasto": 86,
+        "posizionamento": 69,
+        "visione": 75,
+        "calci_piazzati": 82
+      }
+    },
+    {
+      "nome": "Dirk",
+      "cognome": "Kuyt",
+      "data_nascita": "1981-07-01",
+      "nazionalita": "Netherlands",
+      "ruolo": "TRQ",
+      "ruoli_secondari": [
+        "CC"
+      ],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 84,
+        "resistenza": 89,
+        "tecnica": 86,
+        "passaggio": 84,
+        "tiro": 88,
+        "dribbling": 83,
+        "colpo_testa": 82,
+        "marcatura": 75,
+        "contrasto": 66,
+        "posizionamento": 89,
+        "visione": 85,
+        "calci_piazzati": 51
+      }
+    },
+    {
+      "nome": "Tomas",
+      "cognome": "Rosicky",
+      "data_nascita": "1981-07-01",
+      "nazionalita": "Czech Republic",
+      "ruolo": "TRQ",
+      "ruoli_secondari": [
+        "ED",
+        "CC"
+      ],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 83,
+        "resistenza": 79,
+        "tecnica": 89,
+        "passaggio": 89,
+        "tiro": 81,
+        "dribbling": 88,
+        "colpo_testa": 54,
+        "marcatura": 58,
+        "contrasto": 58,
+        "posizionamento": 78,
+        "visione": 88,
+        "calci_piazzati": 76
+      }
+    },
+    {
+      "nome": "Aleksandr",
+      "cognome": "Mostovoi",
+      "data_nascita": "1969-07-01",
+      "nazionalita": "Russia",
+      "ruolo": "TRQ",
+      "ruoli_secondari": [
+        "ES"
+      ],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 78,
+        "resistenza": 81,
+        "tecnica": 88,
+        "passaggio": 89,
+        "tiro": 83,
+        "dribbling": 88,
+        "colpo_testa": 79,
+        "marcatura": 62,
+        "contrasto": 58,
+        "posizionamento": 83,
+        "visione": 87,
+        "calci_piazzati": 89
+      }
+    },
+    {
+      "nome": "Landon",
+      "cognome": "Donovan",
+      "data_nascita": "1983-07-01",
+      "nazionalita": "United States",
+      "ruolo": "PC",
+      "ruoli_secondari": [
+        "ED",
+        "TRQ"
+      ],
+      "piede": "destro",
+      "potenziale": 86,
+      "attributi": {
+        "velocita": 89,
+        "resistenza": 85,
+        "tecnica": 87,
+        "passaggio": 85,
+        "tiro": 86,
+        "dribbling": 85,
+        "colpo_testa": 70,
+        "marcatura": 47,
+        "contrasto": 42,
+        "posizionamento": 86,
+        "visione": 85,
+        "calci_piazzati": 80
+      }
+    },
+    {
+      "nome": "Saeed",
+      "cognome": "Al-Owairan",
+      "data_nascita": "1968-07-01",
+      "nazionalita": "Saudi Arabia",
+      "ruolo": "ED",
+      "ruoli_secondari": [
+        "TRQ",
+        "PC"
+      ],
+      "piede": "sinistro",
+      "potenziale": 85,
+      "attributi": {
+        "velocita": 94,
+        "resistenza": 83,
+        "tecnica": 84,
+        "passaggio": 81,
+        "tiro": 82,
+        "dribbling": 86,
+        "colpo_testa": 76,
+        "marcatura": 27,
+        "contrasto": 31,
+        "posizionamento": 83,
+        "visione": 78,
+        "calci_piazzati": 77
+      }
+    },
+    {
+      "nome": "Alex",
+      "cognome": "Scott",
+      "data_nascita": "1985-07-01",
+      "nazionalita": "England",
+      "ruolo": "TD",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 85,
+      "attributi": {
+        "velocita": 86,
+        "resistenza": 83,
+        "tecnica": 78,
+        "passaggio": 84,
+        "tiro": 70,
+        "dribbling": 78,
+        "colpo_testa": 78,
+        "marcatura": 81,
+        "contrasto": 88,
+        "posizionamento": 69,
+        "visione": 68,
+        "calci_piazzati": 68
+      }
+    },
+    {
+      "nome": "Clint",
+      "cognome": "Dempsey",
+      "data_nascita": "1984-07-01",
+      "nazionalita": "United States",
+      "ruolo": "TRQ",
+      "ruoli_secondari": [
+        "ES"
+      ],
+      "piede": "destro",
+      "potenziale": 85,
+      "attributi": {
+        "velocita": 82,
+        "resistenza": 82,
+        "tecnica": 87,
+        "passaggio": 85,
+        "tiro": 86,
+        "dribbling": 85,
+        "colpo_testa": 81,
+        "marcatura": 44,
+        "contrasto": 49,
+        "posizionamento": 86,
+        "visione": 83,
+        "calci_piazzati": 83
+      }
+    },
+    {
+      "nome": "Tim",
+      "cognome": "Cahill",
+      "data_nascita": "1980-07-01",
+      "nazionalita": "Australia",
+      "ruolo": "PC",
+      "ruoli_secondari": [
+        "CC",
+        "TRQ"
+      ],
+      "piede": "destro",
+      "potenziale": 85,
+      "attributi": {
+        "velocita": 80,
+        "resistenza": 84,
+        "tecnica": 84,
+        "passaggio": 84,
+        "tiro": 85,
+        "dribbling": 81,
+        "colpo_testa": 94,
+        "marcatura": 64,
+        "contrasto": 57,
+        "posizionamento": 82,
+        "visione": 76,
+        "calci_piazzati": 66
+      }
+    },
+    {
+      "nome": "Peter",
+      "cognome": "Crouch",
+      "data_nascita": "1981-07-01",
+      "nazionalita": "England",
+      "ruolo": "PC",
+      "ruoli_secondari": [],
+      "piede": "destro",
+      "potenziale": 85,
+      "attributi": {
+        "velocita": 74,
+        "resistenza": 79,
+        "tecnica": 84,
+        "passaggio": 83,
+        "tiro": 87,
+        "dribbling": 78,
+        "colpo_testa": 94,
+        "marcatura": 52,
+        "contrasto": 46,
+        "posizionamento": 86,
+        "visione": 78,
+        "calci_piazzati": 59
+      }
+    },
+    {
+      "nome": "DaMarcus",
+      "cognome": "Beasley",
+      "data_nascita": "1983-07-01",
+      "nazionalita": "United States",
+      "ruolo": "ES",
+      "ruoli_secondari": [
+        "TS"
+      ],
+      "piede": "sinistro",
+      "potenziale": 85,
+      "attributi": {
+        "velocita": 91,
+        "resistenza": 90,
+        "tecnica": 86,
+        "passaggio": 79,
+        "tiro": 77,
+        "dribbling": 86,
+        "colpo_testa": 62,
+        "marcatura": 76,
+        "contrasto": 75,
+        "posizionamento": 80,
+        "visione": 81,
+        "calci_piazzati": 83
+      }
+    },
+    {
+      "nome": "Lars",
+      "cognome": "Ricken",
+      "data_nascita": "1977-07-01",
+      "nazionalita": "Germany",
+      "ruolo": "TRQ",
+      "ruoli_secondari": [
+        "ED",
+        "PC"
+      ],
+      "piede": "destro",
+      "potenziale": 85,
+      "attributi": {
+        "velocita": 83,
+        "resistenza": 75,
+        "tecnica": 83,
+        "passaggio": 84,
+        "tiro": 85,
+        "dribbling": 83,
+        "colpo_testa": 75,
+        "marcatura": 55,
+        "contrasto": 57,
+        "posizionamento": 86,
+        "visione": 84,
+        "calci_piazzati": 71
+      }
+    }
+  ]
+}

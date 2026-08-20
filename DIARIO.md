@@ -121,3 +121,20 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - `docs/dati.md` aggiornata con la verifica e la fonte candidata per i dati veri: dataset Kaggle "Complete EA FC26 Rating Cards Database" (da scaricare come fatto per FC 26).
 
 **Prossima sessione proposta:** M2 — Carriera minima giocabile (oppure conversione leggende se lo sviluppatore carica il dataset delle carte).
+
+---
+
+## Sessione 7 — 2026-08-20 — Leggende importate (105 Icons + 61 Heroes)
+
+**Obiettivo dichiarato:** trovare una fonte utilizzabile per Icons/Heroes (il dataset Kaggle da >500 MB non è caricabile su GitHub) e importarle col tag categoria.
+
+**Verifiche:**
+- [EAFC26-DataHub](https://github.com/ismailoksuz/EAFC26-DataHub) segnalato dallo sviluppatore: usa lo **stesso** dataset FC 26 che abbiamo già (stesso schema) → niente Icons, ma utile come fonte alternativa auto-scaricabile.
+- Repo `bartlomiej-niemiec/fc24-ultimate-team-players` (MIT, dati futwiz): le carte base di FC 24 hanno le **statistiche complete** (i file FC 25/26 le hanno vuote) → scelta come fonte.
+
+**Fatto:**
+- Nuovo script **`02-converti-leggende.mjs`**: filtra le carte base "Icon" e "FUT Hero", deduplica per nome, mappa gli attributi futwiz sul nostro schema e genera `data/leggende/icons.json` + `heroes.json`. Pipeline ora: 01 scarica → 02 converte leggende → 03 costruisce DB.
+- **166 leggende nel database** (105 Icons + 61 Heroes) con tag `categoria`, visibili nell'app (sezione Leggende + badge ★ICON/⚡HERO).
+- Limiti documentati in docs/dati.md: manca Maradona (escluso da FC 24 per disputa legale), date di nascita sintetiche, incluse le leggende femminili, attributi da carte FUT.
+
+**Prossima sessione proposta:** M2 — Carriera minima giocabile.

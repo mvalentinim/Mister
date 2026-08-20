@@ -151,11 +151,25 @@ Cosa è stato predisposto in attesa della fonte giusta:
 - **interfaccia**: sezione "Leggende" nell'elenco squadre e badge ★ICON/⚡HERO
   nella scheda giocatore.
 
-**Fonte candidata per i dati veri**: il dataset Kaggle
-["Complete EA FC26 Rating Cards Database"](https://www.kaggle.com/datasets/flynn28/complete-ea-fc26-rating-cards-database)
-(carte FUT, che includono Icons e Heroes con attributi). Da scaricare e caricare
-nel repository come fatto per il dataset FC 26: uno script di conversione
-genererà i JSON del canale leggende.
+**Fonte trovata e integrata (sessione 7).** Il dataset Kaggle delle carte
+FC 26 pesa >500 MB (non caricabile su GitHub) e il repo
+[EAFC26-DataHub](https://github.com/ismailoksuz/EAFC26-DataHub) usa lo stesso
+dataset che già abbiamo (niente Icons, verificato). La fonte buona è
+[bartlomiej-niemiec/fc24-ultimate-team-players](https://github.com/bartlomiej-niemiec/fc24-ultimate-team-players)
+(repo pubblico MIT, dati futwiz): le carte base **"Icon" (105)** e
+**"FUT Hero" (61)** di FC 24 hanno le statistiche complete — i file FC 25/26
+dello stesso repo le hanno vuote, quindi FC 24 è l'edizione più recente
+utilizzabile. Lo script `02-converti-leggende.mjs` le converte nei JSON del
+canale (`icons.json`, `heroes.json`) dentro `npm run importa-dati`.
+
+Limiti dichiarati della fonte leggende:
+- **manca Maradona** (escluso da FC 24 per una disputa legale, tornato in
+  FC 25): aggiungibile a mano in un file `correzioni.json` o con l'editor;
+- date di nascita **sintetiche** (le carte riportano solo l'età);
+- il set include anche le **leggende femminili** (FUT è misto da FC 24) —
+  restano nel database col loro tag, le regole di gioco decideranno;
+- gli attributi sono quelli delle carte base FUT (leggermente "generosi"):
+  affinabili con l'editor in M9.
 
 ## Stato
 

@@ -36,17 +36,32 @@ try {
   console.log()
 }
 
-// ── 2. Mondiale 2026 da openfootball ───────────────────────────────────────
-const urlMondiale =
-  'https://raw.githubusercontent.com/openfootball/worldcup/master/2026--canada-usa-mexico/cup.txt'
-console.log('▸ worldcup2026.txt — gironi e qualificate (openfootball)\n  ' + urlMondiale)
-const risposta = await fetch(urlMondiale)
-if (!risposta.ok) throw new Error(`Download fallito (${risposta.status}) per ${urlMondiale}`)
-const contenuto = Buffer.from(await risposta.arrayBuffer())
-if (contenuto.length < 3_000) {
-  throw new Error(`File sospettosamente piccolo (${contenuto.length} byte): mi aspettavo almeno 3000`)
-}
-await writeFile(join(cartellaFonti, 'worldcup2026.txt'), contenuto)
-console.log(`  ✓ salvato (${(contenuto.length / 1_000).toFixed(0)} kB)\n`)
+// ── 2. Download dal web: Mondiale 2026 + carte FUT per le leggende ─────────
+const DOWNLOAD = [
+  {
+    nome: 'worldcup2026.txt',
+    url: 'https://raw.githubusercontent.com/openfootball/worldcup/master/2026--canada-usa-mexico/cup.txt',
+    descrizione: 'Mondiale 2026: gironi e qualificate (openfootball)',
+    byteMinimi: 3_000,
+  },
+  {
+    nome: 'eafc24_ut_players.csv',
+    url: 'https://raw.githubusercontent.com/bartlomiej-niemiec/fc24-ultimate-team-players/main/eafc24_ut_players.csv',
+    descrizione: 'Carte FUT di FC 24 (per le leggende Icons/Heroes, fonte futwiz — repo MIT)',
+    byteMinimi: 3_000_000,
+  },
+]
 
-console.log('Fonti pronte. Ora esegui: node data/importa/02-costruisci-db.mjs')
+for (const fonte of DOWNLOAD) {
+  console.log(`▸ ${fonte.nome} — ${fonte.descrizione}\n  ${fonte.url}`)
+  const risposta = await fetch(fonte.url)
+  if (!risposta.ok) throw new Error(`Download fallito (${risposta.status}) per ${fonte.url}`)
+  const contenuto = Buffer.from(await risposta.arrayBuffer())
+  if (contenuto.length < fonte.byteMinimi) {
+    throw new Error(`File sospettosamente piccolo (${contenuto.length} byte) per ${fonte.nome}`)
+  }
+  await writeFile(join(cartellaFonti, fonte.nome), contenuto)
+  console.log(`  ✓ salvato (${(contenuto.length / 1_000).toFixed(0)} kB)\n`)
+}
+
+console.log('Fonti pronte. Ora esegui: node data/importa/02-converti-leggende.mjs')
