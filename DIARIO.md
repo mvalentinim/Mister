@@ -89,3 +89,19 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 **Resta per chiudere M1 (DoD):** lo sviluppatore esegue di persona `npm run importa-dati` e verifica il report — da fare quando avrà accesso al Mac (insieme alla DoD di M0, ancora in sospeso).
 
 **Prossima sessione proposta:** M2 — Carriera minima giocabile (flusso nuova carriera: nazione → profilo allenatore → offerte dalla seconda divisione).
+
+---
+
+## Sessione 5 — 2026-08-20 — M1: aggiornamento dati a FC 26 (stagione 2025-26)
+
+**Obiettivo dichiarato:** sostituire la fonte FIFA 23 con il dataset **EA Sports FC 26** scaricato da Kaggle dallo sviluppatore e caricato nel repository (`archive.zip` su main → spostato in `data/fc26-kaggle.zip`).
+
+**Fatto:**
+- Verificato il dataset: 18.405 giocatori, snapshot 21/09/2025 → **stagione 2025-26**, con **date di nascita reali** e contratti attuali. Copertura completa delle 10 leghe confermata via `league_id` (i nomi delle leghe in FC 26 sono ambigui: Bundesliga tedesca e austriaca omonime).
+- **Pipeline riscritta su FC 26**: club ricavati dalle righe giocatore (la fonte non ha un file squadre); fama = media overall dei migliori 18, budget derivati da valore rosa e stipendi. Spariti i compromessi dell'ancoraggio temporale (date sintetiche e scadenze traslate).
+- Corretti i nomi paese aggiornati di EA ("Türkiye", "Czechia", "Cabo Verde") per l'aggancio alle qualificate del Mondiale 2026.
+- **Importati: 5.851 giocatori 2025-26, 198 club, 40 nazionali** (29 al Mondiale 2026, 12 a selezione automatica). Unico caso di omonimia: i gemelli Murphy (verificati, persone diverse). Report pulito.
+- `docs/dati.md` aggiornata (fonte, mappatura campo per campo, report).
+- Verificato nel browser: rose attuali (es. Palermo con Pohjanpalo e Palumbo).
+
+**Prossima sessione proposta:** M2 — Carriera minima giocabile.

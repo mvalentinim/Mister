@@ -1,15 +1,17 @@
 // 02-costruisci-db.mjs — costruisce il database statico del gioco
-// (public/mister.sqlite) a partire dalle fonti scaricate in data/fonti/.
+// (public/mister.sqlite) a partire dalle fonti preparate in data/fonti/.
 //
 // Si lancia con: node data/importa/02-costruisci-db.mjs
 // (o tutto insieme: npm run importa-dati)
 //
 // COSA FA, IN ORDINE:
-// 1. legge i CSV FIFA 23 (giocatori + squadre) e il file del Mondiale 2026
+// 1. legge il CSV di EA Sports FC 26 e il file del Mondiale 2026
 // 2. filtra il perimetro del FRD §5.2 Fase A: le 10 leghe top europee
+//    (identificate dal league_id numerico di EA: i nomi sono ambigui,
+//    es. la Bundesliga tedesca e quella austriaca si chiamano uguali)
 // 3. mappa ogni campo della fonte sulle colonne del nostro schema
 //    (la mappatura completa è documentata in docs/dati.md)
-// 4. costruisce le nazionali (rose ufficiali FIFA 23 + selezione automatica
+// 4. costruisce le nazionali (rose ufficiali FC 26 + selezione automatica
 //    per le qualificate al Mondiale 2026 senza rosa ufficiale)
 // 5. salva il database SQLite e stampa il report di verifica (DoD M1)
 
@@ -24,25 +26,18 @@ const fonti = (nome) => join(cartellaDati, 'fonti', nome)
 
 // ── Costanti di progetto ────────────────────────────────────────────────────
 
-// Il mondo di gioco è ancorato a QUESTO anno: le età dei giocatori valgono
-// "oggi" e le scadenze contrattuali della stagione FIFA 23 (2022-23) vengono
-// traslate in avanti dello stesso scarto. Documentato in docs/dati.md.
-const ANNO_RIFERIMENTO = 2026
-const ANNO_FONTE = 2022
-const SCARTO_ANNI = ANNO_RIFERIMENTO - ANNO_FONTE
-
-// Le 10 leghe del perimetro (nomi esatti della fonte) → nostra struttura
+// Le 10 leghe del perimetro: league_id EA → nostra struttura
 const LEGHE = {
-  'Italian Serie A (1)':             { nazione: 'Italia',      nome: 'Serie A',        livello: 1 },
-  'Italian Serie B (2)':             { nazione: 'Italia',      nome: 'Serie B',        livello: 2 },
-  'English Premier League (1)':      { nazione: 'Inghilterra', nome: 'Premier League', livello: 1 },
-  'English League Championship (2)': { nazione: 'Inghilterra', nome: 'Championship',   livello: 2 },
-  'Spain Primera Division (1)':      { nazione: 'Spagna',      nome: 'La Liga',        livello: 1 },
-  'Spanish Segunda División (2)':    { nazione: 'Spagna',      nome: 'Segunda División', livello: 2 },
-  'German 1. Bundesliga (1)':        { nazione: 'Germania',    nome: 'Bundesliga',     livello: 1 },
-  'German 2. Bundesliga (2)':        { nazione: 'Germania',    nome: '2. Bundesliga',  livello: 2 },
-  'French Ligue 1 (1)':              { nazione: 'Francia',     nome: 'Ligue 1',        livello: 1 },
-  'French Ligue 2 (2)':              { nazione: 'Francia',     nome: 'Ligue 2',        livello: 2 },
+  31: { nazione: 'Italia',      nome: 'Serie A',          livello: 1 },
+  32: { nazione: 'Italia',      nome: 'Serie B',          livello: 2 },
+  13: { nazione: 'Inghilterra', nome: 'Premier League',   livello: 1 },
+  14: { nazione: 'Inghilterra', nome: 'Championship',     livello: 2 },
+  53: { nazione: 'Spagna',      nome: 'La Liga',          livello: 1 },
+  54: { nazione: 'Spagna',      nome: 'La Liga 2',        livello: 2 },
+  19: { nazione: 'Germania',    nome: 'Bundesliga',       livello: 1 },
+  20: { nazione: 'Germania',    nome: '2. Bundesliga',    livello: 2 },
+  16: { nazione: 'Francia',     nome: 'Ligue 1',          livello: 1 },
+  17: { nazione: 'Francia',     nome: 'Ligue 2',          livello: 2 },
 }
 const CODICI_NAZIONE = { Italia: 'ITA', Inghilterra: 'ENG', Spagna: 'ESP', Germania: 'GER', Francia: 'FRA' }
 
@@ -53,15 +48,17 @@ const RUOLI = {
   ST: 'PC', CF: 'PC',
 }
 
-// Nomi paese: openfootball (Mondiale 2026) → nomi usati dal dataset FIFA
+// Nomi paese: openfootball (Mondiale 2026) → nomi usati dal dataset EA
 const ALIAS_PAESI = {
   'South Korea': 'Korea Republic',
   'USA': 'United States',
   'Ivory Coast': "Côte d'Ivoire",
   'DR Congo': 'Congo DR',
-  'Cape Verde': 'Cape Verde Islands',
+  'Cape Verde': 'Cabo Verde',
   'Bosnia & Herzegovina': 'Bosnia and Herzegovina',
   'Curaçao': 'Curacao',
+  'Czech Republic': 'Czechia',
+  'Turkey': 'Türkiye',
 }
 
 // ── Piccole utilità ─────────────────────────────────────────────────────────
@@ -117,8 +114,7 @@ function dividiNome(nomeBreve) {
 // ── 1. Lettura fonti ────────────────────────────────────────────────────────
 
 console.log('Leggo le fonti da data/fonti/ ...')
-const squadreFonte = leggiCsv(await readFile(fonti('teams_fifa23.csv'), 'utf8'))
-const giocatoriFonte = leggiCsv(await readFile(fonti('players_fifa23.csv'), 'utf8'))
+const giocatoriFonte = leggiCsv(await readFile(fonti('FC26_20250921.csv'), 'utf8'))
 const mondialeTxt = await readFile(fonti('worldcup2026.txt'), 'utf8')
 
 // Qualificate al Mondiale 2026: righe "Group A | Mexico   South Africa ..."
@@ -128,16 +124,21 @@ const qualificate2026 = mondialeTxt
   .flatMap((r) => r.split('|')[1].trim().split(/\s{2,}/))
   .map((nome) => ALIAS_PAESI[nome] ?? nome)
 console.log(`  Mondiale 2026: ${qualificate2026.length} nazionali qualificate`)
+console.log(`  FC 26: ${giocatoriFonte.length} righe giocatore`)
 
-// ── 2. Filtro del perimetro ────────────────────────────────────────────────
+// ── 2. Filtro del perimetro e club ─────────────────────────────────────────
 
-// Squadre fittizie incluse in FIFA 23 come contenuto bonus: non sono club reali
-const CLUB_ESCLUSI = new Set(['AFC Richmond'])
-
-const clubPerimetro = new Map() // nome club (fonte) → riga squadra + lega
-for (const s of squadreFonte) {
-  const lega = LEGHE[s.League]
-  if (lega && !CLUB_ESCLUSI.has(s.Name.trim())) clubPerimetro.set(s.Name.trim(), { fonte: s, lega })
+// I club si ricavano dalle righe giocatore (la fonte non ha un file squadre):
+// club_team_id → nome, lega, e rosa
+const clubFonte = new Map() // club_team_id → { nome, legaId, giocatori: [] }
+for (const g of giocatoriFonte) {
+  const legaId = intero(g.league_id)
+  if (!(legaId in LEGHE)) continue
+  const idClubFonte = intero(g.club_team_id)
+  if (!clubFonte.has(idClubFonte)) {
+    clubFonte.set(idClubFonte, { nome: g.club_name.trim(), legaId, giocatori: [] })
+  }
+  clubFonte.get(idClubFonte).giocatori.push(g)
 }
 
 // ── 3. Costruzione database ────────────────────────────────────────────────
@@ -149,7 +150,7 @@ db.run(await readFile(join(cartellaDati, 'schema.sql'), 'utf8'))
 // Nazioni e competizioni
 const idNazione = {}
 const idCompetizione = {}
-for (const [nomeFonte, lega] of Object.entries(LEGHE)) {
+for (const [legaId, lega] of Object.entries(LEGHE)) {
   if (!(lega.nazione in idNazione)) {
     db.run('INSERT INTO nazione (nome, codice) VALUES (?, ?)', [lega.nazione, CODICI_NAZIONE[lega.nazione]])
     idNazione[lega.nazione] = db.exec('SELECT last_insert_rowid()')[0].values[0][0]
@@ -157,25 +158,27 @@ for (const [nomeFonte, lega] of Object.entries(LEGHE)) {
   db.run('INSERT INTO competizione (nazione_id, nome, livello) VALUES (?, ?, ?)', [
     idNazione[lega.nazione], lega.nome, lega.livello,
   ])
-  idCompetizione[nomeFonte] = db.exec('SELECT last_insert_rowid()')[0].values[0][0]
+  idCompetizione[legaId] = db.exec('SELECT last_insert_rowid()')[0].values[0][0]
 }
 
-// Club: fama dal prestigio (nazionale 70% + internazionale 30%, scala 1-10 → 1-99)
-const idClub = new Map()
-for (const [nomeClub, { fonte, lega }] of clubPerimetro) {
-  const fama = limita(intero(fonte.DomesticPrestige) * 7 + intero(fonte.IntPrestige) * 3)
-  db.run('INSERT INTO club (competizione_id, nome, fama, budget_mercato, budget_stipendi) VALUES (?, ?, ?, ?, 0)', [
-    idCompetizione[Object.keys(LEGHE).find((k) => LEGHE[k] === lega)], nomeClub, fama, intero(fonte.TransferBudget) ?? 0,
+// Club. La fonte non ha prestigio né budget: li deriviamo dalla rosa.
+// - fama: media overall dei migliori 18 (la forza percepita del club)
+// - budget mercato: 8% del valore totale della rosa
+// - budget stipendi: somma stipendi annuali +15% di margine
+const idClub = new Map() // club_team_id fonte → id nostro club
+for (const [idClubFonte, c] of clubFonte) {
+  const overall = c.giocatori.map((g) => intero(g.overall) ?? 50).sort((a, b) => b - a)
+  const fama = limita(overall.slice(0, 18).reduce((s, v) => s + v, 0) / Math.min(18, overall.length))
+  const valoreRosa = c.giocatori.reduce((s, g) => s + (intero(g.value_eur) ?? 0), 0)
+  const stipendiAnnui = c.giocatori.reduce((s, g) => s + (intero(g.wage_eur) ?? 500) * 52, 0)
+  db.run('INSERT INTO club (competizione_id, nome, fama, budget_mercato, budget_stipendi) VALUES (?, ?, ?, ?, ?)', [
+    idCompetizione[c.legaId], c.nome, fama, Math.round(valoreRosa * 0.08), Math.round(stipendiAnnui * 1.15),
   ])
-  idClub.set(nomeClub, db.exec('SELECT last_insert_rowid()')[0].values[0][0])
+  idClub.set(idClubFonte, db.exec('SELECT last_insert_rowid()')[0].values[0][0])
 }
 
-// Giocatori: nel perimetro se il club è nelle 10 leghe, oppure se servono a
-// una rosa nazionale (in quel caso entrano con club_esterno)
-const nazionaliUfficiali = new Set(
-  giocatoriFonte.map((g) => g.NationalTeam).filter((n) => n && n !== '-' && n !== 'Not in team'),
-)
-
+// Giocatori: nel perimetro se il club è nelle 10 leghe, oppure se convocati
+// in una nazionale (in quel caso entrano con club_esterno)
 const inserisciGiocatore = db.prepare(`
   INSERT INTO giocatore (id, club_id, club_esterno, nome, cognome, data_nascita, nazionalita,
     ruolo, ruoli_secondari, piede,
@@ -188,94 +191,91 @@ const inserisciGiocatore = db.prepare(`
 
 let importati = 0
 let doppioniFonte = 0
-const idVisti = new Set() // la fonte contiene ~119 giocatori ripetuti: teniamo la prima riga
+const idVisti = new Set()
 const importatiPerNazionalita = new Map() // per la selezione automatica delle nazionali
 for (const g of giocatoriFonte) {
-  const nomeClub = (g.Club ?? '').trim()
-  const clubId = idClub.get(nomeClub) ?? null
-  const inNazionale = g.NationalTeam && nazionaliUfficiali.has(g.NationalTeam)
+  const clubId = idClub.get(intero(g.club_team_id)) ?? null
+  const inNazionale = g.nation_team_id !== ''
   if (clubId === null && !inNazionale) continue // fuori perimetro
 
-  const id = intero(g.ID)
+  const id = intero(g.player_id)
   if (idVisti.has(id)) { doppioniFonte++; continue }
   idVisti.add(id)
-  const portiere = g.BestPosition === 'GK'
-  const { nome, cognome } = dividiNome(g.Name)
-  const eta = intero(g.Age) ?? 25
-  const ruolo = RUOLI[g.BestPosition] ?? 'CC'
-  const secondari = [...new Set((g.Positions ?? '').split(',').map((p) => RUOLI[p.trim()]).filter((r) => r && r !== ruolo))]
+
+  // Ruolo primario = primo della lista player_positions ("RW, ST" → RW)
+  const posizioni = g.player_positions.split(',').map((p) => p.trim())
+  const portiere = posizioni[0] === 'GK'
+  const ruolo = RUOLI[posizioni[0]] ?? 'CC'
+  const secondari = [...new Set(posizioni.slice(1).map((p) => RUOLI[p]).filter((r) => r && r !== ruolo))]
+  const { nome, cognome } = dividiNome(g.short_name)
 
   // Comportamentali: non presenti nella fonte → generati con seme = ID
   // (deterministici). L'ambizione cresce col margine di miglioramento.
   const caso = casualeConSeme(id)
   const comportamentale = () => limita(50 + (caso() - 0.5) * 60)
-  const ambizione = limita(comportamentale() + (intero(g.Potential) - intero(g.Overall)))
+  const ambizione = limita(comportamentale() + (intero(g.potential) - intero(g.overall)))
 
   inserisciGiocatore.run([
-    id, clubId, clubId === null ? nomeClub || null : null,
-    nome, cognome, `${ANNO_RIFERIMENTO - eta}-07-01`, g.Nationality,
-    ruolo, secondari.join(',') || null, g.PreferredFoot === 'Left' ? 'sinistro' : 'destro',
+    id, clubId, clubId === null ? g.club_name.trim() || null : null,
+    nome, cognome, g.dob, g.nationality_name,
+    ruolo, secondari.join(',') || null, g.preferred_foot === 'Left' ? 'sinistro' : 'destro',
     // tecnici (per i portieri restano NULL quelli di movimento e viceversa)
-    portiere ? intero(g.SprintSpeed) : intero(g.PaceTotal),
-    intero(g.Stamina),
-    portiere ? null : intero(g.BallControl),
-    portiere ? null : intero(g.ShortPassing),
-    portiere ? null : intero(g.ShootingTotal),
-    portiere ? null : intero(g.DribblingTotal),
-    portiere ? null : intero(g.HeadingAccuracy),
-    portiere ? null : intero(g.Marking),
-    portiere ? null : intero(g.StandingTackle),
-    portiere ? null : intero(g.Positioning),
-    portiere ? null : intero(g.Vision),
-    portiere ? null : intero(g.FKAccuracy),
-    portiere ? intero(g.GKReflexes) : null,
-    portiere ? intero(g.GKHandling) : null,
-    portiere ? intero(g.GKPositioning) : null,
-    portiere ? intero(g.GKKicking) : null,
+    portiere ? intero(g.movement_sprint_speed) : intero(g.pace),
+    intero(g.power_stamina),
+    portiere ? null : intero(g.skill_ball_control),
+    portiere ? null : intero(g.attacking_short_passing),
+    portiere ? null : intero(g.shooting),
+    portiere ? null : intero(g.dribbling),
+    portiere ? null : intero(g.attacking_heading_accuracy),
+    portiere ? null : intero(g.defending_marking_awareness),
+    portiere ? null : intero(g.defending_standing_tackle),
+    portiere ? null : intero(g.mentality_positioning),
+    portiere ? null : intero(g.mentality_vision),
+    portiere ? null : intero(g.skill_fk_accuracy),
+    portiere ? intero(g.goalkeeping_reflexes) : null,
+    portiere ? intero(g.goalkeeping_handling) : null,
+    portiere ? intero(g.goalkeeping_positioning) : null,
+    portiere ? intero(g.goalkeeping_kicking) : null,
     ambizione, comportamentale(), comportamentale(), comportamentale(),
     comportamentale(), comportamentale(), comportamentale(),
-    intero(g.Potential),
+    intero(g.potential),
   ])
   importati++
 
-  if (!importatiPerNazionalita.has(g.Nationality)) importatiPerNazionalita.set(g.Nationality, [])
-  importatiPerNazionalita.get(g.Nationality).push({ id, overall: intero(g.Overall) ?? 50, ruolo })
+  if (!importatiPerNazionalita.has(g.nationality_name)) importatiPerNazionalita.set(g.nationality_name, [])
+  importatiPerNazionalita.get(g.nationality_name).push({ id, overall: intero(g.overall) ?? 50, ruolo })
 
   // Contratto solo per chi gioca in un club del perimetro.
-  // Stipendio: la fonte è settimanale → annuale (×52).
-  // Scadenza: traslata di SCARTO_ANNI per ancorare il mondo al 2026.
+  // Stipendio: la fonte è settimanale → annuale (×52). Scadenza: 30 giugno
+  // dell'anno indicato dalla fonte (stagione 2025-26, nessuna traslazione).
   if (clubId !== null) {
-    const scadenza = (intero(g.ContractUntil) ?? ANNO_FONTE + 2) + SCARTO_ANNI
+    const scadenza = intero(g.club_contract_valid_until_year) ?? 2026
     db.run('INSERT INTO contratto (giocatore_id, club_id, stipendio, scadenza) VALUES (?, ?, ?, ?)', [
-      id, clubId, (intero(g.WageEUR) ?? 500) * 52, `${scadenza}-06-30`,
+      id, clubId, (intero(g.wage_eur) ?? 500) * 52, `${scadenza}-06-30`,
     ])
   }
 }
 inserisciGiocatore.free()
 
-// Budget stipendi del club = somma degli stipendi della rosa +15% di margine
-db.run(`UPDATE club SET budget_stipendi = (
-  SELECT COALESCE(SUM(c.stipendio), 0) * 1.15 FROM contratto c WHERE c.club_id = club.id
-)`)
-
 // ── 4. Nazionali ────────────────────────────────────────────────────────────
-// a) rose ufficiali presenti nella fonte (colonna NationalTeam)
+// a) rose ufficiali presenti nella fonte (nation_team_id valorizzato:
+//    il nome della nazionale è la nazionalità del giocatore)
 // b) qualificate al Mondiale 2026 senza rosa ufficiale → selezione automatica
 //    dei migliori per nazionalità tra i giocatori importati (flag generata=1)
 
 const idNazionale = new Map()
-for (const nomeNazionale of nazionaliUfficiali) {
-  db.run('INSERT INTO nazionale (nome, mondiale_2026, generata) VALUES (?, ?, 0)', [
-    nomeNazionale, qualificate2026.includes(nomeNazionale) ? 1 : 0,
-  ])
-  idNazionale.set(nomeNazionale, db.exec('SELECT last_insert_rowid()')[0].values[0][0])
-}
 for (const g of giocatoriFonte) {
-  if (g.NationalTeam && idNazionale.has(g.NationalTeam)) {
-    db.run('INSERT OR IGNORE INTO convocazione (nazionale_id, giocatore_id) VALUES (?, ?)', [
-      idNazionale.get(g.NationalTeam), intero(g.ID),
+  if (g.nation_team_id === '') continue
+  const paese = g.nationality_name
+  if (!idNazionale.has(paese)) {
+    db.run('INSERT INTO nazionale (nome, mondiale_2026, generata) VALUES (?, ?, 0)', [
+      paese, qualificate2026.includes(paese) ? 1 : 0,
     ])
+    idNazionale.set(paese, db.exec('SELECT last_insert_rowid()')[0].values[0][0])
   }
+  db.run('INSERT OR IGNORE INTO convocazione (nazionale_id, giocatore_id) VALUES (?, ?)', [
+    idNazionale.get(paese), intero(g.player_id),
+  ])
 }
 
 let nazionaliGenerate = 0
@@ -293,7 +293,7 @@ for (const paese of qualificate2026) {
   nazionaliGenerate++
 }
 
-// Fama della nazionale = media overall della rosa (ricavata dagli attributi)
+// Fama della nazionale = media del potenziale della rosa convocata
 db.run(`UPDATE nazionale SET fama = (
   SELECT COALESCE(ROUND(AVG(g.potenziale)), 50) FROM convocazione c
   JOIN giocatore g ON g.id = c.giocatore_id WHERE c.nazionale_id = nazionale.id
@@ -302,11 +302,12 @@ db.run(`UPDATE nazionale SET fama = (
 // ── 5. Salvataggio e report di verifica (DoD M1) ───────────────────────────
 
 const file = join(radiceProgetto, 'public', 'mister.sqlite')
-await writeFile(file, Buffer.from(db.export()))
+const contenutoDb = Buffer.from(db.export())
+await writeFile(file, contenutoDb)
 
 const q = (sql) => db.exec(sql)[0]?.values ?? []
 console.log('\n================ REPORT DI VERIFICA ================')
-console.log(`\nDatabase salvato in public/mister.sqlite (${(Buffer.from(db.export()).length / 1_000_000).toFixed(1)} MB)`)
+console.log(`\nDatabase salvato in public/mister.sqlite (${(contenutoDb.length / 1_000_000).toFixed(1)} MB)`)
 console.log(`\nGiocatori importati: ${importati} (scartate ${doppioniFonte} righe ripetute nella fonte)`)
 console.log('\nClub e giocatori per competizione:')
 for (const [naz, comp, nClub, nGioc] of q(`
