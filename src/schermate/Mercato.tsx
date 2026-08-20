@@ -3,7 +3,7 @@
 // (max 3 round, rifiuti motivati), offerte ricevute dai club IA, gestione
 // della propria rosa (rinnovi, cedibili), svincolati e notiziario.
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Database } from 'sql.js'
 import type { Carriera } from '../carriera/tipi.ts'
 import { salvaCarriera } from '../carriera/salvataggio.ts'
@@ -13,7 +13,7 @@ import {
   proponiCessione, rinnovaContratto, valutaProposta, type Proposta, type Risposta,
 } from '../mercato/ia.ts'
 import {
-  anniContratto, clubDiGiocatore, giocatoriPerId, monteStipendi, rosaClub, valoreInCarriera,
+  anniContratto, giocatoriPerId, monteStipendi, rosaClub, valoreInCarriera,
 } from '../mercato/stato.ts'
 import { stipendioAttesoSvincolato } from '../mercato/ia.ts'
 import { euro } from '../mercato/valore.ts'
@@ -42,10 +42,20 @@ interface Trattativa {
   contropartitaId: number | ''
 }
 
+/** I criteri con cui si può ordinare la ricerca. */
+type ChiaveOrdinamento = 'valore' | 'media' | 'scadenza' | 'eta'
+
 function Mercato({ db, carriera, onModificata }: Props) {
   const m = carriera.mercato
   const [ricerca, setRicerca] = useState('')
   const [filtroRuolo, setFiltroRuolo] = useState('')
+  const [filtroSquadra, setFiltroSquadra] = useState<number | ''>('')
+  const [filtroNazione, setFiltroNazione] = useState('')
+  const [mediaMin, setMediaMin] = useState('') // tenuti come testo: campo vuoto = nessun filtro
+  const [etaMax, setEtaMax] = useState('')
+  const [scadenzaEntro, setScadenzaEntro] = useState<number | ''>('')
+  const [ordina, setOrdina] = useState<ChiaveOrdinamento>('valore')
+  const [decrescente, setDecrescente] = useState(true)
   const [trattativa, setTrattativa] = useState<Trattativa | null>(null)
   const [avviso, setAvviso] = useState<string | null>(null)
   // trattativa col GIOCATORE (M7): dopo l'accordo col club, o per gli svincolati
@@ -66,20 +76,63 @@ function Mercato({ db, carriera, onModificata }: Props) {
   }
 
   // ── ricerca: giocatori degli altri club della nazione ──
-  const tuttiGliAltri: GiocatoreRiga[] = []
-  if (ricerca.length >= 2 || filtroRuolo) {
+  // L'elenco delle nazionalità per il filtro va calcolato una volta sola
+  // (le rose cambiano poco durante una sessione: se un'opzione manca,
+  // basta riaprire la schermata).
+  const nazionalita = useMemo(() => {
+    const tutte = new Set<string>()
     for (const club of carriera.club) {
       if (club.id === carriera.clubId) continue
-      tuttiGliAltri.push(...rosaClub(db, carriera, club.id))
+      for (const g of rosaClub(db, carriera, club.id)) tutte.add(g.nazionalita)
+    }
+    return [...tutte].sort((a, b) => a.localeCompare(b))
+  }, [db, carriera])
+
+  // La ricerca parte solo quando c'è almeno un criterio: così la schermata
+  // non mostra 1.200 giocatori a caso appena la apri.
+  const ricercaAttiva =
+    ricerca.length >= 2 || filtroRuolo !== '' || filtroSquadra !== '' ||
+    filtroNazione !== '' || mediaMin !== '' || etaMax !== '' || scadenzaEntro !== ''
+
+  // Ogni riga porta con sé il club di appartenenza: serve per la colonna
+  // "Club" e per il filtro per squadra senza doverlo ricalcolare.
+  const tuttiGliAltri: { g: GiocatoreRiga; club: string; clubId: number }[] = []
+  if (ricercaAttiva) {
+    for (const club of carriera.club) {
+      if (club.id === carriera.clubId) continue
+      if (filtroSquadra !== '' && club.id !== filtroSquadra) continue
+      for (const g of rosaClub(db, carriera, club.id)) {
+        tuttiGliAltri.push({ g, club: club.nome, clubId: club.id })
+      }
     }
   }
-  const risultati = tuttiGliAltri
-    .filter((g) =>
-      (!filtroRuolo || g.ruolo === filtroRuolo) &&
-      (ricerca.length < 2 || `${g.nome} ${g.cognome}`.toLowerCase().includes(ricerca.toLowerCase())),
-    )
-    .sort((a, b) => valoreInCarriera(carriera, b) - valoreInCarriera(carriera, a))
-    .slice(0, 25)
+
+  /** Il valore usato per ordinare, in base al criterio scelto. */
+  function chiave(g: GiocatoreRiga): number {
+    if (ordina === 'media') return mediaComplessiva(g)
+    if (ordina === 'eta') return calcolaEta(g.data_nascita)
+    if (ordina === 'scadenza') return carriera.contratti[g.id]?.scadenza ?? 9999
+    return valoreInCarriera(carriera, g)
+  }
+
+  const filtrati = tuttiGliAltri.filter(({ g }) =>
+    (!filtroRuolo || g.ruolo === filtroRuolo) &&
+    (!filtroNazione || g.nazionalita === filtroNazione) &&
+    (mediaMin === '' || mediaComplessiva(g) >= Number(mediaMin)) &&
+    (etaMax === '' || calcolaEta(g.data_nascita) <= Number(etaMax)) &&
+    (scadenzaEntro === '' || (carriera.contratti[g.id]?.scadenza ?? 9999) <= scadenzaEntro) &&
+    (ricerca.length < 2 || `${g.nome} ${g.cognome}`.toLowerCase().includes(ricerca.toLowerCase())),
+  )
+  const risultati = filtrati
+    .sort((a, b) => (decrescente ? chiave(b.g) - chiave(a.g) : chiave(a.g) - chiave(b.g)))
+    .slice(0, 30)
+
+  /** Cambia criterio di ordinamento scegliendo anche il verso più naturale:
+      valore e media dal più alto, scadenza ed età dal più basso. */
+  function cambiaOrdinamento(nuova: ChiaveOrdinamento) {
+    setOrdina(nuova)
+    setDecrescente(nuova === 'valore' || nuova === 'media')
+  }
 
   function apriTrattativa(g: GiocatoreRiga) {
     setTrattativa({
@@ -311,34 +364,84 @@ function Mercato({ db, carriera, onModificata }: Props) {
       {m.aperto && !trattativa && !ingaggio && (
         <>
           <h3>🔎 Cerca un rinforzo</h3>
-          <div className="riga-bottoni">
+          {/* prima riga: chi cerchi (nome, squadra, ruolo, nazionalità) */}
+          <div className="riga-bottoni filtri-mercato">
             <input placeholder="Nome del giocatore (min 2 lettere)…" value={ricerca}
               onChange={(e) => setRicerca(e.target.value)} className="campo-ricerca" />
+            <select value={filtroSquadra} onChange={(e) => setFiltroSquadra(e.target.value === '' ? '' : Number(e.target.value))}>
+              <option value="">Tutte le squadre</option>
+              {carriera.club
+                .filter((c) => c.id !== carriera.clubId)
+                .sort((a, b) => a.nome.localeCompare(b.nome))
+                .map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+            </select>
             <select value={filtroRuolo} onChange={(e) => setFiltroRuolo(e.target.value)}>
               <option value="">Tutti i ruoli</option>
               {RUOLI.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
+            <select value={filtroNazione} onChange={(e) => setFiltroNazione(e.target.value)}>
+              <option value="">Tutte le nazionalità</option>
+              {nazionalita.map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
           </div>
+          {/* seconda riga: filtri numerici e ordinamento */}
+          <div className="riga-bottoni filtri-mercato">
+            <label>Media min{' '}
+              <input type="number" min={40} max={99} value={mediaMin} className="campo-numero"
+                onChange={(e) => setMediaMin(e.target.value)} />
+            </label>
+            <label>Età max{' '}
+              <input type="number" min={15} max={45} value={etaMax} className="campo-numero"
+                onChange={(e) => setEtaMax(e.target.value)} />
+            </label>
+            <label>Scadenza entro{' '}
+              <select value={scadenzaEntro} onChange={(e) => setScadenzaEntro(e.target.value === '' ? '' : Number(e.target.value))}>
+                <option value="">—</option>
+                {[1, 2, 3, 4].map((n) => <option key={n} value={carriera.anno + n}>{carriera.anno + n}</option>)}
+              </select>
+            </label>
+            <label>Ordina per{' '}
+              <select value={ordina} onChange={(e) => cambiaOrdinamento(e.target.value as ChiaveOrdinamento)}>
+                <option value="valore">Valore di mercato</option>
+                <option value="media">Media (valore generale)</option>
+                <option value="scadenza">Scadenza contratto</option>
+                <option value="eta">Età</option>
+              </select>
+            </label>
+            <button className="bottone-secondario" title="Inverti l'ordinamento"
+              onClick={() => setDecrescente((d) => !d)}>
+              {decrescente ? '↓ decrescente' : '↑ crescente'}
+            </button>
+          </div>
+          {ricercaAttiva && risultati.length === 0 && (
+            <p className="nota">Nessun giocatore trovato con questi filtri.</p>
+          )}
           {risultati.length > 0 && (
-            <table className="tabella">
-              <thead>
-                <tr><th>Giocatore</th><th>Ruolo</th><th className="num">Età</th><th className="num">Media</th><th>Club</th><th className="num">Scad.</th><th className="num">Valore</th><th></th></tr>
-              </thead>
-              <tbody>
-                {risultati.map((g) => (
-                  <tr key={g.id}>
-                    <td className="grassetto">{g.nome} {g.cognome}</td>
-                    <td>{g.ruolo}</td>
-                    <td className="num">{calcolaEta(g.data_nascita)}</td>
-                    <td className="num evidenza">{mediaComplessiva(g)}</td>
-                    <td>{carriera.club.find((c) => c.id === clubDiGiocatore(carriera, g.id))?.nome}</td>
-                    <td className="num">{carriera.contratti[g.id]?.scadenza}</td>
-                    <td className="num">{euro(valoreInCarriera(carriera, g))}</td>
-                    <td><button className="bottone-secondario" onClick={() => apriTrattativa(g)}>Tratta</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <>
+              {filtrati.length > risultati.length && (
+                <p className="nota">Mostro i primi {risultati.length} di {filtrati.length} risultati: restringi i filtri o cambia ordinamento.</p>
+              )}
+              <table className="tabella">
+                <thead>
+                  <tr><th>Giocatore</th><th>Ruolo</th><th>Naz.</th><th className="num">Età</th><th className="num">Media</th><th>Club</th><th className="num">Scad.</th><th className="num">Valore</th><th></th></tr>
+                </thead>
+                <tbody>
+                  {risultati.map(({ g, club }) => (
+                    <tr key={g.id}>
+                      <td className="grassetto">{g.nome} {g.cognome}</td>
+                      <td>{g.ruolo}</td>
+                      <td>{g.nazionalita}</td>
+                      <td className="num">{calcolaEta(g.data_nascita)}</td>
+                      <td className="num evidenza">{mediaComplessiva(g)}</td>
+                      <td>{club}</td>
+                      <td className="num">{carriera.contratti[g.id]?.scadenza}</td>
+                      <td className="num">{euro(valoreInCarriera(carriera, g))}</td>
+                      <td><button className="bottone-secondario" onClick={() => apriTrattativa(g)}>Tratta</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
           )}
         </>
       )}

@@ -287,3 +287,19 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 **DoD di M7:** convincere un giocatore promettendo la titolarità, lasciarlo in panchina un mese e osservarne le conseguenze ✅ (test end-to-end). La stessa trattativa completabile offline ✅ (è la modalità predefinita del collaudo). Verifica di persona dello sviluppatore (e prova della modalità IA con una chiave reale) in sospeso come sempre.
 
 **Prossima sessione proposta:** M8 — carriera lunga: obiettivi e fama completa, esoneri e offerte migliori, coppa nazionale, crescita/declino dei giocatori (potenziale, età, utilizzo, prestazioni).
+
+---
+
+## Sessione 16 — 2026-08-20 — Ricerca giocatori avanzata nel mercato
+
+**Obiettivo dichiarato (richiesta esplicita):** prima di M8, potenziare la ricerca del mercato — per squadra, ruolo e nazionalità, con filtri e ordinamento per valore generale (media), anno di scadenza del contratto ed età.
+
+**Fatto:**
+- **Nuova barra dei filtri** nella sezione "Cerca un rinforzo": nome (come prima), **squadra** (tutte le squadre delle due divisioni, in ordine alfabetico), **ruolo**, **nazionalità** (elenco costruito dalle rose reali della carriera).
+- **Filtri numerici**: media minima, età massima, scadenza del contratto entro un certo anno (i primi 4 anni).
+- **Ordinamento a scelta**: valore di mercato (come prima, predefinito), media (valore generale), scadenza contratto, età — con bottone per invertire il verso; al cambio di criterio il verso torna a quello naturale (valore/media dal più alto, scadenza/età dal più basso).
+- La ricerca parte con **almeno un criterio attivo** (non serve più digitare un nome per forza: si può filtrare solo per nazionalità o squadra); risultati fino a 30 con avviso "primi X di Y" quando sono troncati; colonna Nazionalità aggiunta alla tabella.
+- Nota emersa dal collaudo: le **nazionalità sono in inglese** ("France", "Italy") perché così sono nel DB di origine — la traduzione è rimandata (eventuale mappa in un lavoro di rifinitura).
+- **Collaudo end-to-end (Playwright)**: filtro squadra (solo Palermo FC ✓), + ruolo PC ✓, nazionalità da sola (30 francesi ✓), età max 21 ordinata crescente ✓, inversione del verso ✓, scadenza entro il 2026 ✓, media ≥70 ordinata decrescente ✓, trattativa apribile dai risultati filtrati ✓. Build e lint verdi.
+
+**Prossima sessione proposta:** M8 — carriera lunga (obiettivi, fama completa, esoneri, coppa, crescita/declino giocatori).

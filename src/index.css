@@ -749,6 +749,30 @@ body {
   color: var(--testo);
 }
 
+/* la barra dei filtri della ricerca giocatori (squadra, ruolo, nazionalità,
+   media, età, scadenza e ordinamento) */
+.filtri-mercato {
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 0.5rem;
+}
+
+.filtri-mercato label {
+  font-size: 0.85rem;
+  color: var(--testo-attenuato);
+  white-space: nowrap;
+}
+
+.campo-numero {
+  width: 4.2rem;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--bordo);
+  border-radius: 6px;
+  font: inherit;
+  background: var(--superficie);
+  color: var(--testo);
+}
+
 .pannello-trattativa {
   background: var(--superficie);
   border: 1px solid var(--accento);
