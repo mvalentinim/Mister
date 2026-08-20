@@ -14,7 +14,7 @@
 
 import type { Database } from 'sql.js'
 import { interroga } from '../db/query.ts'
-import { preparaSquadra } from '../motore/preparazione.ts'
+import { preparaSquadra, tatticaDefault } from '../motore/preparazione.ts'
 import { simulaPartitaMotore } from '../motore/partita.ts'
 import type { SquadraMotore } from '../motore/tipi.ts'
 import { generaCalendario } from './calendario.ts'
@@ -23,13 +23,18 @@ import type {
 } from './tipi.ts'
 
 // Cache delle squadre preparate per il motore: il DB statico non cambia,
-// quindi la formazione di un club si calcola una volta sola per sessione.
+// quindi la formazione di un club IA si calcola una volta sola per sessione.
+// La squadra dell'UTENTE invece si ricostruisce sempre: la sua tattica (M4)
+// può cambiare in ogni momento.
 const cacheSquadre = new Map<number, SquadraMotore>()
 
 function squadraMotore(db: Database, carriera: Carriera, clubId: number): SquadraMotore {
+  const club = carriera.club.find((c) => c.id === clubId)!
+  if (clubId === carriera.clubId) {
+    return preparaSquadra(db, clubId, club.nome, carriera.tattica)
+  }
   let squadra = cacheSquadre.get(clubId)
   if (!squadra) {
-    const club = carriera.club.find((c) => c.id === clubId)!
     squadra = preparaSquadra(db, clubId, club.nome)
     cacheSquadre.set(clubId, squadra)
   }
@@ -137,11 +142,15 @@ export function creaCarriera(
   )
   const club = fotografaClub(db, nazione.id)
   const mieiCompagniDiLega = club.filter((c) => c.livello === 2).map((c) => c.id)
+  const rosaMia = interroga<import('../db/tipi.ts').GiocatoreRiga>(
+    db, 'SELECT * FROM giocatore WHERE club_id = ?', [offerta.clubId],
+  )
   return {
     id: `carriera-${Date.now()}`,
-    versioneSchema: 2,
+    versioneSchema: 3,
     seme: Math.floor(Math.random() * 2_147_483_647), // fissato alla creazione
     cronaca: null,
+    tattica: tatticaDefault(rosaMia),
     allenatore,
     nazione,
     competizioni: {

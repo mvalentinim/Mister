@@ -23,7 +23,7 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
-  // il test di calibrazione gira in Node (via tsx), non nel browser:
-  // lo escludiamo dal controllo tipi dell'app
-  "exclude": ["src/motore/calibra-cli.ts"]
+  // i test da riga di comando (*-cli.ts) girano in Node (via tsx), non nel
+  // browser: li escludiamo dal controllo tipi dell'app
+  "exclude": ["src/**/*-cli.ts"]
 }

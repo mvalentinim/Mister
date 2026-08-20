@@ -569,3 +569,94 @@ body {
 @media (max-width: 800px) {
   .md-corpo { flex-direction: column; }
 }
+
+/* ---- Schermata Tattica (M4) ---- */
+
+.tattica-controlli {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.tattica-controlli label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--testo-attenuato);
+}
+
+.tattica-controlli select,
+.pannello-slot select {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--bordo);
+  border-radius: 6px;
+  font: inherit;
+  background: var(--superficie);
+  color: var(--testo);
+}
+
+.campo-tattico {
+  width: 100%;
+  max-width: 640px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 15%);
+  margin-bottom: 1rem;
+}
+
+.slot {
+  cursor: pointer;
+}
+
+.ruolo-slot {
+  font-size: 1.9px;
+  font-weight: 700;
+  fill: #ffffff;
+  pointer-events: none;
+}
+
+.pannello-slot {
+  background: var(--superficie);
+  border: 1px solid var(--bordo);
+  border-radius: 10px;
+  padding: 1rem 1.3rem;
+}
+
+.pannello-slot h3 {
+  margin: 0 0 0.8rem;
+}
+
+.pannello-slot h4 {
+  margin: 0.8rem 0 0.4rem;
+}
+
+.colonne-movimenti {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0 1.5rem;
+}
+
+.voce-movimento {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  cursor: pointer;
+}
+
+.idoneita {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  color: #ffffff;
+}
+
+.idoneita.ottima { background: #27ae60; }
+.idoneita.buona { background: #7cb342; }
+.idoneita.scarsa { background: #e0a800; }
+.idoneita.pessima { background: #c0392b; }

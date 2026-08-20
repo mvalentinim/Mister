@@ -6,6 +6,7 @@
 // in IndexedDB (vedi salvataggio.ts) dopo ogni avanzamento.
 
 import type { EventoPartita, StatisticheSquadra } from '../motore/tipi.ts'
+import type { Tattica } from '../tattica/definizioni.ts'
 
 /** Il profilo dell'allenatore creato dall'utente. */
 export interface ProfiloAllenatore {
@@ -81,11 +82,13 @@ export interface CronacaPartita {
 /** Lo stato completo di una carriera. */
 export interface Carriera {
   id: string
-  versioneSchema: 2 // per le migrazioni dei salvataggi (FRD §11)
+  versioneSchema: 3 // per le migrazioni dei salvataggi (FRD §11)
   /** seme della carriera: con lo stesso seme le partite sono riproducibili */
   seme: number
   /** cronaca dell'ultima partita giocata dalla squadra dell'utente */
   cronaca: CronacaPartita | null
+  /** l'assetto tattico della squadra dell'utente (M4) */
+  tattica: Tattica
   allenatore: ProfiloAllenatore
   nazione: { id: number; nome: string }
   competizioni: { 1: string; 2: string } // nomi delle due divisioni

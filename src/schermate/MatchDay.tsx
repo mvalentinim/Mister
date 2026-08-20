@@ -27,16 +27,9 @@ interface Props {
 }
 
 // ── Geometria del campo (viewBox 105×68, come i metri di un campo vero) ────
-
-/** Posizioni del 4-4-2 per la squadra di casa (attacca verso destra). */
-const POSIZIONI_CASA: Array<[number, number]> = [
-  [5, 34], // POR
-  [20, 10], [20, 26], [20, 42], [20, 58], // difesa
-  [44, 8], [44, 25], [44, 43], [44, 60], // centrocampo
-  [66, 24], [66, 44], // attacco
-]
+// Le posizioni vengono dagli slot del modulo di ciascuna squadra (M4):
+// quella di casa attacca verso destra, la trasferta viene specchiata.
 const specchia = ([x, y]: [number, number]): [number, number] => [105 - x, y]
-const POSIZIONI_TRASFERTA = POSIZIONI_CASA.map(specchia)
 
 /** Cognome da mostrare sotto il gettone ("K. De Bruyne" → "De Bruyne"). */
 const cognome = (nome: string) => nome.slice(nome.indexOf(' ') + 1)
@@ -241,7 +234,7 @@ function MatchDay({ db, carriera, onFine }: Props) {
       // gioco "normale": la palla gira tra i giocatori della squadra in possesso
       const probCasa = 0.5 + (casa.centrocampo - trasferta.centrocampo) * 0.012
       if (rng.evento(0.35)) s.possessoCasa = rng.evento(Math.max(0.15, Math.min(0.85, probCasa)))
-      const posizioni = s.possessoCasa ? POSIZIONI_CASA : POSIZIONI_TRASFERTA
+      const posizioni = s.possessoCasa ? casa.posizioni : trasferta.posizioni.map(specchia)
       const indice = 1 + rng.intero(10) // mai il portiere, per vivacità
       const [x, y] = posizioni[Math.min(indice, posizioni.length - 1)]
       setPalla([x + rng.intero(7) - 3, y + rng.intero(7) - 3])
@@ -317,8 +310,8 @@ function MatchDay({ db, carriera, onFine }: Props) {
             <rect x="1" y="24.85" width="5.5" height="18.3" />
             <rect x="98.5" y="24.85" width="5.5" height="18.3" />
           </g>
-          {gettoni(casa, POSIZIONI_CASA, 'var(--accento)')}
-          {gettoni(trasferta, POSIZIONI_TRASFERTA, '#37424d')}
+          {gettoni(casa, casa.posizioni, 'var(--accento)')}
+          {gettoni(trasferta, trasferta.posizioni.map(specchia), '#37424d')}
           {/* la palla (si muove con una transizione fluida, vedi CSS) */}
           <circle className="md-palla" cx={palla[0]} cy={palla[1]} r="1.1" fill="#ffffff" stroke="#222" strokeWidth="0.3" />
         </svg>

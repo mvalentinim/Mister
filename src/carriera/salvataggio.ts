@@ -42,9 +42,16 @@ function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: nu
   const salvataggio = caricato as Carriera
   if (caricato.versioneSchema === 1) {
     // v1 → v2 (M3): arrivano il seme del motore e la cronaca
-    salvataggio.versioneSchema = 2
     salvataggio.seme = Math.floor(Math.random() * 2_147_483_647)
     salvataggio.cronaca = null
+    caricato.versioneSchema = 2
+  }
+  if (caricato.versioneSchema === 2) {
+    // v2 → v3 (M4): arriva la tattica; qui non abbiamo il DB per costruire
+    // il default, quindi la marchiamo "da costruire" — ci pensa la schermata
+    // carriera al primo accesso (vedi App/SchermataCarriera)
+    salvataggio.tattica = null as unknown as Carriera['tattica']
+    caricato.versioneSchema = 3
   }
   return salvataggio
 }

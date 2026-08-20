@@ -15,6 +15,9 @@ export interface GiocatoreMotore {
   difesa: number // capacità difensiva
   portiere: number // solo per il POR (0 per gli altri)
   forma: number // 1-99, per ora costante (dinamica in M8)
+  /** moltiplicatore del peso col quale il giocatore viene scelto per
+      concludere le azioni (>1 con movimenti offensivi ben eseguiti) */
+  pesoTiroExtra: number
 }
 
 /** Una squadra pronta per la simulazione. */
@@ -22,11 +25,16 @@ export interface SquadraMotore {
   clubId: number
   nome: string
   titolari: GiocatoreMotore[] // 11 giocatori
-  // forze di reparto aggregate (media pesata dei titolari, scala ~1-99)
+  /** posizione [x, y] di ogni titolare (dagli slot del modulo scelto) */
+  posizioni: Array<[number, number]>
+  // forze di reparto aggregate (media pesata dei titolari, scala ~1-99),
+  // già comprensive di movimenti prevalenti e istruzioni (M4)
   attacco: number
   centrocampo: number
   difesa: number
   portiere: number
+  /** fattore di ritmo (istruzioni): moltiplica la frequenza delle azioni */
+  ritmo: number
 }
 
 /** I tipi di evento che il motore può generare. */

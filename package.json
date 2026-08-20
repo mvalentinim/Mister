@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "importa-dati": "node data/importa/01-scarica-fonti.mjs && node data/importa/02-converti-leggende.mjs && node data/importa/03-costruisci-db.mjs",
     "calibra": "tsx src/motore/calibra-cli.ts",
+    "confronta-tattiche": "tsx src/motore/confronta-tattiche-cli.ts",
     "preview": "vite preview"
   },
   "dependencies": {

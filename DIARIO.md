@@ -195,3 +195,22 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 **Resta per la M5 "piena":** posizioni dei giocatori guidate dal motore (ora i movimenti sono scenici), cambi e tattica durante la partita, pagelle live, eventuale renderer Canvas/Pixi.
 
 **Prossima sessione proposta:** M4 — Tattiche e movimenti prevalenti.
+
+---
+
+## Sessione 11 — 2026-08-20 — M4: TATTICHE E MOVIMENTI PREVALENTI
+
+**Obiettivo dichiarato:** la schermata tattica completa e il suo effetto reale e misurabile sulle partite (FRD §8).
+
+**Fatto:**
+- **`src/tattica/definizioni.ts`**: 6 moduli con gli slot posizionati sul campo; **vocabolario chiuso di 15 movimenti prevalenti** per ruolo (8 offensivi, 7 difensivi) con attributi chiave, effetti sui reparti e freccia; istruzioni di squadra (mentalità, pressing, ampiezza, ritmo — solo 4, FRD §8.3).
+- **Schermata Tattica** nella carriera: scelta modulo, undici titolare (click sullo slot + tendina ordinata per idoneità, con scambio automatico), movimenti max 2+2 per slot con **idoneità del giocatore mostrata** (ottimo/buono/scarso/inadatto) e **frecce sul campo tattico** (oro offensive, grigie difensive), istruzioni. Salvataggio immediato.
+- **Integrazione nel motore** (`preparazione.ts`): reparti decisi dalla POSIZIONE degli slot (le ali del 4-3-3 sono attacco), il numero di uomini per reparto conta (5 difensori coprono di più), fuori ruolo ×0.92, effetti dei movimenti × fattore di idoneità (sotto ~62 il movimento DANNEGGIA), tetto ±8, bonus tiratore, ritmo che modula le azioni della partita. Il Match Day ora dispone i gettoni secondo il modulo scelto.
+- **Test comparativo `npm run confronta-tattiche`** (DoD): 1.200 partite per configurazione — mentalità offensiva → più gol fatti E subiti ✅; movimenti adatti → più xG e bilancio migliore ✅; 5-3-2 → meno gol subiti del 4-3-3 ✅. Il test ha scovato e fatto correggere due difetti reali (saturazione degli effetti, reparti per ruolo anziché per posizione).
+- **Ricalibrazione**: i movimenti default hanno alzato la pericolosità media → `qualitaBase` 0.31 e bonus tiratore dimezzato; `npm run calibra` di nuovo tutto verde (A 2.78, B 2.98 gol/partita).
+- Salvataggi migrati a versioneSchema 3 (la tattica di default si costruisce al primo accesso). Decisioni in `docs/tattica.md`.
+- Collaudo browser: 3-5-2 della Sampdoria con frecce e pannello slot; partita giocata con la nuova tattica.
+
+**DoD di M4:** differenze misurabili e spiegabili ✅ (test comparativo), frecce che riflettono i movimenti ✅. Verifica di persona dello sviluppatore in sospeso come sempre.
+
+**Prossima sessione proposta:** completamento M5 (posizioni dal motore, cambi in partita, pagelle live) oppure M6 — Mercato.

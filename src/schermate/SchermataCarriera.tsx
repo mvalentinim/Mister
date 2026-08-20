@@ -2,11 +2,14 @@
 // giornate. Tre linguette (Partite, Classifica, Rosa), l'avanzamento con
 // salvataggio automatico, e il riepilogo di fine stagione.
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Database } from 'sql.js'
 import {
   avanzaGiornata, calcolaClassifica, chiudiStagione, livelloUtente, stagioneFinita,
 } from '../carriera/motore.ts'
+import { tatticaDefault } from '../motore/preparazione.ts'
+import { interroga } from '../db/query.ts'
+import type { GiocatoreRiga } from '../db/tipi.ts'
 import { salvaCarriera } from '../carriera/salvataggio.ts'
 import {
   DESCRIZIONE_OBIETTIVO, etichettaStagione, type Carriera, type CronacaPartita, type Partita,
@@ -14,6 +17,7 @@ import {
 import type { EventoPartita } from '../motore/tipi.ts'
 import MatchDay from './MatchDay.tsx'
 import Rosa from './Rosa.tsx'
+import Tattica from './Tattica.tsx'
 
 /** Trasforma un evento del motore in una riga di cronaca in italiano. */
 function rigaCronaca(e: EventoPartita): string {
@@ -73,7 +77,7 @@ interface Props {
   carriera: Carriera
 }
 
-type Linguetta = 'partite' | 'classifica' | 'rosa'
+type Linguetta = 'partite' | 'classifica' | 'tattica' | 'rosa'
 
 /** Riepilogo restituito da chiudiStagione, per la schermata di fine stagione. */
 type EsitoStagione = ReturnType<typeof chiudiStagione>
@@ -84,6 +88,18 @@ function SchermataCarriera({ db, carriera }: Props) {
   const [matchDayAperto, setMatchDayAperto] = useState(false)
   // contatore usato solo per forzare il ridisegno dopo aver mutato la carriera
   const [, setVersione] = useState(0)
+
+  // I salvataggi migrati da versioni vecchie non hanno la tattica:
+  // la costruiamo (e salviamo) al primo accesso alla carriera
+  useEffect(() => {
+    if (!carriera.tattica) {
+      const rosa = interroga<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE club_id = ?', [carriera.clubId])
+      carriera.tattica = tatticaDefault(rosa)
+      void salvaCarriera(carriera)
+      setVersione((v) => v + 1)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [carriera])
 
   const nomeClub = carriera.club.find((c) => c.id === carriera.clubId)!.nome
   const nomeCompetizione = carriera.competizioni[livelloUtente(carriera)]
@@ -160,13 +176,13 @@ function SchermataCarriera({ db, carriera }: Props) {
 
       {/* Linguette di navigazione interna */}
       <nav className="linguette">
-        {(['partite', 'classifica', 'rosa'] as const).map((l) => (
+        {(['partite', 'classifica', 'tattica', 'rosa'] as const).map((l) => (
           <button
             key={l}
             className={l === linguetta ? 'linguetta attiva' : 'linguetta'}
             onClick={() => setLinguetta(l)}
           >
-            {l === 'partite' ? 'Partite' : l === 'classifica' ? 'Classifica' : 'Rosa'}
+            {l === 'partite' ? 'Partite' : l === 'classifica' ? 'Classifica' : l === 'tattica' ? 'Tattica' : 'Rosa'}
           </button>
         ))}
       </nav>
@@ -257,6 +273,10 @@ function SchermataCarriera({ db, carriera }: Props) {
             ))}
           </tbody>
         </table>
+      )}
+
+      {linguetta === 'tattica' && carriera.tattica && (
+        <Tattica db={db} carriera={carriera} onModificata={() => setVersione((v) => v + 1)} />
       )}
 
       {linguetta === 'rosa' && (

@@ -27,8 +27,10 @@ export const PARAMETRI = {
   pesoCentrocampo: 0.012,
   /** quanto pesa attacco-difesa sulla qualità dell'occasione */
   pesoAttacco: 0.018,
-  /** qualità di base di un'occasione (probabilità di gol sul tiro in porta, "alla pari") */
-  qualitaBase: 0.35,
+  /** qualità di base di un'occasione (probabilità di gol sul tiro in porta,
+      "alla pari"). Ritoccata in M4: i movimenti prevalenti di default hanno
+      alzato la pericolosità media di tutte le squadre. */
+  qualitaBase: 0.31,
   /** probabilità che l'occasione venga murata prima del tiro */
   probMurata: 0.22,
   /** probabilità che un tiro non murato finisca nello specchio */
@@ -102,9 +104,20 @@ export function simulaPartitaMotore(
     s: StatoSquadra,
     pesi: Record<string, number>,
     attributo: (g: GiocatoreMotore) => number,
+    conMovimenti = false,
   ): GiocatoreMotore {
     const campo = inCampo(s)
-    return rng.pesato(campo, campo.map((g) => (pesi[g.ruolo] ?? 1) * (attributo(g) / 50 + 0.5)))
+    return rng.pesato(
+      campo,
+      campo.map(
+        (g) =>
+          (pesi[g.ruolo] ?? 1) *
+          (attributo(g) / 50 + 0.5) *
+          // i movimenti offensivi ben eseguiti portano il giocatore a
+          // concludere più spesso (M4)
+          (conMovimenti ? g.pesoTiroExtra : 1),
+      ),
+    )
   }
 
   function registraEvento(minuto: number, tipo: TipoEvento, s: StatoSquadra, g: GiocatoreMotore, assistNome?: string) {
@@ -122,8 +135,9 @@ export function simulaPartitaMotore(
     const dominante = rng.evento(probCasa) ? stati[0] : stati[1]
     dominante.contesa++
 
-    // nasce un'azione pericolosa?
-    if (rng.evento(PARAMETRI.azioniAlMinuto)) {
+    // nasce un'azione pericolosa? (il ritmo delle due squadre la modula: M4)
+    const fattoreRitmo = (casa.ritmo + trasferta.ritmo) / 2
+    if (rng.evento(PARAMETRI.azioniAlMinuto * fattoreRitmo)) {
       const attacco = dominante
       const difesa = attacco === stati[0] ? stati[1] : stati[0]
 
@@ -134,7 +148,7 @@ export function simulaPartitaMotore(
       let qualita = limita(
         PARAMETRI.qualitaBase +
           differenza * PARAMETRI.pesoAttacco * PARAMETRI.qualitaBase +
-          (attacco.squadra.attacco - 72) * 0.0022,
+          (attacco.squadra.attacco - 72) * 0.0028,
         0.03, 0.55,
       )
       // "garbage time": con 4 gol segnati, 3 di vantaggio o una partita già
@@ -146,7 +160,7 @@ export function simulaPartitaMotore(
       // meno (è il motivo per cui nel calcio vero i pareggi abbondano —
       // l'effetto che il modello Dixon-Coles corregge con il suo parametro ρ)
       if (minuto > 75 && attacco.gol === difesa.gol) qualita *= 0.7
-      const tiratore = estraiGiocatore(attacco, PESO_TIRO, (g) => g.attacco)
+      const tiratore = estraiGiocatore(attacco, PESO_TIRO, (g) => g.attacco, true)
 
       if (rng.evento(PARAMETRI.probMurata)) {
         // la difesa chiude prima del tiro
