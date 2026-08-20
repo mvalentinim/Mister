@@ -1,0 +1,98 @@
+// tipi.ts — i tipi della carriera (milestone M2).
+//
+// La carriera è un oggetto autonomo che FOTOGRAFA il database statico al
+// momento della creazione (FRD §5.4): dentro ci sono i club delle due
+// divisioni della nazione scelta, il calendario e i risultati. Si salva
+// in IndexedDB (vedi salvataggio.ts) dopo ogni avanzamento.
+
+/** Il profilo dell'allenatore creato dall'utente. */
+export interface ProfiloAllenatore {
+  nome: string
+  nazionalita: string
+  eta: number
+}
+
+/** Gli obiettivi stagionali possibili di un'offerta (semplificati per M2). */
+export type Obiettivo = 'promozione' | 'alta-classifica' | 'salvezza'
+
+export const DESCRIZIONE_OBIETTIVO: Record<Obiettivo, string> = {
+  promozione: 'Promozione (primi 3 posti)',
+  'alta-classifica': 'Alta classifica (primi 8)',
+  salvezza: 'Salvezza (evitare gli ultimi 3 posti)',
+}
+
+/** Un'offerta di panchina ricevuta a inizio carriera. */
+export interface Offerta {
+  clubId: number
+  clubNome: string
+  fama: number
+  budgetMercato: number
+  budgetStipendi: number
+  stipendioAllenatore: number // euro/anno
+  durataAnni: number
+  obiettivo: Obiettivo
+}
+
+/** Una partita del calendario (i gol sono null finché non si gioca). */
+export interface Partita {
+  casaId: number
+  trasfertaId: number
+  golCasa: number | null
+  golTrasferta: number | null
+}
+
+/** La fotografia di un club dentro la carriera. */
+export interface ClubCarriera {
+  id: number
+  nome: string
+  forza: number // la fama del DB statico: media overall dei migliori 18
+  livello: 1 | 2 // divisione di appartenenza IN QUESTA CARRIERA (può cambiare!)
+}
+
+/** Riepilogo di una stagione conclusa (per lo storico). */
+export interface RiepilogoStagione {
+  anno: number // 2025 = stagione 2025-26
+  competizione: string
+  posizione: number
+  punti: number
+  obiettivo: Obiettivo
+  obiettivoRaggiunto: boolean
+  promosso: boolean
+  retrocesso: boolean
+}
+
+/** Lo stato completo di una carriera. */
+export interface Carriera {
+  id: string
+  versioneSchema: 1 // per le migrazioni future dei salvataggi (FRD §11)
+  allenatore: ProfiloAllenatore
+  nazione: { id: number; nome: string }
+  competizioni: { 1: string; 2: string } // nomi delle due divisioni
+  clubId: number
+  obiettivo: Obiettivo
+  annoInizio: number
+  anno: number // anno della stagione corrente (2025 = 2025-26)
+  club: ClubCarriera[] // tutti i club delle due divisioni
+  calendario: Partita[][] // le giornate della competizione dell'utente
+  giornata: number // prossima giornata da giocare (0 = prima)
+  storico: RiepilogoStagione[]
+  aggiornataIl: string // data ISO dell'ultimo salvataggio
+}
+
+/** Una riga della classifica calcolata dai risultati. */
+export interface RigaClassifica {
+  clubId: number
+  nome: string
+  punti: number
+  giocate: number
+  vinte: number
+  pareggiate: number
+  perse: number
+  golFatti: number
+  golSubiti: number
+}
+
+/** Etichetta leggibile della stagione: 2025 → "2025-26". */
+export function etichettaStagione(anno: number): string {
+  return `${anno}-${String((anno + 1) % 100).padStart(2, '0')}`
+}

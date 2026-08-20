@@ -138,3 +138,22 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - Limiti documentati in docs/dati.md: manca Maradona (escluso da FC 24 per disputa legale), date di nascita sintetiche, incluse le leggende femminili, attributi da carte FUT.
 
 **Prossima sessione proposta:** M2 — Carriera minima giocabile.
+
+---
+
+## Sessione 8 — 2026-08-20 — 🎮 M2: CARRIERA MINIMA GIOCABILE
+
+**Obiettivo dichiarato:** il primo "giro" completo del gioco — dalla scelta della nazione alla fine di una stagione, con salvataggio persistente.
+
+**Fatto:**
+- **Flusso nuova carriera** (FRD §4.1): scelta nazione (le 5 con seconda divisione) → profilo allenatore (nome, nazionalità, età — niente skill iniziali) → 3-5 offerte da club di seconda divisione con obiettivo, durata, stipendio e budget → accettazione.
+- **Stagione a giornate**: calendario girone all'italiana (andata/ritorno, algoritmo a rotazione), "Gioca giornata" e "Simula fino a fine stagione", risultati e prossimo turno, classifica completa con la propria squadra evidenziata, rosa consultabile.
+- **Simulatore provvisorio** (sarà sostituito in M3): gol attesi dalla differenza di forza + vantaggio casa, estrazione con distribuzione di Poisson.
+- **Fine stagione**: valutazione obiettivo, promozioni/retrocessioni (3 su / 3 giù, semplificazione dichiarata), l'altra divisione simulata in blocco, passaggio alla stagione successiva a rose congelate.
+- **Salvataggio automatico in IndexedDB** a ogni avanzamento; schermata "Carica carriera" con elenco ed eliminazione salvataggi; predisposta la migrazione futura (`versioneSchema`).
+- Decisioni e semplificazioni documentate in `docs/carriera.md`.
+- **Collaudo end-to-end nel browser**: creata una carriera al Palermo FC (Serie B 2025-26 reale), giocata una stagione intera (11° posto, obiettivo mancato), avviata la stagione 2026-27, ricaricata la pagina e ripresa la carriera dal salvataggio. Build e lint puliti.
+
+**DoD di M2:** dimostrata in ambiente remoto; resta la verifica di persona dello sviluppatore (come per M0/M1).
+
+**Prossima sessione proposta:** M3 — Motore di simulazione v1 (studio riferimenti ESMS/Bygfoot/Dixon-Coles, motore a eventi deterministico con seed, calibrazione).

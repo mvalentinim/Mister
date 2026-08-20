@@ -289,3 +289,116 @@ body {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
 }
+
+/* ---- Carriera (M2) ---- */
+
+.modulo {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 420px;
+}
+
+.modulo label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-weight: 600;
+}
+
+.modulo input {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--bordo);
+  border-radius: 6px;
+  font: inherit;
+  background: var(--superficie);
+  color: var(--testo);
+}
+
+.bottone-primario,
+.bottone-secondario {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bottone-primario {
+  background: var(--accento);
+  color: #ffffff;
+  border: 1px solid var(--accento);
+}
+
+.bottone-primario:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bottone-secondario {
+  background: var(--superficie);
+  color: var(--testo);
+  border: 1px solid var(--bordo);
+}
+
+.bottone-secondario:hover {
+  border-color: var(--accento);
+}
+
+.riga-bottoni {
+  display: flex;
+  gap: 0.8rem;
+  margin: 1rem 0 1.5rem;
+  flex-wrap: wrap;
+}
+
+.linguette {
+  display: flex;
+  gap: 0.4rem;
+  margin: 1rem 0;
+  border-bottom: 2px solid var(--bordo);
+}
+
+.linguetta {
+  padding: 0.5rem 1.1rem;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  color: var(--testo-attenuato);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.linguetta.attiva {
+  color: var(--accento);
+  border-bottom-color: var(--accento);
+}
+
+/* la riga della squadra dell'utente, evidenziata in risultati e classifica */
+.riga-mia {
+  background: var(--accento-tenue);
+}
+
+.riquadro-esito {
+  background: var(--superficie);
+  border: 1px solid var(--bordo);
+  border-radius: 10px;
+  padding: 1.2rem 1.5rem;
+  margin: 1rem 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 1.05rem;
+}
+
+.voce-salvataggio {
+  display: flex;
+  gap: 0.6rem;
+  align-items: stretch;
+}
+
+.voce-salvataggio .voce-menu {
+  flex: 1;
+}
