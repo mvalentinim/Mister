@@ -402,3 +402,40 @@ body {
 .voce-salvataggio .voce-menu {
   flex: 1;
 }
+
+/* ---- Cronaca partita (M3) ---- */
+
+.cronaca {
+  background: var(--superficie);
+  border: 1px solid var(--accento);
+  border-radius: 10px;
+  padding: 1rem 1.3rem;
+  margin-bottom: 1.5rem;
+}
+
+.eventi {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0.8rem 0;
+}
+
+.eventi .minuto {
+  display: inline-block;
+  min-width: 2.4rem;
+  font-weight: 700;
+  color: var(--testo-attenuato);
+  font-variant-numeric: tabular-nums;
+}
+
+.pagelle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
+.pagella {
+  white-space: nowrap;
+  font-size: 0.9rem;
+}

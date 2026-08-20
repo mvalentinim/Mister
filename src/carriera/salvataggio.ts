@@ -35,6 +35,20 @@ export async function salvaCarriera(carriera: Carriera): Promise<void> {
   })
 }
 
+/** Migra un salvataggio di una versione vecchia alla versione corrente.
+    È il meccanismo previsto dal FRD §11: i salvataggi dichiarano la loro
+    versione e vengono aggiornati al caricamento, mai buttati. */
+function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: number }): Carriera {
+  const salvataggio = caricato as Carriera
+  if (caricato.versioneSchema === 1) {
+    // v1 → v2 (M3): arrivano il seme del motore e la cronaca
+    salvataggio.versioneSchema = 2
+    salvataggio.seme = Math.floor(Math.random() * 2_147_483_647)
+    salvataggio.cronaca = null
+  }
+  return salvataggio
+}
+
 /** Tutte le carriere salvate, dalla più recente. */
 export async function caricaCarriere(): Promise<Carriera[]> {
   const db = await apriDbSalvataggi()
@@ -42,7 +56,9 @@ export async function caricaCarriere(): Promise<Carriera[]> {
     const richiesta = db.transaction(NOME_STORE, 'readonly').objectStore(NOME_STORE).getAll()
     richiesta.onsuccess = () =>
       risolvi(
-        (richiesta.result as Carriera[]).sort((a, b) => b.aggiornataIl.localeCompare(a.aggiornataIl)),
+        (richiesta.result as Carriera[])
+          .map(migra)
+          .sort((a, b) => b.aggiornataIl.localeCompare(a.aggiornataIl)),
       )
     richiesta.onerror = () => rifiuta(richiesta.error)
   })

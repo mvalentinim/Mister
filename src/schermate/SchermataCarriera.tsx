@@ -9,9 +9,63 @@ import {
 } from '../carriera/motore.ts'
 import { salvaCarriera } from '../carriera/salvataggio.ts'
 import {
-  DESCRIZIONE_OBIETTIVO, etichettaStagione, type Carriera, type Partita,
+  DESCRIZIONE_OBIETTIVO, etichettaStagione, type Carriera, type CronacaPartita, type Partita,
 } from '../carriera/tipi.ts'
+import type { EventoPartita } from '../motore/tipi.ts'
 import Rosa from './Rosa.tsx'
+
+/** Trasforma un evento del motore in una riga di cronaca in italiano. */
+function rigaCronaca(e: EventoPartita): string {
+  switch (e.tipo) {
+    case 'gol':
+      return `⚽ GOL! ${e.giocatoreNome}${e.assistNome ? ` (assist di ${e.assistNome})` : ''}`
+    case 'occasione-parata':
+      return `🧤 Grande parata di ${e.giocatoreNome}`
+    case 'occasione-fuori':
+      return `💨 Occasione! ${e.giocatoreNome} manda fuori di poco`
+    case 'occasione-murata':
+      return `🛡 Conclusione di ${e.giocatoreNome} respinta dalla difesa`
+    case 'ammonizione':
+      return `🟨 Ammonito ${e.giocatoreNome}`
+    case 'espulsione':
+      return `🟥 ESPULSO ${e.giocatoreNome}!`
+    case 'infortunio':
+      return `🚑 Problema fisico per ${e.giocatoreNome}`
+  }
+}
+
+/** Il pannello con la cronaca dell'ultima partita dell'utente. */
+function PannelloCronaca({ cronaca }: { cronaca: CronacaPartita }) {
+  const { casa, trasferta } = cronaca.statistiche
+  return (
+    <div className="cronaca">
+      <h3>
+        La tua partita — giornata {cronaca.giornata}:{' '}
+        {cronaca.casaNome} {cronaca.golCasa} - {cronaca.golTrasferta} {cronaca.trasfertaNome}
+      </h3>
+      <p className="nota">
+        Possesso {casa.possesso}%-{trasferta.possesso}% · tiri {casa.tiri}-{trasferta.tiri} ·
+        in porta {casa.tiriInPorta}-{trasferta.tiriInPorta} · gol attesi {casa.golAttesi.toFixed(2)}-{trasferta.golAttesi.toFixed(2)}
+      </p>
+      <ul className="eventi">
+        {cronaca.eventi.map((e, i) => (
+          <li key={i}>
+            <span className="minuto">{e.minuto}'</span> {rigaCronaca(e)}
+          </li>
+        ))}
+        {cronaca.eventi.length === 0 && <li>Partita senza emozioni degne di nota.</li>}
+      </ul>
+      <h3>Pagelle</h3>
+      <p className="pagelle">
+        {cronaca.voti.map((v) => (
+          <span key={v.nome} className="pagella">
+            {v.nome} <strong>{v.voto.toFixed(1)}</strong>
+          </span>
+        ))}
+      </p>
+    </div>
+  )
+}
 
 interface Props {
   db: Database
@@ -36,14 +90,14 @@ function SchermataCarriera({ db, carriera }: Props) {
   // Avanza di una giornata (o fino a fine stagione) e salva
   async function gioca(fineStagione: boolean) {
     do {
-      avanzaGiornata(carriera)
+      avanzaGiornata(db, carriera)
     } while (fineStagione && !stagioneFinita(carriera))
     await salvaCarriera(carriera)
     setVersione((v) => v + 1)
   }
 
   async function concludiStagione() {
-    setEsitoStagione(chiudiStagione(carriera))
+    setEsitoStagione(chiudiStagione(db, carriera))
     await salvaCarriera(carriera)
   }
 
@@ -118,6 +172,8 @@ function SchermataCarriera({ db, carriera }: Props) {
               </button>
             </div>
           )}
+
+          {carriera.cronaca && <PannelloCronaca cronaca={carriera.cronaca} />}
 
           {ultimaGiocata && (
             <>

@@ -157,3 +157,22 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 **DoD di M2:** dimostrata in ambiente remoto; resta la verifica di persona dello sviluppatore (come per M0/M1).
 
 **Prossima sessione proposta:** M3 — Motore di simulazione v1 (studio riferimenti ESMS/Bygfoot/Dixon-Coles, motore a eventi deterministico con seed, calibrazione).
+
+---
+
+## Sessione 9 — 2026-08-20 — M3: MOTORE DI SIMULAZIONE v1
+
+**Obiettivo dichiarato:** sostituire il simulatore provvisorio con il motore a eventi deterministico (FRD §9.7), calibrato e testato.
+
+**Studio riferimenti (documentato in docs/match-engine.md):** ESMS (architettura a minuti/eventi, protagonisti estratti per ruolo), Bygfoot (valori di reparto aggregati), Dixon-Coles (Poisson, fattore campo, correlazione dei punteggi bassi → effetto ρ riprodotto con i comportamenti reali: prudenza nel finale in parità). Nessun codice copiato.
+
+**Fatto:**
+- **`src/motore/`**: rng deterministico (xmur3+mulberry32, stesso seme = stessa partita), preparazione squadre (miglior 4-4-2 dalla rosa vera, forze di reparto), motore a eventi sui 90 minuti (possesso → azione → murata/fuori/parata/gol, assist, ammonizioni, espulsioni, infortuni), voti 4-10, statistiche con xG.
+- **Test di calibrazione `npm run calibra`**: 10 stagioni di A e B (7.600 partite) contro i riferimenti reali. **Tutto verde**: gol/partita 2.68 (A) e 2.94 (B), casa/pareggi 45%/26%, campione a 85 punti, capocannoniere a 27-28 gol, risultato più frequente 1-1, niente punteggi assurdi. Exit code 1 se una metrica esce dagli intervalli.
+- **Integrazione in carriera**: ogni partita passa dal motore con gli 11 titolari veri; seme per partita = carriera+stagione+giornata+squadre; **cronaca testuale** della partita dell'utente (eventi col minuto, statistiche, pagelle complete) nella schermata Partite; salvataggi migrati automaticamente alla v2 (arrivano seme e cronaca).
+- Rimosso `simulatore.ts` (il provvisorio di M2). Refactoring: query condivise in `db/query.ts` (usate anche dal CLI Node).
+- Collaudo nel browser: Monza-Venezia 1-1 con cronaca di 27 eventi (gol di Adorante su assist di Kike Pérez, espulsione al 72') e statistiche coerenti (possesso 63-37, xG 2.36-1.35).
+
+**DoD di M3:** risultati credibili ✅ (calibrazione), stesso seed = stessa partita ✅ (test automatico), test lanciabile e leggibile ✅ (`npm run calibra`). Verifica di persona dello sviluppatore in sospeso come per le milestone precedenti.
+
+**Prossima sessione proposta:** M4 — Tattiche e movimenti prevalenti (schermata tattica, moduli, vocabolario movimenti per ruolo, effetti misurabili sul motore).

@@ -7,16 +7,40 @@
 // - nessuno scende SOTTO la seconda divisione (non abbiamo le terze serie);
 // - il campionato dell'altra divisione viene simulato in blocco a fine
 //   stagione (serve solo a decidere chi sale e chi scende);
-// - rose congelate tra le stagioni (il mercato arriva in M6);
-// - simulatore provvisorio non deterministico (il motore vero è M3).
+// - rose congelate tra le stagioni (il mercato arriva in M6).
+//
+// Da M3 le partite passano dal MOTORE A EVENTI deterministico
+// (src/motore/): stessa carriera e stessa giornata → stessa partita.
 
 import type { Database } from 'sql.js'
-import { interroga } from '../db/database.ts'
+import { interroga } from '../db/query.ts'
+import { preparaSquadra } from '../motore/preparazione.ts'
+import { simulaPartitaMotore } from '../motore/partita.ts'
+import type { SquadraMotore } from '../motore/tipi.ts'
 import { generaCalendario } from './calendario.ts'
-import { simulaPartita } from './simulatore.ts'
 import type {
   Carriera, ClubCarriera, Obiettivo, Offerta, ProfiloAllenatore, RigaClassifica,
 } from './tipi.ts'
+
+// Cache delle squadre preparate per il motore: il DB statico non cambia,
+// quindi la formazione di un club si calcola una volta sola per sessione.
+const cacheSquadre = new Map<number, SquadraMotore>()
+
+function squadraMotore(db: Database, carriera: Carriera, clubId: number): SquadraMotore {
+  let squadra = cacheSquadre.get(clubId)
+  if (!squadra) {
+    const club = carriera.club.find((c) => c.id === clubId)!
+    squadra = preparaSquadra(db, clubId, club.nome)
+    cacheSquadre.set(clubId, squadra)
+  }
+  return squadra
+}
+
+/** Il seme di una singola partita: carriera + stagione + giornata + squadre.
+    Stessa carriera e stessa giornata → stessa partita (FRD §9.7). */
+function semePartita(carriera: Carriera, giornata: number, casaId: number, trasfertaId: number): string {
+  return `${carriera.seme}-${carriera.anno}-${giornata}-${casaId}-${trasfertaId}`
+}
 
 export const ANNO_INIZIO_CARRIERA = 2025 // il DB fotografa la stagione 2025-26
 
@@ -99,7 +123,9 @@ export function creaCarriera(
   const mieiCompagniDiLega = club.filter((c) => c.livello === 2).map((c) => c.id)
   return {
     id: `carriera-${Date.now()}`,
-    versioneSchema: 1,
+    versioneSchema: 2,
+    seme: Math.floor(Math.random() * 2_147_483_647), // fissato alla creazione
+    cronaca: null,
     allenatore,
     nazione,
     competizioni: {
@@ -123,16 +149,37 @@ export function livelloUtente(carriera: Carriera): 1 | 2 {
   return carriera.club.find((c) => c.id === carriera.clubId)!.livello
 }
 
-const forzaDi = (carriera: Carriera, clubId: number) =>
-  carriera.club.find((c) => c.id === clubId)!.forza
-
-/** Gioca la prossima giornata: simula tutte le partite e avanza. */
-export function avanzaGiornata(carriera: Carriera): void {
+/** Gioca la prossima giornata: ogni partita passa dal motore a eventi.
+    Per la partita dell'utente si conserva la cronaca completa. */
+export function avanzaGiornata(db: Database, carriera: Carriera): void {
   if (carriera.giornata >= carriera.calendario.length) return
   for (const partita of carriera.calendario[carriera.giornata]) {
-    const esito = simulaPartita(forzaDi(carriera, partita.casaId), forzaDi(carriera, partita.trasfertaId))
+    const casa = squadraMotore(db, carriera, partita.casaId)
+    const trasferta = squadraMotore(db, carriera, partita.trasfertaId)
+    const esito = simulaPartitaMotore(
+      casa, trasferta,
+      semePartita(carriera, carriera.giornata, partita.casaId, partita.trasfertaId),
+    )
     partita.golCasa = esito.golCasa
     partita.golTrasferta = esito.golTrasferta
+
+    // la partita dell'utente merita la cronaca completa (FRD §9: la versione
+    // visuale arriva in M5, per ora l'elenco eventi + statistiche + voti)
+    if (partita.casaId === carriera.clubId || partita.trasfertaId === carriera.clubId) {
+      const miaSquadra = partita.casaId === carriera.clubId ? casa : trasferta
+      carriera.cronaca = {
+        giornata: carriera.giornata + 1,
+        casaNome: casa.nome,
+        trasfertaNome: trasferta.nome,
+        golCasa: esito.golCasa,
+        golTrasferta: esito.golTrasferta,
+        eventi: esito.eventi.filter((e) => e.tipo !== 'occasione-murata'), // cronaca asciutta
+        statistiche: esito.statistiche,
+        voti: miaSquadra.titolari.map((g) => ({
+          nome: g.nome, ruolo: g.ruolo, voto: esito.voti[g.id] ?? 6,
+        })),
+      }
+    }
   }
   carriera.giornata++
 }
@@ -175,13 +222,18 @@ export function calcolaClassifica(carriera: Carriera): RigaClassifica[] {
 }
 
 /** Simula in blocco l'ALTRA divisione (per decidere promozioni/retrocessioni). */
-function classificaAltraDivisione(carriera: Carriera): number[] {
+function classificaAltraDivisione(db: Database, carriera: Carriera): number[] {
   const altroLivello = livelloUtente(carriera) === 2 ? 1 : 2
   const squadre = carriera.club.filter((c) => c.livello === altroLivello)
   const punti = new Map<number, [number, number]>(squadre.map((c) => [c.id, [0, 0]])) // punti, diff reti
-  for (const giornata of generaCalendario(squadre.map((c) => c.id))) {
-    for (const p of giornata) {
-      const esito = simulaPartita(forzaDi(carriera, p.casaId), forzaDi(carriera, p.trasfertaId))
+  const giornate = generaCalendario(squadre.map((c) => c.id))
+  for (let g = 0; g < giornate.length; g++) {
+    for (const p of giornate[g]) {
+      const esito = simulaPartitaMotore(
+        squadraMotore(db, carriera, p.casaId),
+        squadraMotore(db, carriera, p.trasfertaId),
+        `${semePartita(carriera, g, p.casaId, p.trasfertaId)}-altra`,
+      )
       const casa = punti.get(p.casaId)!
       const trasferta = punti.get(p.trasfertaId)!
       casa[1] += esito.golCasa - esito.golTrasferta
@@ -203,7 +255,7 @@ const PROMOSSE = 3 // semplificazione M2: 3 su, 3 giù, niente playoff
  * tra le due divisioni e prepara la stagione successiva (rose congelate).
  * Restituisce il riepilogo per la schermata di fine stagione.
  */
-export function chiudiStagione(carriera: Carriera) {
+export function chiudiStagione(db: Database, carriera: Carriera) {
   const classifica = calcolaClassifica(carriera)
   const posizione = classifica.findIndex((r) => r.clubId === carriera.clubId) + 1
   const totale = classifica.length
@@ -218,7 +270,7 @@ export function chiudiStagione(carriera: Carriera) {
   // ultime 3 della prima divisione giù. Una delle due classifiche è quella
   // dell'utente, l'altra viene simulata in blocco.
   const mia = classifica.map((r) => r.clubId)
-  const altra = classificaAltraDivisione(carriera)
+  const altra = classificaAltraDivisione(db, carriera)
   const [classificaA, classificaB] = livello === 1 ? [mia, altra] : [altra, mia]
   const promosseDallaB = classificaB.slice(0, PROMOSSE)
   const retrocesseDallaA = classificaA.slice(-PROMOSSE)
@@ -245,6 +297,7 @@ export function chiudiStagione(carriera: Carriera) {
   // nuova stagione: stesso club, rose congelate, nuovo calendario
   carriera.anno++
   carriera.giornata = 0
+  carriera.cronaca = null
   const nuovoLivello = livelloUtente(carriera) // ricalcolato dopo i movimenti
   carriera.calendario = generaCalendario(
     carriera.club.filter((c) => c.livello === nuovoLivello).map((c) => c.id),

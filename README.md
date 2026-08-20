@@ -55,8 +55,10 @@ Il server di sviluppo ha il **ricaricamento automatico**: modificando un file in
 ### Altri comandi utili
 
 ```bash
-npm run build    # controlla i tipi TypeScript e produce la versione ottimizzata in dist/
-npm run lint     # cerca errori comuni nel codice
+npm run build         # controlla i tipi TypeScript e produce la versione ottimizzata in dist/
+npm run lint          # cerca errori comuni nel codice
+npm run importa-dati  # ricostruisce il database statico dalle fonti (docs/dati.md)
+npm run calibra       # test di calibrazione del motore di simulazione (docs/match-engine.md)
 ```
 
 ## Il flusso git in breve

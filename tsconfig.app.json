@@ -22,5 +22,8 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  // il test di calibrazione gira in Node (via tsx), non nel browser:
+  // lo escludiamo dal controllo tipi dell'app
+  "exclude": ["src/motore/calibra-cli.ts"]
 }

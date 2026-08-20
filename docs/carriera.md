@@ -20,14 +20,16 @@ Modificare il database statico non tocca le carriere in corso.
   Salvataggio automatico a ogni avanzamento. Il file `.mister` esportabile
   arriva in M10.
 
-## Il simulatore provvisorio
+## Il motore delle partite (da M3)
 
-Dalla differenza di forza tra i club (la "fama" del DB: media overall dei
-migliori 18) si calcolano i gol attesi, con vantaggio casa (1.4 vs 1.1 gol di
-base); i gol reali escono da una **distribuzione di Poisson**, la stessa dei
-modelli statistici sul calcio. Produce risultati con frequenze plausibili
-(tanti 1-0 e 1-1, rari i 4-3). Verrà **sostituito in M3** dal motore a eventi
-deterministico: per questo non è ancora riproducibile con un seed.
+Il simulatore provvisorio di M2 è stato **sostituito dal motore a eventi
+deterministico** (`src/motore/`, progetto completo in `docs/match-engine.md`):
+ogni partita è simulata con gli 11 titolari veri, produce eventi, statistiche,
+marcatori e voti, ed è **riproducibile** (il seme della carriera + stagione +
+giornata + squadre determina la partita). La partita della squadra dell'utente
+genera la **cronaca testuale** mostrata nella schermata Partite; il Match Day
+visuale arriva in M5. Il motore è calibrato sulle distribuzioni reali:
+`npm run calibra` per verificarlo.
 
 ## Semplificazioni dichiarate di M2
 
@@ -35,7 +37,7 @@ deterministico: per questo non è ancora riproducibile con un seed.
 |---|---|
 | Promozioni/retrocessioni: 3 su e 3 giù, senza playoff | regole nazionali parametrizzate (M11) |
 | Nessuna retrocessione sotto la seconda divisione (niente terze serie nel DB) | eventuale espansione contenuti |
-| L'altra divisione è simulata in blocco a fine stagione | M3+ (simulazione di tutte le leghe) |
+| L'altra divisione è simulata in blocco a fine stagione | simulazione parallela di tutte le leghe (M5+) |
 | Rose congelate tra le stagioni | mercato (M6), crescita/declino (M8) |
 | Niente coppa nazionale | M8 |
 | Fama dell'allenatore non ancora calcolata (obiettivo solo valutato) | M8 |

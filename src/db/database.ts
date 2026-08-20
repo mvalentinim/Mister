@@ -6,7 +6,7 @@
 // che stanno in data/. Quando arriveranno le carriere (M2) i salvataggi
 // verranno resi persistenti (IndexedDB), come da FRD §11.
 
-import initSqlJs, { type Database, type BindParams } from 'sql.js'
+import initSqlJs, { type Database } from 'sql.js'
 
 // Vite: "?url" importa il percorso del file WebAssembly di SQLite,
 // "?raw" importa il contenuto testuale dei file .sql.
@@ -45,23 +45,6 @@ export async function apriDatabase(): Promise<Database> {
   return db
 }
 
-/**
- * Esegue una query e restituisce le righe come array di oggetti JavaScript.
- * Esempio: interroga(db, 'SELECT * FROM club WHERE id = ?', [3])
- * I "?" nella query vengono sostituiti dai parametri in modo sicuro.
- */
-export function interroga<T>(db: Database, sql: string, parametri: BindParams = []): T[] {
-  const statement = db.prepare(sql)
-  statement.bind(parametri)
-  const righe: T[] = []
-  while (statement.step()) {
-    righe.push(statement.getAsObject() as T)
-  }
-  statement.free() // libera la memoria dello statement
-  return righe
-}
-
-/** Come interroga(), ma per query che restituiscono una sola riga (o nessuna). */
-export function interrogaUna<T>(db: Database, sql: string, parametri: BindParams = []): T | null {
-  return interroga<T>(db, sql, parametri)[0] ?? null
-}
+// Le funzioni di interrogazione vivono in query.ts (condivise con gli
+// script Node): le ri-esportiamo da qui per comodità delle schermate.
+export { interroga, interrogaUna } from './query.ts'

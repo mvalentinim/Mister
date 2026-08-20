@@ -5,6 +5,8 @@
 // divisioni della nazione scelta, il calendario e i risultati. Si salva
 // in IndexedDB (vedi salvataggio.ts) dopo ogni avanzamento.
 
+import type { EventoPartita, StatisticheSquadra } from '../motore/tipi.ts'
+
 /** Il profilo dell'allenatore creato dall'utente. */
 export interface ProfiloAllenatore {
   nome: string
@@ -61,10 +63,29 @@ export interface RiepilogoStagione {
   retrocesso: boolean
 }
 
+/** La cronaca dell'ultima partita della squadra dell'utente (M3):
+    l'elenco eventi del motore + statistiche + voti, in attesa del
+    Match Day visuale (M5). */
+export interface CronacaPartita {
+  giornata: number // 1-based, per l'intestazione
+  casaNome: string
+  trasfertaNome: string
+  golCasa: number
+  golTrasferta: number
+  eventi: EventoPartita[]
+  statistiche: { casa: StatisticheSquadra; trasferta: StatisticheSquadra }
+  /** voti della squadra dell'utente: nome → voto */
+  voti: Array<{ nome: string; ruolo: string; voto: number }>
+}
+
 /** Lo stato completo di una carriera. */
 export interface Carriera {
   id: string
-  versioneSchema: 1 // per le migrazioni future dei salvataggi (FRD §11)
+  versioneSchema: 2 // per le migrazioni dei salvataggi (FRD §11)
+  /** seme della carriera: con lo stesso seme le partite sono riproducibili */
+  seme: number
+  /** cronaca dell'ultima partita giocata dalla squadra dell'utente */
+  cronaca: CronacaPartita | null
   allenatore: ProfiloAllenatore
   nazione: { id: number; nome: string }
   competizioni: { 1: string; 2: string } // nomi delle due divisioni
