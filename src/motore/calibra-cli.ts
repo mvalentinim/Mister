@@ -16,6 +16,7 @@ import { readFile } from 'node:fs/promises'
 import initSqlJs, { type Database } from 'sql.js'
 import { interroga } from '../db/query.ts'
 import { generaCalendario } from '../carriera/calendario.ts'
+import { creaRng, semeDaStringa } from './rng.ts'
 import { preparaSquadra } from './preparazione.ts'
 import { simulaPartitaMotore } from './partita.ts'
 import type { SquadraMotore } from './tipi.ts'
@@ -85,7 +86,9 @@ for (const nomeLega of ['Serie A', 'Serie B']) {
   for (let stagione = 0; stagione < STAGIONI_PER_LEGA; stagione++) {
     const punti = new Map<number, number>(squadre.map((s) => [s.clubId, 0]))
     const golGiocatore = new Map<number, number>()
-    const calendario = generaCalendario(squadre.map((s) => s.clubId))
+    // calendario seminato: il test è identico a ogni esecuzione
+    const rngCalendario = creaRng(semeDaStringa(`calendario-${nomeLega}-${stagione}`))
+    const calendario = generaCalendario(squadre.map((s) => s.clubId), rngCalendario.numero)
     for (let giornata = 0; giornata < calendario.length; giornata++) {
       for (const p of calendario[giornata]) {
         const esito = simulaPartitaMotore(

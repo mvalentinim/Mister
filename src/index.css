@@ -529,10 +529,59 @@ body {
   stroke-width: 0.5px;
 }
 
+.md-colonna {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* pannello di pausa: cambi e regolazioni */
+.md-pannello {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  background: var(--superficie);
+  border: 1px solid var(--accento);
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 0.8rem;
+}
+
+.md-cambi,
+.md-regolazioni {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.md-pannello select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--bordo);
+  border-radius: 6px;
+  font: inherit;
+  background: var(--superficie);
+  color: var(--testo);
+}
+
+/* pagelle live sotto la telecronaca */
+.md-voti {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.8rem;
+  background: var(--superficie);
+  border: 1px solid var(--bordo);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.82rem;
+}
+
 .md-telecronaca {
   flex: 1;
   min-width: 260px;
-  max-height: 460px;
+  max-height: 380px;
   overflow-y: auto;
   background: var(--superficie);
   border: 1px solid var(--bordo);

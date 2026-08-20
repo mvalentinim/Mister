@@ -176,30 +176,47 @@ export function preparaSquadra(
       if (movimento.tiratore && fattore > 0) giocatori[i].pesoTiroExtra = 1 + fattore * 0.5
     }
   }
-  // il totale dei movimenti non può stravolgere una squadra: tetto ±8
-  attacco += limita(modificatori.attacco, -8, 8)
-  centrocampo += limita(modificatori.centrocampo, -8, 8)
-  difesa += limita(modificatori.difesa, -8, 8)
-
   // ── istruzioni di squadra (FRD §8.3) ──
+  // (il totale dei movimenti, col tetto ±8, entra nel delta qui sotto)
   const istr = assetto.istruzioni
-  attacco += istr.mentalita * 2.5 // mentalità offensiva: più pericolosità...
-  difesa -= istr.mentalita * 2.5 // ...ma più spazi concessi
-  if (istr.pressing === 'alto') { centrocampo += 2; difesa -= 1.5 }
-  if (istr.pressing === 'basso') { centrocampo -= 2; difesa += 1.5 }
-  if (istr.ampiezza === 'larga') { attacco += 1.5; centrocampo -= 1 }
-  if (istr.ampiezza === 'stretta') { attacco -= 1; centrocampo += 1 }
+  const deltaIstruzioni = { attacco: 0, centrocampo: 0, difesa: 0 }
+  deltaIstruzioni.attacco += istr.mentalita * 2.5 // mentalità offensiva: più pericolosità...
+  deltaIstruzioni.difesa -= istr.mentalita * 2.5 // ...ma più spazi concessi
+  if (istr.pressing === 'alto') { deltaIstruzioni.centrocampo += 2; deltaIstruzioni.difesa -= 1.5 }
+  if (istr.pressing === 'basso') { deltaIstruzioni.centrocampo -= 2; deltaIstruzioni.difesa += 1.5 }
+  if (istr.ampiezza === 'larga') { deltaIstruzioni.attacco += 1.5; deltaIstruzioni.centrocampo -= 1 }
+  if (istr.ampiezza === 'stretta') { deltaIstruzioni.attacco -= 1; deltaIstruzioni.centrocampo += 1 }
   const ritmo = istr.ritmo === 'alto' ? 1.12 : istr.ritmo === 'basso' ? 0.9 : 1
+
+  // il delta complessivo (movimenti col tetto + istruzioni) viene registrato
+  // sulla squadra: serve a ricalcolare le forze dopo un cambio (M5)
+  const deltaTattici = {
+    attacco: limita(modificatori.attacco, -8, 8) + deltaIstruzioni.attacco,
+    centrocampo: limita(modificatori.centrocampo, -8, 8) + deltaIstruzioni.centrocampo,
+    difesa: limita(modificatori.difesa, -8, 8) + deltaIstruzioni.difesa,
+  }
+
+  // la panchina: chi non è titolare, in ordine di media (per i cambi, M5)
+  const idTitolari = new Set(righe.map((g) => g.id))
+  const panchina = rosa
+    .filter((g) => !idTitolari.has(g.id))
+    .sort((a, b) => mediaComplessiva(b) - mediaComplessiva(a))
+    .slice(0, 12)
+    .map(preparaGiocatore)
 
   return {
     clubId,
     nome: nomeClub,
     titolari: giocatori,
+    panchina,
     posizioni: slots.map((s) => [s.x, s.y] as [number, number]),
-    attacco,
-    centrocampo,
-    difesa,
+    repartiSlot: slots.map(repartoSlot),
+    attacco: attacco + deltaTattici.attacco,
+    centrocampo: centrocampo + deltaTattici.centrocampo,
+    difesa: difesa + deltaTattici.difesa,
     portiere,
+    deltaTattici,
+    mentalita: istr.mentalita,
     ritmo,
   }
 }

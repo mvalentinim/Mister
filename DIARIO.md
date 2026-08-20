@@ -214,3 +214,22 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 **DoD di M4:** differenze misurabili e spiegabili ✅ (test comparativo), frecce che riflettono i movimenti ✅. Verifica di persona dello sviluppatore in sospeso come sempre.
 
 **Prossima sessione proposta:** completamento M5 (posizioni dal motore, cambi in partita, pagelle live) oppure M6 — Mercato.
+
+---
+
+## Sessione 12 — 2026-08-20 — 🎮 M5 COMPLETA: Match Day interattivo
+
+**Obiettivo dichiarato:** completare la M5 — posizioni guidate dal motore, cambi e regolazioni a partita in corso, pagelle live (FRD §9).
+
+**Fatto:**
+- **Motore "a tappe"** (`creaPartita` → `avanzaMinuto`): la partita avanza minuto per minuto con uno stato modificabile — è ciò che rende possibili i cambi in diretta. `simulaPartitaMotore` è ora un involucro che fa gli stessi passi: campionato e calibrazione identici (verificato: `npm run calibra` verde e ora **deterministico** anche nel calendario).
+- **Sostituzioni (max 3) e regolazioni** di mentalità e ritmo **in pausa e all'intervallo** (pausa automatica al 45'): entrano subito nel motore; le forze di reparto si ricalcolano dopo ogni cambio (`ricalcolaForze`, approssimazione dichiarata sui movimenti del sostituito).
+- **Il risultato visto è quello ufficiale**: al fischio finale il Match Day passa il risultato (cambi inclusi) ad `avanzaGiornata`, che simula solo le altre partite. Senza interventi, la partita resta identica a quella simulata in blocco (stesso seme).
+- **Posizioni guidate dal motore**: la squadra in possesso (deciso dal motore, non più scenico) spinge avanti, chi difende si compatta; espulsi spariscono dal campo, subentrati appaiono.
+- **Pagelle live** (§9.5) sotto la telecronaca, aggiornate ogni minuto e reattive agli eventi (il giallo abbassa il voto in diretta).
+- Pagelle con nomi nel risultato del motore (`pagelle`), usate anche dalla cronaca post-partita.
+- **Collaudo end-to-end**: pausa al 20', cambio effettuato ("entra D'Alessandro, esce Antonini"), mentalità a molto offensiva, pausa automatica all'intervallo, fine partita Catanzaro 2-1 Reggiana = risultato registrato in campionato. Build, lint, calibrazione e test tattiche tutti verdi.
+
+**DoD di M5:** partita guardata dall'inizio alla fine con cambio di velocità ✅, sostituzione all'intervallo ✅, telecronaca dei gol ✅, highlights e pagelle rileggibili a fine gara ✅ (schermata Partite). Verifica di persona dello sviluppatore in sospeso come sempre.
+
+**Prossima sessione proposta:** M6 — Mercato (trattative club-club, IA dei club, finestre).

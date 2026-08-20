@@ -9,18 +9,20 @@
 import type { Partita } from './tipi.ts'
 
 /** Mescola una copia dell'array (algoritmo di Fisher-Yates). */
-function mescola<T>(array: T[]): T[] {
+function mescola<T>(array: T[], casuale: () => number): T[] {
   const copia = [...array]
   for (let i = copia.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
+    const j = Math.floor(casuale() * (i + 1))
     ;[copia[i], copia[j]] = [copia[j], copia[i]]
   }
   return copia
 }
 
-/** Genera tutte le giornate (andata + ritorno) per i club dati. */
-export function generaCalendario(clubIds: number[]): Partita[][] {
-  const squadre = mescola(clubIds)
+/** Genera tutte le giornate (andata + ritorno) per i club dati.
+    Il generatore casuale è iniettabile: i test di calibrazione ne passano
+    uno seminato per avere calendari (e quindi esiti) riproducibili. */
+export function generaCalendario(clubIds: number[], casuale: () => number = Math.random): Partita[][] {
+  const squadre = mescola(clubIds, casuale)
   // con un numero dispari di squadre si aggiunge un "riposo" fittizio
   if (squadre.length % 2 === 1) squadre.push(-1)
   const n = squadre.length

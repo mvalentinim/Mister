@@ -175,23 +175,33 @@ export function livelloUtente(carriera: Carriera): 1 | 2 {
 }
 
 /** Gioca la prossima giornata: ogni partita passa dal motore a eventi.
-    Per la partita dell'utente si conserva la cronaca completa. */
-export function avanzaGiornata(db: Database, carriera: Carriera): void {
+    Per la partita dell'utente si conserva la cronaca completa.
+    Se `risultatoUtente` è fornito (Match Day appena guardato, M5), la
+    partita dell'utente usa QUEL risultato — che include gli effetti dei
+    cambi e delle regolazioni fatte in diretta. */
+export function avanzaGiornata(
+  db: Database,
+  carriera: Carriera,
+  risultatoUtente?: import('../motore/tipi.ts').RisultatoPartita,
+): void {
   if (carriera.giornata >= carriera.calendario.length) return
   for (const partita of carriera.calendario[carriera.giornata]) {
+    const partitaMia = partita.casaId === carriera.clubId || partita.trasfertaId === carriera.clubId
     const casa = squadraMotore(db, carriera, partita.casaId)
     const trasferta = squadraMotore(db, carriera, partita.trasfertaId)
-    const esito = simulaPartitaMotore(
-      casa, trasferta,
-      semePartita(carriera, carriera.giornata, partita.casaId, partita.trasfertaId),
-    )
+    const esito =
+      partitaMia && risultatoUtente
+        ? risultatoUtente
+        : simulaPartitaMotore(
+            casa, trasferta,
+            semePartita(carriera, carriera.giornata, partita.casaId, partita.trasfertaId),
+          )
     partita.golCasa = esito.golCasa
     partita.golTrasferta = esito.golTrasferta
 
-    // la partita dell'utente merita la cronaca completa (FRD §9: la versione
-    // visuale arriva in M5, per ora l'elenco eventi + statistiche + voti)
-    if (partita.casaId === carriera.clubId || partita.trasfertaId === carriera.clubId) {
-      const miaSquadra = partita.casaId === carriera.clubId ? casa : trasferta
+    // la partita dell'utente merita la cronaca completa (FRD §9)
+    if (partitaMia) {
+      const latoMio = partita.casaId === carriera.clubId ? 'casa' : 'trasferta'
       carriera.cronaca = {
         giornata: carriera.giornata + 1,
         casaNome: casa.nome,
@@ -200,9 +210,7 @@ export function avanzaGiornata(db: Database, carriera: Carriera): void {
         golTrasferta: esito.golTrasferta,
         eventi: esito.eventi.filter((e) => e.tipo !== 'occasione-murata'), // cronaca asciutta
         statistiche: esito.statistiche,
-        voti: miaSquadra.titolari.map((g) => ({
-          nome: g.nome, ruolo: g.ruolo, voto: esito.voti[g.id] ?? 6,
-        })),
+        voti: esito.pagelle[latoMio].map((p) => ({ nome: p.nome, ruolo: p.ruolo, voto: p.voto })),
       }
     }
   }

@@ -25,14 +25,22 @@ export interface SquadraMotore {
   clubId: number
   nome: string
   titolari: GiocatoreMotore[] // 11 giocatori
+  /** la panchina, per le sostituzioni nel Match Day (M5) */
+  panchina: GiocatoreMotore[]
   /** posizione [x, y] di ogni titolare (dagli slot del modulo scelto) */
   posizioni: Array<[number, number]>
+  /** reparto di ogni slot (deciso dalla posizione sul campo, M4) */
+  repartiSlot: Array<'POR' | 'DIF' | 'CEN' | 'ATT'>
   // forze di reparto aggregate (media pesata dei titolari, scala ~1-99),
   // già comprensive di movimenti prevalenti e istruzioni (M4)
   attacco: number
   centrocampo: number
   difesa: number
   portiere: number
+  /** il delta di movimenti+istruzioni, per ricalcolare dopo un cambio (M5) */
+  deltaTattici: { attacco: number; centrocampo: number; difesa: number }
+  /** mentalità corrente (per le regolazioni a partita in corso, M5) */
+  mentalita: number
   /** fattore di ritmo (istruzioni): moltiplica la frequenza delle azioni */
   ritmo: number
 }
@@ -66,6 +74,14 @@ export interface StatisticheSquadra {
   golAttesi: number // xG semplificato: somma della qualità delle occasioni
 }
 
+/** Una pagella: giocatore + voto. */
+export interface Pagella {
+  id: number
+  nome: string
+  ruolo: string
+  voto: number
+}
+
 /** Il risultato completo prodotto dal motore. */
 export interface RisultatoPartita {
   golCasa: number
@@ -74,4 +90,6 @@ export interface RisultatoPartita {
   statistiche: { casa: StatisticheSquadra; trasferta: StatisticheSquadra }
   /** voto 4-10 per ogni titolare (chiave: id giocatore) */
   voti: Record<number, number>
+  /** le pagelle con i nomi, per squadra (chi era in campo al fischio finale) */
+  pagelle: { casa: Pagella[]; trasferta: Pagella[] }
 }

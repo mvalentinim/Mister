@@ -84,9 +84,28 @@ Se una modifica al motore fa uscire una metrica dagli intervalli, il test
 fallisce (exit code 1): i parametri da ritoccare sono tutti nell'oggetto
 `PARAMETRI` in cima a `partita.ts`.
 
+## Il motore "a tappe" (M5)
+
+Per il Match Day interattivo il motore espone anche un'interfaccia a tappe:
+
+```ts
+const partita = creaPartita(casa, trasferta, seme)
+partita.avanzaMinuto()      // gioca un minuto, restituisce i suoi eventi
+partita.votiLive('casa')    // pagelle in tempo reale
+partita.sostituisci(...)    // cambio (max 3): ricalcola le forze di reparto
+partita.regola(...)         // mentalità e ritmo a partita in corso
+partita.risultatoFinale()   // punteggio, eventi, statistiche, voti, pagelle
+```
+
+`simulaPartitaMotore` (campionato, calibrazione) è un involucro che fa gli
+stessi identici passi senza interventi: i risultati non cambiano, e una
+partita guardata senza toccare nulla è identica a una simulata in blocco.
+Dopo una sostituzione le forze di reparto vengono ricalcolate con le stesse
+regole della preparazione (`ricalcolaForze`), ri-applicando il delta di
+movimenti+istruzioni registrato a inizio partita (approssimazione dichiarata).
+
 ## Cosa NON fa ancora (arriva dopo)
 
-- moduli diversi dal 4-4-2, tattiche e **movimenti prevalenti** → M4
-- forma e morale dinamiche, sostituzioni → M4/M8
-- infortuni con durata e conseguenze → M4+
-- posizioni dei giocatori nel tempo (per la vista campo) → M5
+- forma e morale dinamiche → M8
+- infortuni con durata e indisponibilità → annotato in IDEE-FUTURE
+- cambi delle squadre IA durante la partita → rifinitura futura

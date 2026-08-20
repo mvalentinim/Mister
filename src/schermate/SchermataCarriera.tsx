@@ -120,16 +120,19 @@ function SchermataCarriera({ db, carriera }: Props) {
   }
 
   // ── Match Day in corso: la vista partita prende tutto lo schermo ──
-  // A fine partita si avanza la giornata: per il determinismo (stesso seme)
-  // il risultato registrato è identico a quello appena visto in campo.
+  // Al fischio finale la giornata avanza usando IL RISULTATO VISTO (che
+  // include cambi e regolazioni fatte in diretta, M5); le altre partite
+  // vengono simulate normalmente.
   if (matchDayAperto) {
     return (
       <MatchDay
         db={db}
         carriera={carriera}
-        onFine={async () => {
-          await gioca(false)
+        onFine={async (risultato) => {
+          avanzaGiornata(db, carriera, risultato)
+          await salvaCarriera(carriera)
           setMatchDayAperto(false)
+          setVersione((v) => v + 1)
         }}
       />
     )

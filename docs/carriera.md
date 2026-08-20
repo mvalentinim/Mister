@@ -43,28 +43,36 @@ visuale arriva in M5. Il motore è calibrato sulle distribuzioni reali:
 | Fama dell'allenatore non ancora calcolata (obiettivo solo valutato) | M8 |
 | Calendario generato, non quello reale | fonte calendari (docs/dati.md) |
 
-## Il Match Day "in diretta" (anticipo di M5)
+## Il Match Day "in diretta" (M5 completa)
 
-Su richiesta dello sviluppatore, la vista partita del FRD §9 è stata
-anticipata (in forma essenziale) rispetto all'ordine del piano:
+La vista partita del FRD §9, al completo:
 
-- **campo schematico** (SVG) con i gettoni nominali delle due squadre in
-  4-4-2 e la palla che scivola tra i giocatori della squadra in possesso;
-- **cronometro** con velocità 1x/2x/3x/5x + pausa (FRD §9.3);
-- **telecronaca testuale** generata a fianco del campo minuto per minuto:
-  frasi di riempimento nei momenti tranquilli e, sulle azioni importanti,
-  **il tempo rallenta** e il racconto si infittisce in più battute fino
-  all'esito (la "telecronaca ibrida" del FRD §9.4), con template procedurali
-  variati in italiano;
-- a fine partita: statistiche complete; le pagelle restano nella schermata
-  Partite.
+- **campo schematico** (SVG) con i gettoni disposti secondo il **modulo
+  scelto** (M4) e **posizioni guidate dal motore**: la squadra in possesso
+  spinge in avanti, quella che difende si compatta; gli espulsi spariscono
+  dal campo, i subentrati appaiono (§9.2);
+- **cronometro** con velocità 1x/2x/3x/5x + pausa (§9.3);
+- **telecronaca ibrida** (§9.4): righe di riempimento nei momenti
+  tranquilli; sulle azioni importanti il tempo rallenta e il racconto si
+  infittisce in più battute fino all'esito, con template variati in italiano;
+- **pagelle live** della propria squadra, aggiornate minuto per minuto e
+  reattive agli eventi (§9.5);
+- **in pausa (e all'intervallo, con pausa automatica): sostituzioni (max 3)
+  e regolazioni di mentalità e ritmo**, che entrano SUBITO nel motore (§9.3);
+- a fine partita: statistiche complete; highlights e pagelle rileggibili
+  nella schermata Partite (§9.6).
 
-Grazie al determinismo del motore (M3), la partita mostrata è pre-calcolata
-con lo stesso seme del campionato: ciò che vedi è ciò che va in classifica
-(coerenza verificata da collaudo automatico). Restano per la M5 "piena":
-posizioni dei giocatori guidate dal motore (ora i movimenti sono scenici),
-cambi e regolazioni durante la partita, pagelle live, renderer Canvas/Pixi
-se servirà più fluidità.
+Come funziona sotto: il motore è "a tappe" (`creaPartita` → `avanzaMinuto`,
+vedi docs/match-engine.md). Senza interventi la partita è identica a quella
+che il campionato avrebbe simulato in blocco (stesso seme); se intervieni,
+**il risultato visto diventa quello ufficiale** — al fischio finale viene
+passato ad `avanzaGiornata`, che simula normalmente le altre partite.
+Coerenza verificata da collaudo automatico.
+
+Semplificazioni dichiarate: i cambi li fa solo l'utente (i club IA giocano
+senza sostituzioni); dopo un cambio l'effetto dei movimenti prevalenti resta
+quello calcolato a inizio partita (docs/tattica.md); renderer Canvas/Pixi
+solo se servirà più fluidità.
 
 ## Flusso utente
 
