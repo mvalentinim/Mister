@@ -12,6 +12,27 @@ e poi li muove coi trasferimenti: `carriera.rose` (club → id giocatori),
 (si leggono per id). Motore, Match Day, Tattica e Rosa leggono tutti la rosa
 di carriera; la cache delle squadre si invalida da sola quando una rosa cambia.
 
+## Il mercato è mondiale
+
+La fotografia copre **tutti i club del DB** (i 10 campionati del perimetro:
+prime e seconde divisioni dei 5 grandi campionati europei, ~198 club e
+~5.500 contratti), non solo la nazione in cui si gioca. Ogni club della
+carriera porta `nazioneId` e `campionato`: **classifica, promozioni e
+calendario filtrano per nazione** (`clubNazione` nel motore), il mercato no.
+Si può quindi comprare da (e vendere a) qualunque club, e l'IA dei club fa
+mercato in tutto il mondo — per tenere i tempi rapidi, ogni giorno di
+mercato è un campione: 8-11 club compratori, ognuno valuta gli esuberi di
+40 club scelti dal caso seminato.
+
+La ricerca giocatori copre l'intero bacino, con filtri per campionato,
+squadra (raggruppate per campionato), ruolo, nazionalità, media minima,
+età massima e scadenza, e ordinamento per valore/media/scadenza/età.
+
+I campionati esteri **non vengono simulati**: le loro rose vivono solo come
+mercato (semplificazione dichiarata). I salvataggi vecchi (v5) vengono
+estesi al mondo al primo accesso (`estendiMercatoAlMondo`, idempotente),
+senza toccare i trasferimenti già fatti.
+
 ## Le finestre
 
 - **Estiva** (8 giorni) all'inizio di ogni stagione; **invernale** (5 giorni)

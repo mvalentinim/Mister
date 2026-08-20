@@ -15,7 +15,7 @@
 import type { Database } from 'sql.js'
 import { interroga } from '../db/query.ts'
 import { preparaSquadra, tatticaDefault } from '../motore/preparazione.ts'
-import { fineStagioneMercato, inizializzaMercato, aggiungiNotizia } from '../mercato/stato.ts'
+import { estendiMercatoAlMondo, fineStagioneMercato, inizializzaMercato, aggiungiNotizia } from '../mercato/stato.ts'
 import { GIORNI_FINESTRA_INVERNALE } from '../mercato/stato.ts'
 import { aggiornaComportamento, verificaPromesseFineStagione } from '../comportamento/comportamento.ts'
 import { simulaPartitaMotore } from '../motore/partita.ts'
@@ -91,6 +91,7 @@ function fotografaClub(db: Database, nazioneId: number): ClubCarriera[] {
   return interroga<ClubCarriera>(
     db,
     `SELECT c.id, c.nome, c.fama AS forza, co.livello,
+            co.nazione_id AS nazioneId, co.nome AS campionato,
             c.budget_mercato AS budgetMercato, c.budget_mercato AS budgetMercatoIniziale
      FROM club c JOIN competizione co ON co.id = c.competizione_id
      WHERE co.nazione_id = ? AND co.livello IN (1, 2)`,
@@ -159,7 +160,7 @@ export function creaCarriera(
   )
   const carriera: Carriera = {
     id: `carriera-${Date.now()}`,
-    versioneSchema: 5,
+    versioneSchema: 6,
     morale: {},
     statistiche: {},
     promesse: [],
@@ -196,8 +197,10 @@ export function creaCarriera(
     storico: [],
     aggiornataIl: new Date().toISOString(),
   }
-  // fotografa rose, contratti e budget e apre la finestra estiva (M6)
+  // fotografa rose, contratti e budget e apre la finestra estiva (M6);
+  // poi estende il mercato a tutti i campionati del DB
   inizializzaMercato(db, carriera)
+  estendiMercatoAlMondo(db, carriera)
   carriera.budget.mercato = offerta.budgetMercato
   carriera.budget.stipendi = Math.max(carriera.budget.stipendi, offerta.budgetStipendi)
   return carriera
@@ -206,6 +209,16 @@ export function creaCarriera(
 /** La divisione in cui gioca l'utente in questa stagione. */
 export function livelloUtente(carriera: Carriera): 1 | 2 {
   return carriera.club.find((c) => c.id === carriera.clubId)!.livello
+}
+
+/** I club del campionato dell'utente (le due divisioni della sua nazione).
+    Da quando il mercato è mondiale `carriera.club` contiene TUTTI i club:
+    classifica, promozioni e calendario devono restare nella nazione.
+    (Il confronto con undefined copre i salvataggi non ancora estesi.) */
+function clubNazione(carriera: Carriera) {
+  return carriera.club.filter(
+    (c) => c.nazioneId === undefined || c.nazioneId === carriera.nazione.id,
+  )
 }
 
 /** Gioca la prossima giornata: ogni partita passa dal motore a eventi.
@@ -271,7 +284,7 @@ export function stagioneFinita(carriera: Carriera): boolean {
 export function calcolaClassifica(carriera: Carriera): RigaClassifica[] {
   const righe = new Map<number, RigaClassifica>()
   const livello = livelloUtente(carriera)
-  for (const c of carriera.club.filter((c) => c.livello === livello)) {
+  for (const c of clubNazione(carriera).filter((c) => c.livello === livello)) {
     righe.set(c.id, {
       clubId: c.id, nome: c.nome, punti: 0, giocate: 0,
       vinte: 0, pareggiate: 0, perse: 0, golFatti: 0, golSubiti: 0,
@@ -302,7 +315,7 @@ export function calcolaClassifica(carriera: Carriera): RigaClassifica[] {
 /** Simula in blocco l'ALTRA divisione (per decidere promozioni/retrocessioni). */
 function classificaAltraDivisione(db: Database, carriera: Carriera): number[] {
   const altroLivello = livelloUtente(carriera) === 2 ? 1 : 2
-  const squadre = carriera.club.filter((c) => c.livello === altroLivello)
+  const squadre = clubNazione(carriera).filter((c) => c.livello === altroLivello)
   const punti = new Map<number, [number, number]>(squadre.map((c) => [c.id, [0, 0]])) // punti, diff reti
   const giornate = generaCalendario(squadre.map((c) => c.id))
   for (let g = 0; g < giornate.length; g++) {
@@ -383,7 +396,7 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
   fineStagioneMercato(db, carriera)
   const nuovoLivello = livelloUtente(carriera) // ricalcolato dopo i movimenti
   carriera.calendario = generaCalendario(
-    carriera.club.filter((c) => c.livello === nuovoLivello).map((c) => c.id),
+    clubNazione(carriera).filter((c) => c.livello === nuovoLivello).map((c) => c.id),
   )
 
   return { posizione, totale, obiettivoRaggiunto, promosso, retrocesso }

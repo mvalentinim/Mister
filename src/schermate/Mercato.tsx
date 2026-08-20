@@ -50,7 +50,10 @@ function Mercato({ db, carriera, onModificata }: Props) {
   const [ricerca, setRicerca] = useState('')
   const [filtroRuolo, setFiltroRuolo] = useState('')
   const [filtroSquadra, setFiltroSquadra] = useState<number | ''>('')
+  const [filtroCampionato, setFiltroCampionato] = useState('')
   const [filtroNazione, setFiltroNazione] = useState('')
+  // incrementato dopo ogni operazione: fa ricalcolare il bacino della ricerca
+  const [versioneRose, setVersioneRose] = useState(0)
   const [mediaMin, setMediaMin] = useState('') // tenuti come testo: campo vuoto = nessun filtro
   const [etaMax, setEtaMax] = useState('')
   const [scadenzaEntro, setScadenzaEntro] = useState<number | ''>('')
@@ -72,40 +75,43 @@ function Mercato({ db, carriera, onModificata }: Props) {
   async function applica(modifica: () => void) {
     modifica()
     await salvaCarriera(carriera)
+    setVersioneRose((v) => v + 1) // le rose possono essere cambiate
     onModificata()
   }
 
-  // ── ricerca: giocatori degli altri club della nazione ──
-  // L'elenco delle nazionalità per il filtro va calcolato una volta sola
-  // (le rose cambiano poco durante una sessione: se un'opzione manca,
-  // basta riaprire la schermata).
-  const nazionalita = useMemo(() => {
-    const tutte = new Set<string>()
+  // ── ricerca: TUTTI i giocatori del mondo (mercato mondiale) ──
+  // Col mercato aperto su ~200 club (≈6.000 giocatori) il bacino non si può
+  // ricostruire a ogni tasto premuto: lo si fotografa una volta (useMemo) e
+  // lo si rinfresca solo dopo un'operazione di mercato (versioneRose).
+  const tuttiGliAltri = useMemo(() => {
+    const bacino: { g: GiocatoreRiga; club: string; clubId: number; campionato: string }[] = []
     for (const club of carriera.club) {
       if (club.id === carriera.clubId) continue
-      for (const g of rosaClub(db, carriera, club.id)) tutte.add(g.nazionalita)
-    }
-    return [...tutte].sort((a, b) => a.localeCompare(b))
-  }, [db, carriera])
-
-  // La ricerca parte solo quando c'è almeno un criterio: così la schermata
-  // non mostra 1.200 giocatori a caso appena la apri.
-  const ricercaAttiva =
-    ricerca.length >= 2 || filtroRuolo !== '' || filtroSquadra !== '' ||
-    filtroNazione !== '' || mediaMin !== '' || etaMax !== '' || scadenzaEntro !== ''
-
-  // Ogni riga porta con sé il club di appartenenza: serve per la colonna
-  // "Club" e per il filtro per squadra senza doverlo ricalcolare.
-  const tuttiGliAltri: { g: GiocatoreRiga; club: string; clubId: number }[] = []
-  if (ricercaAttiva) {
-    for (const club of carriera.club) {
-      if (club.id === carriera.clubId) continue
-      if (filtroSquadra !== '' && club.id !== filtroSquadra) continue
       for (const g of rosaClub(db, carriera, club.id)) {
-        tuttiGliAltri.push({ g, club: club.nome, clubId: club.id })
+        bacino.push({ g, club: club.nome, clubId: club.id, campionato: club.campionato ?? '' })
       }
     }
-  }
+    return bacino
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [db, carriera, versioneRose])
+
+  // le opzioni dei filtri, ricavate dal bacino reale
+  const nazionalita = useMemo(
+    () => [...new Set(tuttiGliAltri.map(({ g }) => g.nazionalita))].sort((a, b) => a.localeCompare(b)),
+    [tuttiGliAltri],
+  )
+  const campionati = useMemo(
+    () => [...new Set(carriera.club.map((c) => c.campionato).filter(Boolean))],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [carriera, versioneRose],
+  )
+
+  // La ricerca parte solo quando c'è almeno un criterio: così la schermata
+  // non mostra 6.000 giocatori a caso appena la apri.
+  const ricercaAttiva =
+    ricerca.length >= 2 || filtroRuolo !== '' || filtroSquadra !== '' ||
+    filtroCampionato !== '' || filtroNazione !== '' ||
+    mediaMin !== '' || etaMax !== '' || scadenzaEntro !== ''
 
   /** Il valore usato per ordinare, in base al criterio scelto. */
   function chiave(g: GiocatoreRiga): number {
@@ -115,7 +121,9 @@ function Mercato({ db, carriera, onModificata }: Props) {
     return valoreInCarriera(carriera, g)
   }
 
-  const filtrati = tuttiGliAltri.filter(({ g }) =>
+  const filtrati = !ricercaAttiva ? [] : tuttiGliAltri.filter(({ g, clubId, campionato }) =>
+    (filtroSquadra === '' || clubId === filtroSquadra) &&
+    (!filtroCampionato || campionato === filtroCampionato) &&
     (!filtroRuolo || g.ruolo === filtroRuolo) &&
     (!filtroNazione || g.nazionalita === filtroNazione) &&
     (mediaMin === '' || mediaComplessiva(g) >= Number(mediaMin)) &&
@@ -123,8 +131,11 @@ function Mercato({ db, carriera, onModificata }: Props) {
     (scadenzaEntro === '' || (carriera.contratti[g.id]?.scadenza ?? 9999) <= scadenzaEntro) &&
     (ricerca.length < 2 || `${g.nome} ${g.cognome}`.toLowerCase().includes(ricerca.toLowerCase())),
   )
+  // il valore di ordinamento si calcola UNA volta per riga (non a ogni
+  // confronto del sort: su migliaia di righe farebbe la differenza)
   const risultati = filtrati
-    .sort((a, b) => (decrescente ? chiave(b.g) - chiave(a.g) : chiave(a.g) - chiave(b.g)))
+    .map((r) => ({ ...r, ordine: chiave(r.g) }))
+    .sort((a, b) => (decrescente ? b.ordine - a.ordine : a.ordine - b.ordine))
     .slice(0, 30)
 
   /** Cambia criterio di ordinamento scegliendo anche il verso più naturale:
@@ -368,12 +379,24 @@ function Mercato({ db, carriera, onModificata }: Props) {
           <div className="riga-bottoni filtri-mercato">
             <input placeholder="Nome del giocatore (min 2 lettere)…" value={ricerca}
               onChange={(e) => setRicerca(e.target.value)} className="campo-ricerca" />
+            <select value={filtroCampionato}
+              onChange={(e) => { setFiltroCampionato(e.target.value); setFiltroSquadra('') }}>
+              <option value="">Tutti i campionati</option>
+              {campionati.map((k) => <option key={k} value={k}>{k}</option>)}
+            </select>
             <select value={filtroSquadra} onChange={(e) => setFiltroSquadra(e.target.value === '' ? '' : Number(e.target.value))}>
               <option value="">Tutte le squadre</option>
-              {carriera.club
-                .filter((c) => c.id !== carriera.clubId)
-                .sort((a, b) => a.nome.localeCompare(b.nome))
-                .map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+              {/* raggruppate per campionato (o solo quello filtrato) */}
+              {campionati
+                .filter((k) => !filtroCampionato || k === filtroCampionato)
+                .map((k) => (
+                  <optgroup key={k} label={k}>
+                    {carriera.club
+                      .filter((c) => c.campionato === k && c.id !== carriera.clubId)
+                      .sort((a, b) => a.nome.localeCompare(b.nome))
+                      .map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                  </optgroup>
+                ))}
             </select>
             <select value={filtroRuolo} onChange={(e) => setFiltroRuolo(e.target.value)}>
               <option value="">Tutti i ruoli</option>

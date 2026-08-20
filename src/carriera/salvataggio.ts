@@ -70,6 +70,13 @@ function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: nu
     salvataggio.messaggi = []
     caricato.versioneSchema = 5
   }
+  if (caricato.versioneSchema === 5) {
+    // v5 → v6: il mercato diventa mondiale. Anche qui il lavoro vero
+    // (aggiungere i club esteri e fotografarne le rose) serve il DB,
+    // quindi avviene al primo accesso alla carriera: lo si riconosce
+    // dai club senza il campo `nazioneId`.
+    caricato.versioneSchema = 6
+  }
   return salvataggio
 }
 

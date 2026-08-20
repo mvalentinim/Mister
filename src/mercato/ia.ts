@@ -113,7 +113,10 @@ export function giornoDiMercato(db: Database, carriera: Carriera): void {
   const rng = creaRng(semeDaStringa(`mercato-${carriera.seme}-${carriera.anno}-${m.finestra}-${giorno}`))
 
   const clubIA = carriera.club.filter((c) => c.id !== carriera.clubId)
-  const attivi = [...clubIA].sort(() => rng.numero() - 0.5).slice(0, 5 + rng.intero(3))
+  // col mercato mondiale i club sono ~200: l'attività IA resta un campione
+  // (8-11 compratori al giorno), il mescolamento è deterministico (seminato)
+  const mescolati = [...clubIA].sort(() => rng.numero() - 0.5)
+  const attivi = mescolati.slice(0, 8 + rng.intero(4))
 
   for (const compratore of attivi) {
     const analisi = analizzaRosa(db, carriera, compratore.id)
@@ -122,10 +125,11 @@ export function giornoDiMercato(db: Database, carriera: Carriera): void {
     const personalita = personalitaClub(compratore.id)
 
     // candidati: esuberi degli altri club (utente escluso: con lui si
-    // tratta, non si saccheggia) + svincolati del reparto giusto
+    // tratta, non si saccheggia) + svincolati del reparto giusto.
+    // Analizzare 200 rose costerebbe troppo: si guarda un campione di 40.
+    const venditori = mescolati.filter((c) => c.id !== compratore.id).slice(0, 40)
     const candidati: GiocatoreRiga[] = []
-    for (const altro of clubIA) {
-      if (altro.id === compratore.id) continue
+    for (const altro of venditori) {
       candidati.push(...analizzaRosa(db, carriera, altro.id).esuberi.filter((g) => REPARTO[g.ruolo] === reparto))
     }
     const svincolatiReparto = giocatoriPerId(db, carriera.svincolati).filter((g) => REPARTO[g.ruolo] === reparto)
@@ -410,17 +414,25 @@ export function proponiCessione(
   const valore = valoreInCarriera(carriera, g)
   const rng = creaRng(semeDaStringa(`proposta-${carriera.seme}-${carriera.anno}-${m.giorniRimasti}-${giocatoreId}-${tipo}`))
 
-  // club interessati: hanno quel reparto scoperto (o quasi) e i soldi
-  const interessati = carriera.club.filter((c) => {
+  // club interessati: hanno quel reparto scoperto (o quasi) e i soldi.
+  // Prima i filtri economici (economici anche da calcolare), poi l'analisi
+  // della rosa su un campione di 40 club: col mercato mondiale sono ~200.
+  const conSoldi = carriera.club.filter((c) => {
     if (c.id === carriera.clubId) return false
     if (tipo === 'vendita' && c.budgetMercato < valore * 0.8) return false
-    const analisi = analizzaRosa(db, carriera, c.id)
-    const reparto = REPARTO[g.ruolo]
-    return (
-      analisi.scoperti.includes(reparto) ||
-      (!analisi.esuberi.some((e) => REPARTO[e.ruolo] === reparto) && rng.evento(0.4))
-    )
+    return true
   })
+  const interessati = conSoldi
+    .sort(() => rng.numero() - 0.5)
+    .slice(0, 40)
+    .filter((c) => {
+      const analisi = analizzaRosa(db, carriera, c.id)
+      const reparto = REPARTO[g.ruolo]
+      return (
+        analisi.scoperti.includes(reparto) ||
+        (!analisi.esuberi.some((e) => REPARTO[e.ruolo] === reparto) && rng.evento(0.4))
+      )
+    })
   if (interessati.length === 0) {
     return `Per ora nessun club cerca un ${g.ruolo}: riprova nei prossimi giorni o abbassa le pretese.`
   }

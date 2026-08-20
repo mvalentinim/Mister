@@ -44,12 +44,16 @@ export interface Partita {
   golTrasferta: number | null
 }
 
-/** La fotografia di un club dentro la carriera. */
+/** La fotografia di un club dentro la carriera.
+    Da quando il mercato è mondiale, l'elenco copre TUTTI i club del DB:
+    nazioneId e campionato distinguono il campionato giocato dagli altri. */
 export interface ClubCarriera {
   id: number
   nome: string
   forza: number // la fama del DB statico: media overall dei migliori 18
   livello: 1 | 2 // divisione di appartenenza IN QUESTA CARRIERA (può cambiare!)
+  nazioneId: number // la nazione del campionato del club
+  campionato: string // nome della competizione (es. "Serie A", "Premier League")
   /** budget mercato residuo (mutabile: i trasferimenti lo muovono, M6) */
   budgetMercato: number
   /** il budget di partenza, per il ripristino a inizio stagione */
@@ -163,7 +167,7 @@ export interface CronacaPartita {
 /** Lo stato completo di una carriera. */
 export interface Carriera {
   id: string
-  versioneSchema: 5 // per le migrazioni dei salvataggi (FRD §11)
+  versioneSchema: 6 // per le migrazioni dei salvataggi (FRD §11)
   /** le ROSE della carriera: club → id dei giocatori. Fotografate alla
       creazione dal DB statico, poi mosse dai trasferimenti (M6). */
   rose: Record<number, number[]>

@@ -303,3 +303,18 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Collaudo end-to-end (Playwright)**: filtro squadra (solo Palermo FC ✓), + ruolo PC ✓, nazionalità da sola (30 francesi ✓), età max 21 ordinata crescente ✓, inversione del verso ✓, scadenza entro il 2026 ✓, media ≥70 ordinata decrescente ✓, trattativa apribile dai risultati filtrati ✓. Build e lint verdi.
 
 **Prossima sessione proposta:** M8 — carriera lunga (obiettivi, fama completa, esoneri, coppa, crescita/declino giocatori).
+
+---
+
+## Sessione 16-bis — 2026-08-20 — Il mercato diventa MONDIALE
+
+**Obiettivo dichiarato (richiesta esplicita):** il mercato deve essere aperto su tutto il DB dei giocatori, anche nei campionati diversi da quello in cui si gioca.
+
+**Fatto:**
+- **La carriera fotografa il mondo intero**: `carriera.club` contiene ora tutti i ~198 club del perimetro (10 campionati) con ~5.500 contratti; ogni club porta `nazioneId` e `campionato`. Salvataggi a **versioneSchema 6**: i vecchi vengono estesi al primo accesso (`estendiMercatoAlMondo`, idempotente, non tocca i trasferimenti già fatti — verificato con test dedicato).
+- **Il campionato resta nazionale**: classifica, promozioni/retrocessioni e calendario filtrano per nazione (`clubNazione` nel motore); i campionati esteri non si simulano (semplificazione dichiarata in `docs/mercato.md`).
+- **IA di mercato mondiale ma a campione** (per i tempi): 8-11 club compratori al giorno, ognuno valuta gli esuberi di 40 club estratti dal caso seminato; stesso campione (40) per i club interessati alle cessioni dell'utente. Ora nel notiziario compaiono anche PSG e Barcellona che fanno acquisti.
+- **Ricerca sul bacino mondiale**: nuovo filtro Campionato, squadre raggruppate per campionato nel menu; il bacino (~6.000 giocatori) è memoizzato e si rinfresca solo dopo un'operazione; ordinamento pre-calcolato per riga (niente ricalcoli nel sort).
+- **Collaudo end-to-end**: 198 club e 5.563 contratti fotografati ✓; "Haaland" trovato al Manchester City ✓; filtro Premier League con Rodri/Mac Allister in testa per media ✓; rosa del Real Madrid trattabile (accordo tra club raggiunto con un club estero) ✓; classifica ancora a 20 squadre italiane dopo una giornata ✓. Build, lint, tsc e calibrazione verdi.
+
+**Prossima sessione proposta:** M8.

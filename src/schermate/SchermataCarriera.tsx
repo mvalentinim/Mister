@@ -15,7 +15,7 @@ import {
   DESCRIZIONE_OBIETTIVO, etichettaStagione, type Carriera, type CronacaPartita, type Partita,
 } from '../carriera/tipi.ts'
 import type { EventoPartita } from '../motore/tipi.ts'
-import { inizializzaMercato } from '../mercato/stato.ts'
+import { estendiMercatoAlMondo, inizializzaMercato } from '../mercato/stato.ts'
 import MatchDay from './MatchDay.tsx'
 import Mercato from './Mercato.tsx'
 import Rosa from './Rosa.tsx'
@@ -111,6 +111,12 @@ function SchermataCarriera({ db, carriera }: Props) {
         }
       }
       inizializzaMercato(db, carriera, false) // senza aprire la finestra a metà stagione
+      cambiata = true
+    }
+    if (carriera.rose && carriera.club.some((c) => c.nazioneId === undefined)) {
+      // v5 → v6: il mercato diventa mondiale — si aggiungono i club esteri
+      // (con le loro rose) ai salvataggi vecchi, senza toccare i trasferimenti
+      estendiMercatoAlMondo(db, carriera)
       cambiata = true
     }
     if (cambiata) {

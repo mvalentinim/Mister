@@ -118,6 +118,65 @@ export function inizializzaMercato(db: Database, carriera: Carriera, apriFinestr
   if (apriFinestra) aggiungiNotizia(carriera, 'Si apre la finestra di mercato estiva!', 'avviso')
 }
 
+/** Estende il mercato a TUTTO il mondo del DB: aggiunge a `carriera.club`
+    i club degli altri campionati (con budget e campionato di appartenenza)
+    e ne fotografa rose e contratti. È idempotente: completa solo ciò che
+    manca, quindi serve sia alle carriere nuove sia ai salvataggi migrati
+    (v5 → v6) senza toccare i trasferimenti già fatti. */
+export function estendiMercatoAlMondo(db: Database, carriera: Carriera): void {
+  const righe = interroga<{
+    id: number; nome: string; forza: number; livello: 1 | 2
+    nazioneId: number; campionato: string; budget: number
+  }>(
+    db,
+    `SELECT c.id, c.nome, c.fama AS forza, co.livello,
+            co.nazione_id AS nazioneId, co.nome AS campionato,
+            c.budget_mercato AS budget
+     FROM club c JOIN competizione co ON co.id = c.competizione_id`,
+  )
+  const perId = new Map(righe.map((r) => [r.id, r]))
+
+  // 1. completa i club già presenti (salvataggi vecchi senza nazioneId)
+  for (const club of carriera.club) {
+    const riga = perId.get(club.id)
+    if (!riga) continue
+    if (club.nazioneId === undefined) club.nazioneId = riga.nazioneId
+    if (club.campionato === undefined) club.campionato = riga.campionato
+  }
+
+  // 2. aggiunge i club degli altri campionati
+  const presenti = new Set(carriera.club.map((c) => c.id))
+  for (const r of righe) {
+    if (presenti.has(r.id)) continue
+    carriera.club.push({
+      id: r.id, nome: r.nome, forza: r.forza, livello: r.livello,
+      nazioneId: r.nazioneId, campionato: r.campionato,
+      budgetMercato: r.budget ?? 1_000_000,
+      budgetMercatoIniziale: r.budget ?? 1_000_000,
+    })
+  }
+
+  // 3. fotografa rose e contratti dei club appena aggiunti
+  for (const club of carriera.club) {
+    if (carriera.rose[club.id]) continue
+    const rosa = interroga<{ id: number; stipendio: number; scadenza: string }>(
+      db,
+      `SELECT g.id, c.stipendio, c.scadenza FROM giocatore g
+       LEFT JOIN contratto c ON c.giocatore_id = g.id
+       WHERE g.club_id = ?`,
+      [club.id],
+    )
+    carriera.rose[club.id] = rosa.map((r) => r.id)
+    for (const r of rosa) {
+      if (carriera.contratti[r.id]) continue // già tracciato (non dovrebbe accadere)
+      carriera.contratti[r.id] = {
+        stipendio: r.stipendio ?? 300_000,
+        scadenza: r.scadenza ? parseInt(r.scadenza, 10) : carriera.anno + 2,
+      }
+    }
+  }
+}
+
 // ── Operazioni ─────────────────────────────────────────────────────────────
 
 /** Sposta un giocatore tra club (o da/verso gli svincolati) e sistema il
