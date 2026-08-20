@@ -42,17 +42,25 @@ decadono (non sono più i tuoi).
 A fine stagione la fama sblocca offerte da club più forti del tuo
 (0-3, deterministiche):
 
-| Fascia | Soglia fama |
-|---|---|
-| Club di seconda divisione | sempre |
-| Club medi di prima divisione | 40 |
-| Club alti di prima divisione | 55 |
-| Top club (primi 4 per forza) | 70 |
+| Fascia | Soglia fama (in patria) | Soglia fama (all'estero) |
+|---|---|---|
+| Club di seconda divisione | sempre | 40 |
+| Club medi di prima divisione | 40 | 50 |
+| Club alti di prima divisione | 55 | 65 |
+| Top club (primi 4 per forza) | 70 | 80 |
+
+Le offerte arrivano da **tutta Europa** (le 10 leghe del perimetro): la
+fascia di un club estero si giudica dentro il SUO campionato, con un
+sovrapprezzo di fama (+10) perché all'estero la reputazione viaggia più
+lenta. Accettando una panchina estera **a fine stagione** si trasloca:
+nazione, nomi delle divisioni, calendario (con le giornate giuste: 34 in
+Bundesliga, 46 in Championship…) e tabellone di coppa diventano quelli
+nuovi. A stagione in corso (esonero) si resta nella propria divisione.
 
 L'**obiettivo si rinegozia a ogni stagione** in base al rango del club nella
 sua divisione: un club appena promosso chiede la salvezza, non un'altra
-promozione. Semplificazione dichiarata: le panchine estere e le nazionali
-arrivano più avanti (M11 / M8 parte 2).
+promozione. Semplificazione dichiarata: le nazionali arrivano più avanti
+(M8 parte 2).
 
 ## La coppa nazionale
 

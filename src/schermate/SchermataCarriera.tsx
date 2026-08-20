@@ -132,6 +132,8 @@ function SchermataCarriera({ db, carriera }: Props) {
   const nomeClub = carriera.club.find((c) => c.id === carriera.clubId)!.nome
   const nomeCompetizione = carriera.competizioni[livelloUtente(carriera)]
   const nomeDi = (id: number) => carriera.club.find((c) => c.id === id)!.nome
+  // il campionato di un club (per etichettare le offerte, anche estere)
+  const campionatoDi = (id: number) => carriera.club.find((c) => c.id === id)?.campionato ?? ''
 
   // Avanza di una giornata (o fino a fine stagione) e salva
   async function gioca(fineStagione: boolean) {
@@ -201,7 +203,7 @@ function SchermataCarriera({ db, carriera }: Props) {
             <button key={o.clubId} className="voce-menu" onClick={() => void accettaOfferta(o)}>
               <span className="voce-etichetta">{o.clubNome}</span>
               <span className="nota">
-                obiettivo {DESCRIZIONE_OBIETTIVO[o.obiettivo]} · budget mercato {euro(o.budgetMercato)}
+                {campionatoDi(o.clubId)} · obiettivo {DESCRIZIONE_OBIETTIVO[o.obiettivo]} · budget mercato {euro(o.budgetMercato)}
               </span>
             </button>
           ))}
@@ -271,7 +273,7 @@ function SchermataCarriera({ db, carriera }: Props) {
                   onClick={() => { void accettaOfferta(o); setEsitoStagione(null) }}>
                   <span className="voce-etichetta">{o.clubNome}</span>
                   <span className="nota">
-                    obiettivo {DESCRIZIONE_OBIETTIVO[o.obiettivo]} · budget mercato {euro(o.budgetMercato)}
+                    {campionatoDi(o.clubId)} · obiettivo {DESCRIZIONE_OBIETTIVO[o.obiettivo]} · budget mercato {euro(o.budgetMercato)}
                   </span>
                 </button>
               ))}
@@ -357,7 +359,7 @@ function SchermataCarriera({ db, carriera }: Props) {
                 {carriera.offerteSpeciali.offerte.map((o) => (
                   <button key={o.clubId} className="voce-menu" onClick={() => void accettaOfferta(o)}>
                     <span className="voce-etichetta">{o.clubNome}</span>
-                    <span className="nota">obiettivo {DESCRIZIONE_OBIETTIVO[o.obiettivo]} · budget mercato {euro(o.budgetMercato)}</span>
+                    <span className="nota">{campionatoDi(o.clubId)} · obiettivo {DESCRIZIONE_OBIETTIVO[o.obiettivo]} · budget mercato {euro(o.budgetMercato)}</span>
                   </button>
                 ))}
               </div>

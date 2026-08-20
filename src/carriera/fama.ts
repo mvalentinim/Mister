@@ -11,11 +11,13 @@
 // Ogni variazione di fama finisce in un registro spiegabile (FRD §12).
 
 import type { Database } from 'sql.js'
+import { interroga } from '../db/query.ts'
 import type { GiocatoreRiga } from '../db/tipi.ts'
 import { creaRng, semeDaStringa } from '../motore/rng.ts'
 import { tatticaDefault } from '../motore/preparazione.ts'
 import { aggiungiNotizia, rosaClub } from '../mercato/stato.ts'
 import { generaCalendario } from './calendario.ts'
+import { creaCoppa } from './coppa.ts'
 import type { Carriera, ClubCarriera, Obiettivo, Offerta, RigaClassifica } from './tipi.ts'
 
 /** Sotto questa fiducia (e dopo qualche giornata) scatta l'esonero. */
@@ -125,22 +127,41 @@ export function obiettivoDelClub(carriera: Carriera, club: ClubCarriera): Obiett
   return rango < 7 ? 'alta-classifica' : 'salvezza'
 }
 
+/** Quanta fama in più serve perché un club ESTERO ti chiami: all'estero
+    la reputazione viaggia più lenta. (Il perimetro del DB è già solo
+    europeo: le 10 leghe dei 5 grandi campionati.) */
+const SOVRAPPREZZO_ESTERO = 10
+
 /** Le offerte di fine stagione: club di fascia superiore, sbloccati dalla
-    fama (FRD §4.3). Restituisce 0-3 offerte (0 = nessuno ti ha cercato). */
+    fama (FRD §4.3) — da TUTTA Europa, non solo dalla nazione in cui si
+    allena. Restituisce 0-3 offerte (0 = nessuno ti ha cercato). */
 export function offerteFineStagione(carriera: Carriera): Offerta[] {
   const mio = carriera.club.find((c) => c.id === carriera.clubId)!
   const fama = carriera.famaAllenatore
-  const nazione = clubDellaNazione(carriera)
-  const primaDivisione = nazione.filter((c) => c.livello === 1).sort((a, b) => b.forza - a.forza)
-  const mediana = primaDivisione[Math.floor(primaDivisione.length / 2)]?.forza ?? 70
 
-  const candidati = nazione.filter((c) => {
+  // per giudicare la fascia di un club serve la classifica di forza della
+  // SUA prima divisione (ogni nazione ha la propria)
+  const primaDivPerNazione = new Map<number, ClubCarriera[]>()
+  for (const c of carriera.club) {
+    if (c.livello !== 1) continue
+    const chiave = c.nazioneId ?? carriera.nazione.id
+    if (!primaDivPerNazione.has(chiave)) primaDivPerNazione.set(chiave, [])
+    primaDivPerNazione.get(chiave)!.push(c)
+  }
+  for (const lega of primaDivPerNazione.values()) lega.sort((a, b) => b.forza - a.forza)
+
+  const candidati = carriera.club.filter((c) => {
     if (c.id === carriera.clubId || c.forza <= mio.forza + 2) return false // solo fasce superiori
-    if (c.livello === 2) return true // la B è sempre raggiungibile
-    const rango = primaDivisione.findIndex((x) => x.id === c.id)
-    if (rango < 4) return fama >= FASCE_FAMA.top // i top club
-    if (c.forza >= mediana) return fama >= FASCE_FAMA.altaA
-    return fama >= FASCE_FAMA.mediA
+    const nazioneClub = c.nazioneId ?? carriera.nazione.id
+    const estero = nazioneClub !== carriera.nazione.id
+    const extra = estero ? SOVRAPPREZZO_ESTERO : 0
+    if (c.livello === 2) return estero ? fama >= FASCE_FAMA.mediA : true // la B di casa è sempre raggiungibile
+    const lega = primaDivPerNazione.get(nazioneClub) ?? []
+    const rango = lega.findIndex((x) => x.id === c.id)
+    const mediana = lega[Math.floor(lega.length / 2)]?.forza ?? 70
+    if (rango >= 0 && rango < 4) return fama >= FASCE_FAMA.top + extra // i top club
+    if (c.forza >= mediana) return fama >= FASCE_FAMA.altaA + extra
+    return fama >= FASCE_FAMA.mediA + extra
   })
 
   const rng = creaRng(semeDaStringa(`offerte-${carriera.seme}-${carriera.anno}`))
@@ -175,6 +196,22 @@ export function accettaOffertaPanchina(db: Database, carriera: Carriera, offerta
     stipendi: Math.max(offerta.budgetStipendi, Math.round(monteStipendiDi(carriera, offerta.clubId) * 1.1)),
   }
 
+  // ── trasloco all'estero (solo in estate): cambia la nazione di lavoro ──
+  // Il campionato che si gioca diventa quello del nuovo club: nomi delle
+  // divisioni, calendario e coppa seguono. Le nazioni estere si possono
+  // raggiungere solo a fine stagione (a metà campionato non avrebbe senso).
+  const nazioneClub = club.nazioneId ?? carriera.nazione.id
+  if (quando === 'fine-stagione' && nazioneClub !== carriera.nazione.id) {
+    const nomeNazione =
+      interroga<{ nome: string }>(db, 'SELECT nome FROM nazione WHERE id = ?', [nazioneClub])[0]?.nome ?? 'Estero'
+    carriera.nazione = { id: nazioneClub, nome: nomeNazione }
+    carriera.competizioni = {
+      1: carriera.club.find((c) => c.nazioneId === nazioneClub && c.livello === 1)?.campionato ?? 'Prima divisione',
+      2: carriera.club.find((c) => c.nazioneId === nazioneClub && c.livello === 2)?.campionato ?? 'Seconda divisione',
+    }
+    aggiungiNotizia(carriera, `Si va all'estero! Nuova vita in ${nomeNazione}.`, 'ufficiale')
+  }
+
   // la tattica riparte dai migliori del nuovo club
   carriera.tattica = tatticaDefault(rosaMia(db, carriera))
 
@@ -185,11 +222,13 @@ export function accettaOffertaPanchina(db: Database, carriera: Carriera, offerta
   )
 
   // in estate il calendario si rigenera per la divisione del nuovo club
+  // (che può essere in un'altra nazione) e la coppa rifà il tabellone
   if (quando === 'fine-stagione') {
     carriera.calendario = generaCalendario(
       clubDellaNazione(carriera).filter((c) => c.livello === club.livello).map((c) => c.id),
     )
     carriera.giornata = 0
+    carriera.coppa = creaCoppa(carriera)
   }
   aggiungiNotizia(carriera, `Nuova avventura: sei l'allenatore del ${club.nome}!`, 'ufficiale')
 }

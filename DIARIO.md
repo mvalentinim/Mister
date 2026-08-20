@@ -340,3 +340,15 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 **DoD di M8 (parte nucleo):** 3+ stagioni con offerte migliori e fasce sbloccate ✅ (collaudo automatico); esonero su fallimento ✅. Verifica di persona dello sviluppatore in sospeso come sempre.
 
 **Resta per chiudere M8** (prossima sessione): competizioni continentali semplificate e panchine delle nazionali oltre soglia di fama (ciclo qualificazioni/torneo).
+
+---
+
+## Sessione 17-bis — 2026-08-20 — Panchine estere (richiesta esplicita)
+
+**Obiettivo dichiarato:** l'allenatore riceve offerte anche da club di altri campionati europei e può trasferirsi in un'altra nazione.
+
+**Fatto:**
+- **Offerte da tutta Europa a fine stagione**: i candidati vengono da tutte le 10 leghe del perimetro (che è già solo europeo). La fascia di un club estero si giudica nel SUO campionato (rango e mediana della sua prima divisione) con un sovrapprezzo di +10 fama — all'estero la reputazione viaggia più lenta. La B di casa resta sempre raggiungibile; la B estera chiede fama ≥ 40.
+- **Trasloco completo accettando** (solo a fine stagione): cambiano nazione, nomi delle divisioni, calendario (giornate corrette per taglia di lega: 34 in Bundesliga, 46 in Championship…) e tabellone di coppa; notizia dedicata. Dopo un esonero, invece, si resta nella propria divisione (a metà campionato il trasloco non avrebbe senso).
+- Le offerte mostrano il campionato di provenienza in tutte e tre le schermate (esonero, fine stagione, riquadro in Partite).
+- **Collaudo end-to-end**: carriera con fama alta → a fine stagione offerte da RB Leipzig (Bundesliga), Bournemouth (Premier League) e Marsiglia (Ligue 1) ✓; accettato il Lipsia → nazione Germania, Bundesliga/2. Bundesliga, calendario a 34 giornate, coppa tedesca a 32 squadre, prima giornata giocata con classifica a 18 ✓. Verificato anche che tutte le 10 leghe hanno squadre pari (calendario sempre generabile). Build, lint, tsc e calibrazione verdi.
