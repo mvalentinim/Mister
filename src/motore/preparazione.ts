@@ -3,6 +3,7 @@
 // dei movimenti prevalenti e delle istruzioni di squadra (M4, FRD §8).
 
 import type { Database } from 'sql.js'
+import { applicaDelta } from '../carriera/crescita.ts'
 import { interroga } from '../db/query.ts'
 import type { GiocatoreRiga } from '../db/tipi.ts'
 import { mediaComplessiva } from '../db/tipi.ts'
@@ -107,8 +108,9 @@ export function preparaSquadra(
   nomeClub: string,
   tattica?: Tattica,
   giocatoriIds?: number[],
+  crescita?: Record<number, number>, // crescita/declino di carriera (M8)
 ): SquadraMotore {
-  const rosa = giocatoriIds
+  const rosa = applicaDelta(crescita, giocatoriIds
     ? giocatoriIds.length > 0
       ? interroga<GiocatoreRiga>(
           db,
@@ -116,7 +118,7 @@ export function preparaSquadra(
           giocatoriIds,
         )
       : []
-    : interroga<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE club_id = ?', [clubId])
+    : interroga<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE club_id = ?', [clubId]))
   const assetto = tattica ?? tatticaDefault(rosa)
   const slots = MODULI[assetto.modulo]
   const perId = new Map(rosa.map((g) => [g.id, g]))

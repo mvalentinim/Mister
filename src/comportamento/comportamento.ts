@@ -109,7 +109,7 @@ function verificaPromesse(db: Database, carriera: Carriera): void {
     const s = carriera.statistiche[promessa.giocatoreId]
     const presenzeNellaFinestra = (s?.presenze ?? 0) - promessa.presenzeAllaCreazione
     const richieste = promessa.tipo === 'titolarita' ? PRESENZE_TITOLARITA : PRESENZE_CENTRALITA
-    const g = giocatoriPerId(db, [promessa.giocatoreId])[0]
+    const g = giocatoriPerId(db, [promessa.giocatoreId], carriera)[0]
     const nome = g ? `${g.nome} ${g.cognome}` : 'Un giocatore'
 
     if (presenzeNellaFinestra >= richieste) {
@@ -133,7 +133,7 @@ function verificaPromesse(db: Database, carriera: Carriera): void {
 export function verificaPromesseFineStagione(db: Database, carriera: Carriera, promosso: boolean): void {
   for (const promessa of carriera.promesse) {
     if (promessa.stato !== 'attiva' || promessa.tipo !== 'progetto') continue
-    const g = giocatoriPerId(db, [promessa.giocatoreId])[0]
+    const g = giocatoriPerId(db, [promessa.giocatoreId], carriera)[0]
     const nome = g ? `${g.nome} ${g.cognome}` : 'Un giocatore'
     if (promosso) {
       promessa.stato = 'mantenuta'

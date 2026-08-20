@@ -164,10 +164,70 @@ export interface CronacaPartita {
   voti: Array<{ nome: string; ruolo: string; voto: number }>
 }
 
+// ── M8: coppa nazionale, fama completa, fiducia, esoneri ──────────────────
+
+/** Una partita di coppa (a eliminazione diretta). */
+export interface PartitaCoppa {
+  casaId: number
+  trasfertaId: number
+  golCasa: number | null
+  golTrasferta: number | null
+  /** vincitrice (dopo i rigori in caso di pareggio) */
+  vincitriceId: number | null
+}
+
+export interface TurnoCoppa {
+  nome: string // "Sedicesimi di finale", …, "Finale"
+  dopoGiornata: number // si gioca quando il campionato supera questa giornata
+  partite: PartitaCoppa[]
+}
+
+/** La coppa nazionale della stagione (32 squadre, eliminazione diretta). */
+export interface CoppaStagione {
+  turni: TurnoCoppa[]
+  prossimoTurno: number // indice del prossimo turno da giocare
+  vincitriceId: number | null
+}
+
+/** Una voce del registro spiegabile della fama (FRD §12: si vede il perché). */
+export interface EventoFama {
+  anno: number
+  descrizione: string
+  delta: number
+}
+
+/** Un trofeo vinto in carriera. */
+export interface Trofeo {
+  anno: number
+  nome: string
+}
+
+/** Offerte di panchina fuori dal flusso normale: dopo un esonero
+    (si sceglie subito una nuova squadra) o a fine stagione (club di
+    fascia superiore attirati dalla fama). */
+export interface OfferteSpeciali {
+  contesto: 'esonero' | 'fine-stagione'
+  offerte: Offerta[]
+}
+
 /** Lo stato completo di una carriera. */
 export interface Carriera {
   id: string
-  versioneSchema: 6 // per le migrazioni dei salvataggi (FRD §11)
+  versioneSchema: 7 // per le migrazioni dei salvataggi (FRD §11)
+  // ── M8: fama completa, fiducia, coppa, crescita ──
+  /** fiducia della dirigenza (0-100): sotto la soglia scatta l'esonero */
+  fiducia: number
+  /** crescita/declino accumulato dei giocatori (giocatoreId → delta attributi) */
+  crescita: Record<number, number>
+  /** la coppa nazionale della stagione (null nei salvataggi migrati a metà stagione) */
+  coppa: CoppaStagione | null
+  /** registro spiegabile delle variazioni di fama */
+  eventiFama: EventoFama[]
+  trofei: Trofeo[]
+  /** quante volte l'allenatore è stato esonerato */
+  esoneri: number
+  /** offerte in attesa di risposta (esonero o fine stagione); blocca il resto */
+  offerteSpeciali: OfferteSpeciali | null
   /** le ROSE della carriera: club → id dei giocatori. Fotografate alla
       creazione dal DB statico, poi mosse dai trasferimenti (M6). */
   rose: Record<number, number[]>

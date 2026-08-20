@@ -5,6 +5,7 @@
 
 import { useState } from 'react'
 import type { Database } from 'sql.js'
+import { applicaCrescita } from '../carriera/crescita.ts'
 import type { Carriera } from '../carriera/tipi.ts'
 import { salvaCarriera } from '../carriera/salvataggio.ts'
 import { interroga } from '../db/query.ts'
@@ -44,7 +45,7 @@ function Tattica({ db, carriera, onModificata }: Props) {
 
   // la rosa DI CARRIERA (M6): i trasferimenti la cambiano
   const idsRosa = carriera.rose?.[carriera.clubId]
-  const rosa = idsRosa
+  const rosa = applicaCrescita(carriera, idsRosa
     ? idsRosa.length > 0
       ? interroga<GiocatoreRiga>(
           db,
@@ -52,7 +53,7 @@ function Tattica({ db, carriera, onModificata }: Props) {
           idsRosa,
         )
       : []
-    : interroga<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE club_id = ?', [carriera.clubId])
+    : interroga<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE club_id = ?', [carriera.clubId]))
   const perId = new Map(rosa.map((g) => [g.id, g]))
   const titolareDelloSlot = (i: number) => perId.get(tattica.titolari[i])
 

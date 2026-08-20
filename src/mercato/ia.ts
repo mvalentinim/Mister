@@ -132,7 +132,7 @@ export function giornoDiMercato(db: Database, carriera: Carriera): void {
     for (const altro of venditori) {
       candidati.push(...analizzaRosa(db, carriera, altro.id).esuberi.filter((g) => REPARTO[g.ruolo] === reparto))
     }
-    const svincolatiReparto = giocatoriPerId(db, carriera.svincolati).filter((g) => REPARTO[g.ruolo] === reparto)
+    const svincolatiReparto = giocatoriPerId(db, carriera.svincolati, carriera).filter((g) => REPARTO[g.ruolo] === reparto)
     candidati.push(...svincolatiReparto)
 
     const acquistabili = candidati
@@ -224,7 +224,7 @@ export type Risposta =
 
 /** Il club valuta una proposta dell'utente per un suo giocatore. */
 export function valutaProposta(db: Database, carriera: Carriera, p: Proposta): Risposta {
-  const g = giocatoriPerId(db, [p.giocatoreId])[0]
+  const g = giocatoriPerId(db, [p.giocatoreId], carriera)[0]
   const clubId = clubDiGiocatore(carriera, p.giocatoreId)!
   const personalita = personalitaClub(clubId)
   const analisi = analizzaRosa(db, carriera, clubId)
@@ -268,7 +268,7 @@ export function valutaProposta(db: Database, carriera: Carriera, p: Proposta): R
   let valoreOfferta = p.prezzo + p.bonus * 0.5
   let contropartitaUtile = true
   if (p.contropartitaId) {
-    const contro = giocatoriPerId(db, [p.contropartitaId])[0]
+    const contro = giocatoriPerId(db, [p.contropartitaId], carriera)[0]
     const valoreContro = valoreInCarriera(carriera, contro)
     // la contropartita interessa solo se copre un reparto scoperto (o quasi)
     contropartitaUtile =
@@ -309,7 +309,7 @@ export function eseguiAcquisto(
   p: Proposta,
   contrattoNegoziato?: { stipendio: number; durataAnni: number },
 ): string | null {
-  const g = giocatoriPerId(db, [p.giocatoreId])[0]
+  const g = giocatoriPerId(db, [p.giocatoreId], carriera)[0]
   const venditoreId = clubDiGiocatore(carriera, p.giocatoreId)!
   const venditore = carriera.club.find((c) => c.id === venditoreId)!
   const vecchioContratto = carriera.contratti[p.giocatoreId]
@@ -327,7 +327,7 @@ export function eseguiAcquisto(
 
   let testoContropartita = ''
   if (p.contropartitaId) {
-    const contro = giocatoriPerId(db, [p.contropartitaId])[0]
+    const contro = giocatoriPerId(db, [p.contropartitaId], carriera)[0]
     spostaGiocatore(carriera, p.contropartitaId, venditoreId, {
       stipendio: carriera.contratti[p.contropartitaId]?.stipendio ?? 300_000,
       scadenza: carriera.anno + 3,
@@ -371,7 +371,7 @@ export function accettaOfferta(db: Database, carriera: Carriera, offertaId: numb
   const m = carriera.mercato
   const offerta = m.offerteRicevute.find((o) => o.id === offertaId)
   if (!offerta) return
-  const g = giocatoriPerId(db, [offerta.giocatoreId])[0]
+  const g = giocatoriPerId(db, [offerta.giocatoreId], carriera)[0]
   const compratore = carriera.club.find((c) => c.id === offerta.clubId)!
 
   if (offerta.tipo === 'acquisto') {
@@ -410,7 +410,7 @@ export function proponiCessione(
 ): string | null {
   const m = carriera.mercato
   if (!m.aperto) return 'Il mercato è chiuso.'
-  const g = giocatoriPerId(db, [giocatoreId])[0]
+  const g = giocatoriPerId(db, [giocatoreId], carriera)[0]
   const valore = valoreInCarriera(carriera, g)
   const rng = creaRng(semeDaStringa(`proposta-${carriera.seme}-${carriera.anno}-${m.giorniRimasti}-${giocatoreId}-${tipo}`))
 
@@ -478,7 +478,7 @@ export function ingaggiaSvincolato(
   giocatoreId: number,
   contratto?: { stipendio: number; durataAnni: number },
 ): string | null {
-  const g = giocatoriPerId(db, [giocatoreId])[0]
+  const g = giocatoriPerId(db, [giocatoreId], carriera)[0]
   const stipendio = contratto?.stipendio ?? stipendioAttesoSvincolato(carriera, g)
   if (monteStipendi(carriera) + stipendio > carriera.budget.stipendi) {
     return 'Monte stipendi insufficiente.'

@@ -318,3 +318,25 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Collaudo end-to-end**: 198 club e 5.563 contratti fotografati ✓; "Haaland" trovato al Manchester City ✓; filtro Premier League con Rodri/Mac Allister in testa per media ✓; rosa del Real Madrid trattabile (accordo tra club raggiunto con un club estero) ✓; classifica ancora a 20 squadre italiane dopo una giornata ✓. Build, lint, tsc e calibrazione verdi.
 
 **Prossima sessione proposta:** M8.
+
+---
+
+## Sessione 17 — 2026-08-20 — M8 (nucleo): fama completa, fiducia, esoneri, coppa, crescita giocatori
+
+**Obiettivo dichiarato:** il loop di carriera del FRD §4 — fama con soglie e fasce di offerte, fiducia della dirigenza con esoneri e subentri, valutazione obiettivi, coppa nazionale, crescita/declino dei giocatori.
+
+**Fatto:**
+- **Fama completa e spiegabile**: ogni variazione (vittorie di prestigio, obiettivi, promozioni, coppa, giovani valorizzati, esoneri, promesse tradite) finisce in un registro (`eventiFama`) mostrato nel riepilogo di fine stagione (FRD §12). Soglie che sbloccano fasce di offerte: 40 (medi di A), 55 (alti di A), 70 (top club).
+- **Fiducia della dirigenza** (0-100, visibile in intestazione): segue risultati e posizione rispetto all'obiettivo; sotto 5 scatta l'**esonero** con fama −10 e 2-3 offerte immediate dai club in difficoltà della stessa divisione — si sceglie e si riparte **in corsa** (subentro: rosa, budget, obiettivo e tattica del nuovo club; le promesse ai vecchi giocatori decadono).
+- **L'obiettivo si rinegozia a ogni stagione** dal rango del club nella divisione. Bug reale trovato dal collaudo: dopo una promozione l'obiettivo restava "promozione" anche in A → esonero ingiusto. Corretto.
+- **Offerte di fine stagione**: 0-3 club di fascia superiore (deterministiche), nel riepilogo con "Resta al club" sempre possibile.
+- **Coppa nazionale**: 32 squadre a eliminazione diretta, 5 turni intrecciati al campionato (dopo le giornate 5/10/15/20/25), rigori seminati, riquadro dedicato nella linguetta Partite, trofeo in bacheca e +6 fama. Semplificazione dichiarata: partite di coppa simulate (niente Match Day in coppa per ora).
+- **Crescita/declino dei giocatori** (richiesta esplicita confermata prima di M7): a fine stagione TUTTI i giocatori tracciati (~5-6.000) ricevono un delta da potenziale + età di gioco + utilizzo + prestazioni; il delta vive nella carriera (`crescita`) e si applica in lettura ovunque (motore, rosa, tattica, mercato, valore) — il DB statico non si tocca mai. Deterministico. Riepilogo dei movimenti della propria rosa a fine stagione.
+- Salvataggi a **versioneSchema 7** (migrazione automatica); cache delle squadre motore invalidata per stagione (la crescita cambia gli attributi).
+- **Taratura**: prima stesura della fiducia troppo severa (3 esoneri in 3 stagioni nel collaudo) → penalità sconfitta ridotte, premi vittoria alzati, fiducia iniziale 60 → 1 esonero (meritato: Sampdoria 17ª con obiettivo promozione) su 3 stagioni.
+- **Collaudo end-to-end del DoD**: 3+ stagioni consecutive partendo dalla B ✓; promozione con fama in crescita (Monza 2°, fama 20→33, in un run) ✓; fallimento clamoroso → esonero e subentro in corsa ✓; crescita registrata per ~4.800 giocatori ✓; coppa giocata ogni stagione ✓; con fama alta (75) le offerte di fine stagione arrivano da Milan e Fiorentina (fasce sbloccate) ✓; offerta accettata e cambio panchina a fine stagione ✓. Build, lint, tsc, calibrazione e test tattiche tutti verdi.
+- Decisioni e tabelle in `docs/fama-e-crescita.md`.
+
+**DoD di M8 (parte nucleo):** 3+ stagioni con offerte migliori e fasce sbloccate ✅ (collaudo automatico); esonero su fallimento ✅. Verifica di persona dello sviluppatore in sospeso come sempre.
+
+**Resta per chiudere M8** (prossima sessione): competizioni continentali semplificate e panchine delle nazionali oltre soglia di fama (ciclo qualificazioni/torneo).

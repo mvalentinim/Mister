@@ -77,6 +77,18 @@ function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: nu
     // dai club senza il campo `nazioneId`.
     caricato.versioneSchema = 6
   }
+  if (caricato.versioneSchema === 6) {
+    // v6 → v7 (M8): fiducia, crescita giocatori, coppa, trofei, esoneri.
+    // La coppa resta null per la stagione in corso (parte dalla prossima).
+    salvataggio.fiducia = 55
+    salvataggio.crescita = {}
+    salvataggio.coppa = null
+    salvataggio.eventiFama = []
+    salvataggio.trofei = []
+    salvataggio.esoneri = 0
+    salvataggio.offerteSpeciali = null
+    caricato.versioneSchema = 7
+  }
   return salvataggio
 }
 

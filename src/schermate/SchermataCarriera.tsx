@@ -12,8 +12,11 @@ import { interroga } from '../db/query.ts'
 import type { GiocatoreRiga } from '../db/tipi.ts'
 import { salvaCarriera } from '../carriera/salvataggio.ts'
 import {
-  DESCRIZIONE_OBIETTIVO, etichettaStagione, type Carriera, type CronacaPartita, type Partita,
+  DESCRIZIONE_OBIETTIVO, etichettaStagione, type Carriera, type CronacaPartita,
+  type Offerta, type Partita,
 } from '../carriera/tipi.ts'
+import { accettaOffertaPanchina } from '../carriera/fama.ts'
+import { euro } from '../mercato/valore.ts'
 import type { EventoPartita } from '../motore/tipi.ts'
 import { estendiMercatoAlMondo, inizializzaMercato } from '../mercato/stato.ts'
 import MatchDay from './MatchDay.tsx'
@@ -134,8 +137,9 @@ function SchermataCarriera({ db, carriera }: Props) {
   async function gioca(fineStagione: boolean) {
     do {
       avanzaGiornata(db, carriera)
-      // la corsa si ferma se si apre il mercato invernale (M6)
-    } while (fineStagione && !stagioneFinita(carriera) && !carriera.mercato.aperto)
+      // la corsa si ferma se si apre il mercato invernale (M6) o se
+      // scatta un esonero (M8): c'è una decisione da prendere
+    } while (fineStagione && !stagioneFinita(carriera) && !carriera.mercato.aperto && !carriera.offerteSpeciali)
     await salvaCarriera(carriera)
     setVersione((v) => v + 1)
   }
@@ -143,6 +147,22 @@ function SchermataCarriera({ db, carriera }: Props) {
   async function concludiStagione() {
     setEsitoStagione(chiudiStagione(db, carriera))
     await salvaCarriera(carriera)
+  }
+
+  // ── M8: accettare una panchina nuova (dopo esonero o a fine stagione) ──
+  async function accettaOfferta(offerta: Offerta) {
+    accettaOffertaPanchina(db, carriera, offerta)
+    await salvaCarriera(carriera)
+    setVersione((v) => v + 1)
+  }
+
+  /** "Resta al club": chiude il riepilogo scartando le offerte ricevute. */
+  async function restaEIniziaStagione() {
+    if (carriera.offerteSpeciali?.contesto === 'fine-stagione') {
+      carriera.offerteSpeciali = null
+      await salvaCarriera(carriera)
+    }
+    setEsitoStagione(null)
   }
 
   // ── Match Day in corso: la vista partita prende tutto lo schermo ──
@@ -164,8 +184,36 @@ function SchermataCarriera({ db, carriera }: Props) {
     )
   }
 
+  // ── ESONERO (M8): la decisione blocca tutto il resto ──
+  if (carriera.offerteSpeciali?.contesto === 'esonero') {
+    return (
+      <section className="schermata">
+        <h2>⚡ Esonerato</h2>
+        <div className="riquadro-esito">
+          <p>
+            La dirigenza ha perso la pazienza: sei stato sollevato dall'incarico.
+            La fama accusa il colpo (ora {carriera.famaAllenatore}), ma il telefono
+            squilla già: questi club vogliono la svolta.
+          </p>
+        </div>
+        <div className="menu">
+          {carriera.offerteSpeciali.offerte.map((o) => (
+            <button key={o.clubId} className="voce-menu" onClick={() => void accettaOfferta(o)}>
+              <span className="voce-etichetta">{o.clubNome}</span>
+              <span className="nota">
+                obiettivo {DESCRIZIONE_OBIETTIVO[o.obiettivo]} · budget mercato {euro(o.budgetMercato)}
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
   // ── Riepilogo di fine stagione (dopo chiudiStagione) ──
   if (esitoStagione) {
+    const offerte = carriera.offerteSpeciali?.contesto === 'fine-stagione'
+      ? carriera.offerteSpeciali.offerte : []
     return (
       <section className="schermata">
         <h2>Stagione {etichettaStagione(carriera.anno - 1)} conclusa!</h2>
@@ -180,9 +228,59 @@ function SchermataCarriera({ db, carriera }: Props) {
           </p>
           {esitoStagione.promosso && <p>🎉 <strong>PROMOZIONE!</strong> Si sale di categoria.</p>}
           {esitoStagione.retrocesso && <p>😞 <strong>Retrocessione.</strong> Si riparte dal basso.</p>}
+          {esitoStagione.coppaVinta && <p>🏆 <strong>COPPA NAZIONALE VINTA!</strong> Un trofeo in bacheca.</p>}
         </div>
-        <button className="bottone-primario" onClick={() => setEsitoStagione(null)}>
-          Inizia la stagione {etichettaStagione(carriera.anno)} →
+
+        {/* il bilancio spiegabile della fama (M8, FRD §12) */}
+        {esitoStagione.eventiFama.length > 0 && (
+          <div className="riquadro-esito">
+            <h3>La tua fama ora: {esitoStagione.famaDopo}</h3>
+            <p className="nota">Gli episodi che l'hanno mossa in stagione:</p>
+            <ul>
+              {esitoStagione.eventiFama.map((e, i) => (
+                <li key={i}>{e.delta > 0 ? '➕' : '➖'} {e.descrizione} ({e.delta > 0 ? '+' : ''}{e.delta})</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* crescita e declino della rosa (M8) */}
+        {esitoStagione.crescita.length > 0 && (
+          <div className="riquadro-esito">
+            <h3>📈 La rosa cresce (e invecchia)</h3>
+            <p className="nota">Potenziale, età, utilizzo e prestazioni muovono gli attributi a fine stagione.</p>
+            <ul>
+              {esitoStagione.crescita.slice(0, 5).map((n) => (
+                <li key={n.giocatoreId}>📈 <strong>{n.nome}</strong> +{n.delta} (media {n.nuovaMedia})</li>
+              ))}
+              {esitoStagione.crescita.filter((n) => n.delta < 0).slice(-3).map((n) => (
+                <li key={n.giocatoreId}>📉 {n.nome} {n.delta} (media {n.nuovaMedia})</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* le offerte di fascia superiore sbloccate dalla fama (M8, FRD §4.3) */}
+        {offerte.length > 0 && (
+          <div className="riquadro-esito">
+            <h3>📞 Ti cercano</h3>
+            <p className="nota">La tua fama ({carriera.famaAllenatore}) apre porte nuove. Decidi prima della nuova stagione.</p>
+            <div className="menu">
+              {offerte.map((o) => (
+                <button key={o.clubId} className="voce-menu"
+                  onClick={() => { void accettaOfferta(o); setEsitoStagione(null) }}>
+                  <span className="voce-etichetta">{o.clubNome}</span>
+                  <span className="nota">
+                    obiettivo {DESCRIZIONE_OBIETTIVO[o.obiettivo]} · budget mercato {euro(o.budgetMercato)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <button className="bottone-primario" onClick={() => void restaEIniziaStagione()}>
+          {offerte.length > 0 ? `Resta al ${nomeClub} — ` : ''}Inizia la stagione {etichettaStagione(carriera.anno)} →
         </button>
       </section>
     )
@@ -198,7 +296,9 @@ function SchermataCarriera({ db, carriera }: Props) {
     <section className="schermata">
       <h2>{nomeClub} — {nomeCompetizione} {etichettaStagione(carriera.anno)}</h2>
       <p className="nota">
-        Allenatore: {carriera.allenatore.nome} (fama {carriera.famaAllenatore ?? 20}) ·
+        Allenatore: {carriera.allenatore.nome} (fama {carriera.famaAllenatore ?? 20}
+        {' '}· fiducia {carriera.fiducia ?? 55})
+        {carriera.trofei && carriera.trofei.length > 0 && <> · 🏆 {carriera.trofei.length}</>} ·
         obiettivo: {DESCRIZIONE_OBIETTIVO[carriera.obiettivo]} ·
         giornata {Math.min(carriera.giornata + 1, carriera.calendario.length)} di {carriera.calendario.length}
         {' '}· salvataggio automatico attivo
@@ -248,6 +348,63 @@ function SchermataCarriera({ db, carriera }: Props) {
               </button>
             </div>
           )}
+
+          {/* offerte di fine stagione ancora sul tavolo (es. dopo un ricaricamento) */}
+          {carriera.offerteSpeciali?.contesto === 'fine-stagione' && (
+            <div className="riquadro-esito">
+              <h3>📞 Ti cercano</h3>
+              <div className="menu">
+                {carriera.offerteSpeciali.offerte.map((o) => (
+                  <button key={o.clubId} className="voce-menu" onClick={() => void accettaOfferta(o)}>
+                    <span className="voce-etichetta">{o.clubNome}</span>
+                    <span className="nota">obiettivo {DESCRIZIONE_OBIETTIVO[o.obiettivo]} · budget mercato {euro(o.budgetMercato)}</span>
+                  </button>
+                ))}
+              </div>
+              <button className="bottone-secondario" onClick={() => void restaEIniziaStagione()}>
+                Resta al {nomeClub}
+              </button>
+            </div>
+          )}
+
+          {/* la coppa nazionale (M8): l'ultimo turno giocato e il prossimo */}
+          {carriera.coppa && (() => {
+            const coppa = carriera.coppa
+            const ultimoGiocato = [...coppa.turni].reverse()
+              .find((t) => t.partite.some((p) => p.golCasa !== null))
+            const miaUltima = ultimoGiocato?.partite.find(
+              (p) => p.casaId === carriera.clubId || p.trasfertaId === carriera.clubId)
+            const inCorsa = coppa.vincitriceId === null
+              ? !miaUltima || miaUltima.vincitriceId === carriera.clubId
+              : coppa.vincitriceId === carriera.clubId
+            const prossimoTurno = coppa.turni[coppa.prossimoTurno]
+            return (
+              <div className="riquadro-coppa">
+                <h3>🏆 Coppa nazionale</h3>
+                {coppa.vincitriceId !== null ? (
+                  <p>{coppa.vincitriceId === carriera.clubId
+                    ? <strong>COPPA VINTA! 🎉</strong>
+                    : <>Vinta dal {nomeDi(coppa.vincitriceId)}.</>}</p>
+                ) : (
+                  <>
+                    {miaUltima && ultimoGiocato && (
+                      <p>
+                        {ultimoGiocato.nome}: {nomeDi(miaUltima.casaId)} {miaUltima.golCasa}-{miaUltima.golTrasferta} {nomeDi(miaUltima.trasfertaId)}
+                        {miaUltima.golCasa === miaUltima.golTrasferta ? ' (rigori)' : ''} —{' '}
+                        {miaUltima.vincitriceId === carriera.clubId ? 'passiamo il turno! ✅' : 'eliminati ❌'}
+                      </p>
+                    )}
+                    {inCorsa && prossimoTurno && (
+                      <p className="nota">
+                        {prossimoTurno.nome}: si gioca dopo la giornata {prossimoTurno.dopoGiornata}.
+                      </p>
+                    )}
+                    {!inCorsa && <p className="nota">Il cammino in coppa è finito per quest'anno.</p>}
+                  </>
+                )}
+              </div>
+            )
+          })()}
 
           {/* lo spogliatoio: le reazioni dei giocatori (M7, FRD §7) */}
           {carriera.messaggi && carriera.messaggi.length > 0 && (
@@ -339,6 +496,7 @@ function SchermataCarriera({ db, carriera }: Props) {
           db={db}
           squadra={{ tipo: 'club', id: carriera.clubId }}
           giocatoriIds={carriera.rose?.[carriera.clubId]}
+          crescita={carriera.crescita}
           onApriGiocatore={() => {}}
         />
       )}

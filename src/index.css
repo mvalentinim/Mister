@@ -763,6 +763,19 @@ body {
   white-space: nowrap;
 }
 
+/* il riquadro della coppa nazionale (M8) */
+.riquadro-coppa {
+  border: 1px solid var(--bordo);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0;
+  background: var(--superficie);
+}
+
+.riquadro-coppa h3 {
+  margin: 0 0 0.4rem;
+}
+
 .campo-numero {
   width: 4.2rem;
   padding: 0.45rem 0.5rem;

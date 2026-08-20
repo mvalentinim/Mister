@@ -212,7 +212,7 @@ function Mercato({ db, carriera, onModificata }: Props) {
   }
 
   const RUOLI = ['POR', 'DC', 'TD', 'TS', 'MED', 'CC', 'TRQ', 'ED', 'ES', 'PC']
-  const svincolati = giocatoriPerId(db, carriera.svincolati)
+  const svincolati = giocatoriPerId(db, carriera.svincolati, carriera)
     .sort((a, b) => mediaComplessiva(b) - mediaComplessiva(a))
     .slice(0, 15)
 
@@ -255,7 +255,7 @@ function Mercato({ db, carriera, onModificata }: Props) {
           <table className="tabella">
             <tbody>
               {m.offerteRicevute.map((o) => {
-                const g = giocatoriPerId(db, [o.giocatoreId])[0]
+                const g = giocatoriPerId(db, [o.giocatoreId], carriera)[0]
                 const club = carriera.club.find((c) => c.id === o.clubId)
                 return (
                   <tr key={o.id}>

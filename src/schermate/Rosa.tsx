@@ -4,6 +4,7 @@
 
 import { useState } from 'react'
 import type { Database } from 'sql.js'
+import { applicaDelta } from '../carriera/crescita.ts'
 import { interroga, interrogaUna } from '../db/database.ts'
 import { calcolaEta, mediaComplessiva, type GiocatoreRiga } from '../db/tipi.ts'
 
@@ -12,6 +13,8 @@ interface Props {
   squadra: { tipo: 'club' | 'nazionale'; id: number }
   /** rosa di carriera (M6): se presente, sostituisce quella del DB statico */
   giocatoriIds?: number[]
+  /** crescita/declino di carriera (M8): applicata agli attributi in lettura */
+  crescita?: Record<number, number>
   onApriGiocatore: (giocatoreId: number) => void
 }
 
@@ -31,7 +34,7 @@ type ChiaveColonna = (typeof COLONNE)[number]['chiave']
 // Ordine "naturale" dei ruoli nelle rose: portieri, difesa, centrocampo, attacco
 const ORDINE_RUOLI = ['POR', 'DC', 'TD', 'TS', 'MED', 'CC', 'TRQ', 'ED', 'ES', 'PC']
 
-function Rosa({ db, squadra, giocatoriIds, onApriGiocatore }: Props) {
+function Rosa({ db, squadra, giocatoriIds, crescita, onApriGiocatore }: Props) {
   const [colonnaOrdine, setColonnaOrdine] = useState<ChiaveColonna>('ruolo')
   const [discendente, setDiscendente] = useState(false)
 
@@ -41,7 +44,7 @@ function Rosa({ db, squadra, giocatoriIds, onApriGiocatore }: Props) {
     squadra.tipo === 'club'
       ? interrogaUna<{ nome: string }>(db, 'SELECT nome FROM club WHERE id = ?', [squadra.id])?.nome
       : interrogaUna<{ nome: string }>(db, 'SELECT nome FROM nazionale WHERE id = ?', [squadra.id])?.nome
-  const giocatori =
+  const giocatori = applicaDelta(crescita,
     giocatoriIds
       ? giocatoriIds.length > 0
         ? interroga<GiocatoreRiga>(
@@ -58,7 +61,7 @@ function Rosa({ db, squadra, giocatoriIds, onApriGiocatore }: Props) {
            JOIN convocazione cv ON cv.giocatore_id = g.id
            WHERE cv.nazionale_id = ?`,
           [squadra.id],
-        )
+        ))
 
   // Ordina la copia dell'elenco secondo la colonna scelta
   const colonna = COLONNE.find((c) => c.chiave === colonnaOrdine)!

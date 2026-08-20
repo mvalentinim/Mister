@@ -8,6 +8,7 @@ import { interroga } from '../db/query.ts'
 import { mediaComplessiva, type GiocatoreRiga } from '../db/tipi.ts'
 import type { Carriera, ContrattoCarriera, Notizia } from '../carriera/tipi.ts'
 import { valoreMercato, euro } from './valore.ts'
+import { applicaCrescita } from '../carriera/crescita.ts'
 
 export const GIORNI_FINESTRA_ESTIVA = 8
 export const GIORNI_FINESTRA_INVERNALE = 5
@@ -16,23 +17,24 @@ export const GIORNI_FINESTRA_INVERNALE = 5
 
 /** La rosa DI CARRIERA di un club (non quella del DB statico!). */
 export function rosaClub(db: Database, carriera: Carriera, clubId: number): GiocatoreRiga[] {
-  const ids = carriera.rose[clubId] ?? []
-  if (ids.length === 0) return []
-  return interroga<GiocatoreRiga>(
-    db,
-    `SELECT * FROM giocatore WHERE id IN (${ids.map(() => '?').join(',')})`,
-    ids,
-  )
+  // la crescita/declino di carriera (M8) si applica in lettura
+  return applicaCrescita(carriera, giocatoriPerId(db, carriera.rose[clubId] ?? []))
 }
 
-/** Le righe di un elenco di giocatori. */
-export function giocatoriPerId(db: Database, ids: number[]): GiocatoreRiga[] {
+/** Le righe di un elenco di giocatori (a blocchi: SQLite accetta al massimo
+    999 segnaposto). Se si passa la carriera, applica la crescita (M8). */
+export function giocatoriPerId(db: Database, ids: number[], carriera?: Carriera): GiocatoreRiga[] {
   if (ids.length === 0) return []
-  return interroga<GiocatoreRiga>(
-    db,
-    `SELECT * FROM giocatore WHERE id IN (${ids.map(() => '?').join(',')})`,
-    ids,
-  )
+  const righe: GiocatoreRiga[] = []
+  for (let i = 0; i < ids.length; i += 500) {
+    const blocco = ids.slice(i, i + 500)
+    righe.push(...interroga<GiocatoreRiga>(
+      db,
+      `SELECT * FROM giocatore WHERE id IN (${blocco.map(() => '?').join(',')})`,
+      blocco,
+    ))
+  }
+  return carriera ? applicaCrescita(carriera, righe) : righe
 }
 
 /** In quale club gioca (in questa carriera) un giocatore? null = svincolato. */

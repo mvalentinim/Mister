@@ -16,6 +16,9 @@ import type { Database } from 'sql.js'
 import { interroga } from '../db/query.ts'
 import { preparaSquadra, tatticaDefault } from '../motore/preparazione.ts'
 import { estendiMercatoAlMondo, fineStagioneMercato, inizializzaMercato, aggiungiNotizia } from '../mercato/stato.ts'
+import { creaCoppa, giocaTurnoCoppaSeDovuto } from './coppa.ts'
+import { aggiornaFiducia, controllaEsonero, famaFineStagione, obiettivoDelClub, offerteFineStagione } from './fama.ts'
+import { crescitaFineStagione, type NotaCrescita } from './crescita.ts'
 import { GIORNI_FINESTRA_INVERNALE } from '../mercato/stato.ts'
 import { aggiornaComportamento, verificaPromesseFineStagione } from '../comportamento/comportamento.ts'
 import { simulaPartitaMotore } from '../motore/partita.ts'
@@ -32,11 +35,11 @@ import type {
 // può cambiare in ogni momento.
 const cacheSquadre = new Map<number, { chiave: string; squadra: SquadraMotore }>()
 
-function squadraMotore(db: Database, carriera: Carriera, clubId: number): SquadraMotore {
+export function squadraMotore(db: Database, carriera: Carriera, clubId: number): SquadraMotore {
   const club = carriera.club.find((c) => c.id === clubId)!
   const ids = carriera.rose?.[clubId]
   if (clubId === carriera.clubId) {
-    const squadra = preparaSquadra(db, clubId, club.nome, carriera.tattica, ids)
+    const squadra = preparaSquadra(db, clubId, club.nome, carriera.tattica, ids, carriera.crescita)
     // il MORALE della rosa dell'utente diventa la "forma" nel motore (M7,
     // FRD §7: effetti sul rendimento — oggi pesa sui voti, domani di più)
     for (const g of [...squadra.titolari, ...squadra.panchina]) {
@@ -44,10 +47,12 @@ function squadraMotore(db: Database, carriera: Carriera, clubId: number): Squadr
     }
     return squadra
   }
-  const chiave = ids ? ids.join(',') : 'statico'
+  // l'anno entra nella chiave: la crescita dei giocatori (M8) cambia a ogni
+  // stagione e la squadra in cache va ricostruita coi nuovi attributi
+  const chiave = `${carriera.anno}:${ids ? ids.join(',') : 'statico'}`
   const inCache = cacheSquadre.get(clubId)
   if (inCache && inCache.chiave === chiave) return inCache.squadra
-  const squadra = preparaSquadra(db, clubId, club.nome, undefined, ids)
+  const squadra = preparaSquadra(db, clubId, club.nome, undefined, ids, carriera.crescita)
   cacheSquadre.set(clubId, { chiave, squadra })
   return squadra
 }
@@ -160,7 +165,15 @@ export function creaCarriera(
   )
   const carriera: Carriera = {
     id: `carriera-${Date.now()}`,
-    versioneSchema: 6,
+    versioneSchema: 7,
+    // ── M8: fama completa, fiducia, coppa, crescita ──
+    fiducia: 60,
+    crescita: {},
+    coppa: null, // creata subito sotto, dopo la fotografia dei club
+    eventiFama: [],
+    trofei: [],
+    esoneri: 0,
+    offerteSpeciali: null,
     morale: {},
     statistiche: {},
     promesse: [],
@@ -203,6 +216,7 @@ export function creaCarriera(
   estendiMercatoAlMondo(db, carriera)
   carriera.budget.mercato = offerta.budgetMercato
   carriera.budget.stipendi = Math.max(carriera.budget.stipendi, offerta.budgetStipendi)
+  carriera.coppa = creaCoppa(carriera) // la coppa nazionale (M8)
   return carriera
 }
 
@@ -215,7 +229,7 @@ export function livelloUtente(carriera: Carriera): 1 | 2 {
     Da quando il mercato è mondiale `carriera.club` contiene TUTTI i club:
     classifica, promozioni e calendario devono restare nella nazione.
     (Il confronto con undefined copre i salvataggi non ancora estesi.) */
-function clubNazione(carriera: Carriera) {
+export function clubNazione(carriera: Carriera) {
   return carriera.club.filter(
     (c) => c.nazioneId === undefined || c.nazioneId === carriera.nazione.id,
   )
@@ -265,6 +279,12 @@ export function avanzaGiornata(
 
   // statistiche, morale, promesse e spogliatoio (M7, FRD §7)
   aggiornaComportamento(db, carriera)
+
+  // fiducia della dirigenza, coppa nazionale ed eventuale esonero (M8)
+  const classificaOggi = calcolaClassifica(carriera)
+  aggiornaFiducia(carriera, classificaOggi)
+  giocaTurnoCoppaSeDovuto(db, carriera)
+  controllaEsonero(carriera, classificaOggi)
 
   // a metà campionato si apre la finestra invernale (M6, FRD §6.1)
   if (carriera.giornata === Math.floor(carriera.calendario.length / 2)) {
@@ -385,6 +405,12 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
     retrocesso,
   })
 
+  // ── M8: bilancio di fama e crescita dei giocatori ──
+  // Entrambi PRIMA dell'azzeramento delle statistiche (che li alimentano).
+  const famaPrima = carriera.famaAllenatore
+  famaFineStagione(db, carriera, { posizione, obiettivoRaggiunto, promosso, retrocesso })
+  const crescita = crescitaFineStagione(db, carriera)
+
   // le promesse "di progetto" si verificano coi verdetti (M7, FRD §6.3)
   verificaPromesseFineStagione(db, carriera, promosso)
 
@@ -392,12 +418,30 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
   carriera.anno++
   carriera.giornata = 0
   carriera.cronaca = null
+  carriera.fiducia = Math.max(carriera.fiducia, 55) // la dirigenza riparte fiduciosa
   // prestiti, scadenze, svincoli e riapertura del mercato estivo (M6)
   fineStagioneMercato(db, carriera)
   const nuovoLivello = livelloUtente(carriera) // ricalcolato dopo i movimenti
   carriera.calendario = generaCalendario(
     clubNazione(carriera).filter((c) => c.livello === nuovoLivello).map((c) => c.id),
   )
+  carriera.coppa = creaCoppa(carriera) // nuovo tabellone di coppa (M8)
 
-  return { posizione, totale, obiettivoRaggiunto, promosso, retrocesso }
+  // l'obiettivo si rinegozia a ogni stagione (M8): un club appena promosso
+  // chiede la salvezza, non un'altra promozione
+  carriera.obiettivo = obiettivoDelClub(carriera, carriera.club.find((c) => c.id === carriera.clubId)!)
+
+  // le offerte di fascia superiore, sbloccate dalla fama (FRD §4.3)
+  const offerte = offerteFineStagione(carriera)
+  if (offerte.length > 0) carriera.offerteSpeciali = { contesto: 'fine-stagione', offerte }
+
+  // gli eventi di fama della stagione appena chiusa, per il riepilogo
+  const eventiFama = carriera.eventiFama.filter((e) => e.anno === carriera.anno - 1)
+
+  return {
+    posizione, totale, obiettivoRaggiunto, promosso, retrocesso,
+    eventiFama, famaPrima, famaDopo: carriera.famaAllenatore,
+    crescita: crescita as NotaCrescita[],
+    coppaVinta: carriera.trofei.some((t) => t.anno === carriera.anno - 1),
+  }
 }
