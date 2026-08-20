@@ -21,7 +21,8 @@ type Vista =
   | { tipo: 'menu' }
   | { tipo: 'squadre' }
   | { tipo: 'rosa'; squadra: Squadra }
-  | { tipo: 'giocatore'; giocatoreId: number; squadra: Squadra }
+  // squadra assente = scheda aperta dall'elenco leggende (che non hanno club)
+  | { tipo: 'giocatore'; giocatoreId: number; squadra?: Squadra }
 
 // Voci del menu non ancora attive, con la milestone in cui arriveranno
 const VOCI_FUTURE = [
@@ -112,10 +113,10 @@ function App() {
         <button className="bottone-indietro" onClick={() => setVista({ tipo: 'squadre' })}>
           Squadre
         </button>
-        {(vista.tipo === 'rosa' || vista.tipo === 'giocatore') && (
+        {(vista.tipo === 'rosa' || (vista.tipo === 'giocatore' && vista.squadra)) && (
           <button
             className="bottone-indietro"
-            onClick={() => setVista({ tipo: 'rosa', squadra: vista.squadra })}
+            onClick={() => setVista({ tipo: 'rosa', squadra: vista.squadra! })}
           >
             Rosa
           </button>
@@ -123,7 +124,11 @@ function App() {
       </header>
 
       {vista.tipo === 'squadre' && (
-        <ElencoSquadre db={db} onApriRosa={(squadra) => setVista({ tipo: 'rosa', squadra })} />
+        <ElencoSquadre
+          db={db}
+          onApriRosa={(squadra) => setVista({ tipo: 'rosa', squadra })}
+          onApriGiocatore={(giocatoreId) => setVista({ tipo: 'giocatore', giocatoreId })}
+        />
       )}
       {vista.tipo === 'rosa' && (
         <Rosa

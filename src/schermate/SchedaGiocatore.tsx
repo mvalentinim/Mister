@@ -67,7 +67,12 @@ function SchedaGiocatore({ db, giocatoreId }: Props) {
       <h2>{g.nome} {g.cognome}</h2>
       <p className="riga-info">
         <span className="etichetta-ruolo">{g.ruolo}</span>
-        {' '}· {nomeClub ?? 'Svincolato'} · {calcolaEta(g.data_nascita)} anni · {g.nazionalita} ·
+        {/* Badge per le leggende (tag categoria: icon/hero) */}
+        {g.categoria !== 'normale' && (
+          <>{' '}<span className="etichetta-leggenda">{g.categoria === 'icon' ? '★ ICON' : '⚡ HERO'}</span></>
+        )}
+        {' '}· {nomeClub ?? (g.categoria === 'normale' ? 'Svincolato' : 'Leggenda')} ·{' '}
+        {calcolaEta(g.data_nascita)} anni · {g.nazionalita} ·
         piede {g.piede} · <strong>media {mediaComplessiva(g)}</strong> · potenziale {g.potenziale}
         {nazionale && <> · 🏆 nazionale: {nazionale.nome}</>}
       </p>

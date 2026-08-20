@@ -37,6 +37,7 @@ export interface GiocatoreRiga {
   nazionalita: string
   ruolo: string
   piede: string
+  categoria: 'normale' | 'icon' | 'hero'
   // tecnici (null per i portieri)
   velocita: number | null
   resistenza: number | null

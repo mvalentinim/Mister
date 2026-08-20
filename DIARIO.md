@@ -105,3 +105,19 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - Verificato nel browser: rose attuali (es. Palermo con Pohjanpalo e Palumbo).
 
 **Prossima sessione proposta:** M2 — Carriera minima giocabile.
+
+---
+
+## Sessione 6 — 2026-08-20 — Verifica file Icons/Heroes + tag categoria
+
+**Obiettivo dichiarato:** verificare il file `Icons and Heroes Unlock.rar` caricato su main e predisporre l'integrazione delle leggende con un tag dedicato nel database.
+
+**Verifica:** il RAR contiene `SquadsBaseIconsHeroes`, uno **squad file binario del gioco** (formato proprietario EA "FBCHUNKS", compresso): serve a sbloccare le leggende dentro FC 26, non è un export di dati → **non importabile**. Verificato anche che il CSV FC 26 non contiene Icons/Heroes (i nomi trovati erano omonimi, es. Luca Zidane).
+
+**Fatto (predisposizione completa, collaudata):**
+- **Tag `categoria`** su giocatore: `normale` | `icon` | `hero` con vincolo CHECK — richiesto per le regole future di inclusione/esclusione delle leggende dalle rose.
+- **Canale di import `data/leggende/*.json`** con formato documentato (README nella cartella), ID da 900000 in su; collaudato end-to-end con un file di prova poi rimosso.
+- **UI**: sezione "Leggende" nell'elenco squadre (visibile solo se presenti) e badge ★ICON/⚡HERO nella scheda giocatore.
+- `docs/dati.md` aggiornata con la verifica e la fonte candidata per i dati veri: dataset Kaggle "Complete EA FC26 Rating Cards Database" (da scaricare come fatto per FC 26).
+
+**Prossima sessione proposta:** M2 — Carriera minima giocabile (oppure conversione leggende se lo sviluppatore carica il dataset delle carte).

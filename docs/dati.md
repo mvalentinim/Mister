@@ -133,6 +133,30 @@ editor. Attenzione ai nomi EA aggiornati: "Türkiye", "Czechia", "Cabo Verde"
   Murphy, nati lo stesso giorno — persone diverse
 - Database: `public/mister.sqlite`
 
+## Icons e Heroes (giocatori leggenda) — verifica del file caricato
+
+Lo sviluppatore ha caricato su GitHub `Icons and Heroes Unlock.rar` (sessione 6).
+Verifica: contiene `SquadsBaseIconsHeroes`, uno **squad file binario del gioco**
+(formato proprietario EA "FBCHUNKS", compresso). Serve a sbloccare le leggende
+*dentro* FC 26, ma **non è un export di dati leggibile**: non importabile.
+Il file resta su `main` ma non viene usato dalla pipeline.
+
+Cosa è stato predisposto in attesa della fonte giusta:
+- **tag `categoria`** sulla tabella giocatore: `normale` | `icon` | `hero`
+  (con vincolo CHECK). Richiesto dalle regole di gioco future: ogni carriera
+  potrà includere o escludere le leggende dalle rose.
+- **canale di import** `data/leggende/*.json` (formato documentato in
+  `data/leggende/README.md`), letto da `npm run importa-dati`; ID assegnati
+  da 900000 in su per non collidere con i player_id di EA. Collaudato.
+- **interfaccia**: sezione "Leggende" nell'elenco squadre e badge ★ICON/⚡HERO
+  nella scheda giocatore.
+
+**Fonte candidata per i dati veri**: il dataset Kaggle
+["Complete EA FC26 Rating Cards Database"](https://www.kaggle.com/datasets/flynn28/complete-ea-fc26-rating-cards-database)
+(carte FUT, che includono Icons e Heroes con attributi). Da scaricare e caricare
+nel repository come fatto per il dataset FC 26: uno script di conversione
+genererà i JSON del canale leggende.
+
 ## Stato
 
 - [x] Valutazione preliminare delle fonti

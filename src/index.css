@@ -247,6 +247,17 @@ body {
   font-size: 0.85rem;
 }
 
+/* Badge dorato per Icons e Heroes */
+.etichetta-leggenda {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  background: #b8860b;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
 .griglia-attributi {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));

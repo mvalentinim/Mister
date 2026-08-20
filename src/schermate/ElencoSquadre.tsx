@@ -9,9 +9,10 @@ import type { ClubRiga, NazionaleRiga } from '../db/tipi.ts'
 interface Props {
   db: Database
   onApriRosa: (squadra: { tipo: 'club' | 'nazionale'; id: number }) => void
+  onApriGiocatore: (giocatoreId: number) => void
 }
 
-function ElencoSquadre({ db, onApriRosa }: Props) {
+function ElencoSquadre({ db, onApriRosa, onApriGiocatore }: Props) {
   // Club con nazione e competizione (JOIN) e conteggio giocatori
   const club = interroga<ClubRiga & { gruppo: string }>(
     db,
@@ -31,6 +32,14 @@ function ElencoSquadre({ db, onApriRosa }: Props) {
             (SELECT COUNT(*) FROM convocazione cv WHERE cv.nazionale_id = n.id) AS numero_giocatori
      FROM nazionale n
      ORDER BY n.mondiale_2026 DESC, n.fama DESC`,
+  )
+
+  // Le leggende (Icons/Heroes) non appartengono a un club: elenco dedicato
+  const leggende = interroga<{ id: number; nome: string; cognome: string; categoria: string; ruolo: string; nazionalita: string }>(
+    db,
+    `SELECT id, nome, cognome, categoria, ruolo, nazionalita
+     FROM giocatore WHERE categoria != 'normale'
+     ORDER BY categoria, cognome`,
   )
 
   // Gruppi distinti mantenendo l'ordine della query
@@ -99,6 +108,33 @@ function ElencoSquadre({ db, onApriRosa }: Props) {
           ))}
         </tbody>
       </table>
+
+      {/* Sezione visibile solo se il database contiene leggende */}
+      {leggende.length > 0 && (
+        <>
+          <h3 className="titolo-competizione">Leggende (Icons e Heroes)</h3>
+          <table className="tabella">
+            <thead>
+              <tr>
+                <th>Giocatore</th>
+                <th>Categoria</th>
+                <th>Ruolo</th>
+                <th>Naz.</th>
+              </tr>
+            </thead>
+            <tbody>
+              {leggende.map((l) => (
+                <tr key={l.id} className="riga-cliccabile" onClick={() => onApriGiocatore(l.id)}>
+                  <td className="grassetto">{l.nome} {l.cognome}</td>
+                  <td>{l.categoria === 'icon' ? '★ Icon' : '⚡ Hero'}</td>
+                  <td>{l.ruolo}</td>
+                  <td>{l.nazionalita}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
     </section>
   )
 }

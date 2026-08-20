@@ -59,6 +59,14 @@ CREATE TABLE giocatore (
   ruoli_secondari TEXT,                       -- eventuali altri ruoli, separati da virgola
   piede         TEXT NOT NULL DEFAULT 'destro',  -- destro | sinistro | ambidestro
 
+  -- Tag di categoria (richiesto per le regole di gioco future: includere o
+  -- escludere queste categorie dalle rose sarà una scelta di ogni carriera):
+  --   'normale' = giocatore in attività della stagione corrente
+  --   'icon'    = leggenda storica (Icons in FC)
+  --   'hero'    = eroe di culto (Heroes in FC)
+  categoria     TEXT NOT NULL DEFAULT 'normale'
+                CHECK (categoria IN ('normale', 'icon', 'hero')),
+
   -- ▸ Attributi tecnici, giocatori di movimento (12)
   velocita      INTEGER, resistenza    INTEGER, tecnica       INTEGER,
   passaggio     INTEGER, tiro          INTEGER, dribbling     INTEGER,

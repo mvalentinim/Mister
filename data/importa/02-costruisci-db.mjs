@@ -15,7 +15,7 @@
 //    per le qualificate al Mondiale 2026 senza rosa ufficiale)
 // 5. salva il database SQLite e stampa il report di verifica (DoD M1)
 
-import { readFile, writeFile } from 'node:fs/promises'
+import { readFile, writeFile, readdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import initSqlJs from 'sql.js'
@@ -299,7 +299,58 @@ db.run(`UPDATE nazionale SET fama = (
   JOIN giocatore g ON g.id = c.giocatore_id WHERE c.nazionale_id = nazionale.id
 )`)
 
-// ── 5. Salvataggio e report di verifica (DoD M1) ───────────────────────────
+// ── 5. Leggende (Icons e Heroes) dal canale data/leggende/*.json ───────────
+// I giocatori "leggenda" non esistono in nessun dataset aperto di qualità:
+// entrano da file JSON nel nostro formato (vedi data/leggende/README.md),
+// con il tag `categoria` = 'icon' o 'hero' (richiesto dalle regole di gioco
+// future: ogni carriera potrà includerli o escluderli dalle rose).
+// Gli ID partono da 900000 per non collidere mai con i player_id di EA.
+
+let leggendeImportate = 0
+const ID_BASE_LEGGENDE = 900_000
+try {
+  const cartellaLeggende = join(cartellaDati, 'leggende')
+  const fileJson = (await readdir(cartellaLeggende)).filter((f) => f.endsWith('.json'))
+  let prossimoId = ID_BASE_LEGGENDE
+  for (const nomeFile of fileJson) {
+    const { categoria, giocatori } = JSON.parse(await readFile(join(cartellaLeggende, nomeFile), 'utf8'))
+    if (!['icon', 'hero'].includes(categoria)) {
+      throw new Error(`${nomeFile}: categoria "${categoria}" non valida (attese: icon, hero)`)
+    }
+    for (const g of giocatori) {
+      const caso = casualeConSeme(prossimoId)
+      const comportamentale = () => limita(50 + (caso() - 0.5) * 60)
+      const a = g.attributi ?? {}
+      db.run(
+        `INSERT INTO giocatore (id, club_id, club_esterno, nome, cognome, data_nascita,
+           nazionalita, ruolo, ruoli_secondari, piede, categoria,
+           velocita, resistenza, tecnica, passaggio, tiro, dribbling, colpo_testa,
+           marcatura, contrasto, posizionamento, visione, calci_piazzati,
+           riflessi, presa, uscite, rinvio,
+           ambizione, attaccamento_denaro, fedelta, bisogno_giocare, professionalita,
+           leadership, legame_territoriale, potenziale)
+         VALUES (?,NULL,NULL,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?,?,?, ?,?,?,?, ?,?,?,?,?,?,?,?)`,
+        [
+          g.id ?? prossimoId, g.nome ?? '', g.cognome, g.data_nascita, g.nazionalita,
+          g.ruolo, (g.ruoli_secondari ?? []).join(',') || null, g.piede ?? 'destro', categoria,
+          a.velocita ?? null, a.resistenza ?? null, a.tecnica ?? null, a.passaggio ?? null,
+          a.tiro ?? null, a.dribbling ?? null, a.colpo_testa ?? null, a.marcatura ?? null,
+          a.contrasto ?? null, a.posizionamento ?? null, a.visione ?? null, a.calci_piazzati ?? null,
+          a.riflessi ?? null, a.presa ?? null, a.uscite ?? null, a.rinvio ?? null,
+          comportamentale(), comportamentale(), comportamentale(), comportamentale(),
+          comportamentale(), comportamentale(), comportamentale(),
+          g.potenziale ?? a.media ?? 80,
+        ],
+      )
+      prossimoId++
+      leggendeImportate++
+    }
+  }
+} catch (errore) {
+  if (errore.code !== 'ENOENT') throw errore // la cartella può non esistere: ok
+}
+
+// ── 6. Salvataggio e report di verifica (DoD M1) ───────────────────────────
 
 const file = join(radiceProgetto, 'public', 'mister.sqlite')
 const contenutoDb = Buffer.from(db.export())
@@ -326,5 +377,6 @@ console.log('\nDuplicati per (nome, cognome, data di nascita):')
 const duplicati = q(`SELECT nome, cognome, COUNT(*) FROM giocatore GROUP BY nome, cognome, data_nascita HAVING COUNT(*) > 1`)
 console.log(duplicati.length ? duplicati.map(([n, c, k]) => `  ⚠ ${n} ${c} ×${k}`).join('\n') : '  nessuno ✓')
 console.log(`\nNazionali: ${q('SELECT COUNT(*) FROM nazionale')[0][0]} totali, di cui ${q('SELECT COUNT(*) FROM nazionale WHERE mondiale_2026=1')[0][0]} al Mondiale 2026 (${nazionaliGenerate} con rosa selezionata automaticamente)`)
+console.log(`Leggende (categoria icon/hero): ${leggendeImportate} importate da data/leggende/`)
 if (senzaRosa.length) console.log(`Qualificate 2026 SENZA rosa (giocatori insufficienti nel perimetro):\n  ${senzaRosa.join('\n  ')}`)
 console.log('\n====================================================')
