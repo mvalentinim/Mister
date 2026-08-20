@@ -17,6 +17,7 @@ import { interroga } from '../db/query.ts'
 import { preparaSquadra, tatticaDefault } from '../motore/preparazione.ts'
 import { fineStagioneMercato, inizializzaMercato, aggiungiNotizia } from '../mercato/stato.ts'
 import { GIORNI_FINESTRA_INVERNALE } from '../mercato/stato.ts'
+import { aggiornaComportamento, verificaPromesseFineStagione } from '../comportamento/comportamento.ts'
 import { simulaPartitaMotore } from '../motore/partita.ts'
 import type { SquadraMotore } from '../motore/tipi.ts'
 import { generaCalendario } from './calendario.ts'
@@ -35,7 +36,13 @@ function squadraMotore(db: Database, carriera: Carriera, clubId: number): Squadr
   const club = carriera.club.find((c) => c.id === clubId)!
   const ids = carriera.rose?.[clubId]
   if (clubId === carriera.clubId) {
-    return preparaSquadra(db, clubId, club.nome, carriera.tattica, ids)
+    const squadra = preparaSquadra(db, clubId, club.nome, carriera.tattica, ids)
+    // il MORALE della rosa dell'utente diventa la "forma" nel motore (M7,
+    // FRD §7: effetti sul rendimento — oggi pesa sui voti, domani di più)
+    for (const g of [...squadra.titolari, ...squadra.panchina]) {
+      g.forma = carriera.morale?.[g.id] ?? 50
+    }
+    return squadra
   }
   const chiave = ids ? ids.join(',') : 'statico'
   const inCache = cacheSquadre.get(clubId)
@@ -152,7 +159,14 @@ export function creaCarriera(
   )
   const carriera: Carriera = {
     id: `carriera-${Date.now()}`,
-    versioneSchema: 4,
+    versioneSchema: 5,
+    morale: {},
+    statistiche: {},
+    promesse: [],
+    prossimaPromessaId: 1,
+    promesseTradite: 0,
+    famaAllenatore: 20, // bassa e uguale per tutti (FRD §4.1); cresce in M8
+    messaggi: [],
     seme: Math.floor(Math.random() * 2_147_483_647), // fissato alla creazione
     cronaca: null,
     tattica: tatticaDefault(rosaMia),
@@ -235,6 +249,9 @@ export function avanzaGiornata(
     }
   }
   carriera.giornata++
+
+  // statistiche, morale, promesse e spogliatoio (M7, FRD §7)
+  aggiornaComportamento(db, carriera)
 
   // a metà campionato si apre la finestra invernale (M6, FRD §6.1)
   if (carriera.giornata === Math.floor(carriera.calendario.length / 2)) {
@@ -354,6 +371,9 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
     promosso,
     retrocesso,
   })
+
+  // le promesse "di progetto" si verificano coi verdetti (M7, FRD §6.3)
+  verificaPromesseFineStagione(db, carriera, promosso)
 
   // nuova stagione: stesso club, nuovo calendario
   carriera.anno++

@@ -267,3 +267,23 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Collaudo del giro completo**: prestito con diritto ceduto (Ceccaroni al Pisa per 1,7M) ✓, finestra invernale aperta a metà stagione ✓, stagione conclusa, nuova stagione con mercato estivo aperto ✓, 24 svincoli a fine stagione ✓. Build, lint e calibrazione verdi.
 
 **M6 CHIUSA.** Prossima: M7 — Trattativa conversazionale (cervello deterministico + LLM con fallback offline) e comportamento giocatori.
+
+---
+
+## Sessione 15 — 2026-08-20 — M7: trattativa conversazionale e comportamento giocatori
+
+**Obiettivo dichiarato:** la volontà del giocatore nel mercato (cervello deterministico + voce LLM opzionale con fallback offline) e il livello comportamentale della rosa: morale, promesse, spogliatoio (FRD §6.3, §7).
+
+**Fatto:**
+- **Cervello deterministico** (`src/trattativa/interesse.ts`): `punteggioInteresse` 0–100 con fattori spiegabili (prestigio del progetto, fama allenatore, denaro vs stipendio atteso, durata, minutaggio previsto contando i concorrenti di reparto, leve, promesse tradite in passato). Soglie: ≥60 firma, <40 rifiuto netto, in mezzo trattabile per max 3 round. **L'IA non decide mai**: firma e rifiuto escono solo da qui.
+- **Il dialogo d'ingaggio** (`DialogoIngaggio.tsx`): dopo l'accordo tra i club (o per gli svincolati) devi convincere il giocatore. Riepilogo strutturato sempre visibile con termometro dell'interesse e "Perché questo interesse?" (FRD §12). Due modalità: **offline** (promesse a scelta multipla, battute-template — il gioco è sempre completabile) e **IA** (discorso libero: Claude interpreta il testo, riconosce le promesse fatte a voce e risponde nel personaggio usando gli attributi di personalità).
+- **Protocollo risorsa esterna per la chiave API**: si incolla nel pannello ⚙️ della trattativa, vive solo nel `localStorage` del browser (`mister-chiave-api`), mai nel codice né su git; ogni errore LLM fa scattare il fallback offline senza perdere la trattativa. SDK ufficiale `@anthropic-ai/sdk`; modelli claude-opus-5 (default), claude-sonnet-5, claude-haiku-4-5.
+- **Le promesse vincolano** (`src/comportamento/comportamento.ts`): registrate alla firma, verificate automaticamente — titolarità: ≥4 presenze in 6 giornate; centralità: ≥3; progetto: promozione a fine stagione. Mantenuta: morale +10, fama +1. Tradita: morale −30, fama −4, contatore `promesseTradite` che pesa sulle trattative future, messaggio furioso nello spogliatoio.
+- **Morale e statistiche**: dopo ogni giornata si aggiornano presenze/voti/gol dalle pagelle; morale +2/+1 a chi gioca, −3 agli importanti (top-14 per media) dimenticati in panchina da 4+ giornate, che si lamentano nello **spogliatoio** (riquadro nella linguetta Partite). Il morale entra nel motore come `forma` dei tuoi giocatori: uno spogliatoio depresso gioca peggio. Fama allenatore sempre visibile nell'intestazione.
+- Salvataggi a **versioneSchema 5** (migrazione automatica); carriera nuova parte con fama 20.
+- **Collaudo end-to-end (Playwright)**: acquisto di Vicari dal Bari con promessa di titolarità in modalità offline (interesse 69/100, promessa registrata `attiva`, morale d'arrivo 65) → 7 giornate simulate senza mai schierarlo → promessa `tradita`, morale 65→35, fama 20→16, messaggio "è FURIOSO" nello spogliatoio, lamentele anche degli altri panchinari importanti ✓. Prima stesura del collaudo bocciata correttamente dal gioco: stipendio offerto da 2M sforava il monte stipendi e la firma veniva rifiutata — il vincolo funziona. Build, lint e calibrazione verdi.
+- Decisioni e protocollo chiave API in `docs/trattativa.md`.
+
+**DoD di M7:** convincere un giocatore promettendo la titolarità, lasciarlo in panchina un mese e osservarne le conseguenze ✅ (test end-to-end). La stessa trattativa completabile offline ✅ (è la modalità predefinita del collaudo). Verifica di persona dello sviluppatore (e prova della modalità IA con una chiave reale) in sospeso come sempre.
+
+**Prossima sessione proposta:** M8 — carriera lunga: obiettivi e fama completa, esoneri e offerte migliori, coppa nazionale, crescita/declino dei giocatori (potenziale, età, utilizzo, prestazioni).

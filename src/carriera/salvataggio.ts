@@ -59,6 +59,17 @@ function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: nu
     salvataggio.rose = null as unknown as Carriera['rose']
     caricato.versioneSchema = 4
   }
+  if (caricato.versioneSchema === 4) {
+    // v4 → v5 (M7): morale, statistiche, promesse, fama e spogliatoio
+    salvataggio.morale = {}
+    salvataggio.statistiche = {}
+    salvataggio.promesse = []
+    salvataggio.prossimaPromessaId = 1
+    salvataggio.promesseTradite = 0
+    salvataggio.famaAllenatore = 20
+    salvataggio.messaggi = []
+    caricato.versioneSchema = 5
+  }
   return salvataggio
 }
 

@@ -192,7 +192,8 @@ function SchermataCarriera({ db, carriera }: Props) {
     <section className="schermata">
       <h2>{nomeClub} — {nomeCompetizione} {etichettaStagione(carriera.anno)}</h2>
       <p className="nota">
-        Allenatore: {carriera.allenatore.nome} · obiettivo: {DESCRIZIONE_OBIETTIVO[carriera.obiettivo]} ·
+        Allenatore: {carriera.allenatore.nome} (fama {carriera.famaAllenatore ?? 20}) ·
+        obiettivo: {DESCRIZIONE_OBIETTIVO[carriera.obiettivo]} ·
         giornata {Math.min(carriera.giornata + 1, carriera.calendario.length)} di {carriera.calendario.length}
         {' '}· salvataggio automatico attivo
       </p>
@@ -239,6 +240,18 @@ function SchermataCarriera({ db, carriera }: Props) {
               <button className="bottone-primario" onClick={concludiStagione}>
                 🏁 Concludi la stagione (verdetti e nuova stagione)
               </button>
+            </div>
+          )}
+
+          {/* lo spogliatoio: le reazioni dei giocatori (M7, FRD §7) */}
+          {carriera.messaggi && carriera.messaggi.length > 0 && (
+            <div className="spogliatoio">
+              <h3>📣 Spogliatoio</h3>
+              {carriera.messaggi.slice(0, 6).map((msg, i) => (
+                <p key={i} className={`msg-spogliatoio ${msg.tono}`}>
+                  <span className="nota">[g. {msg.giornata}]</span> <strong>{msg.giocatoreNome}</strong> {msg.testo}
+                </p>
+              ))}
             </div>
           )}
 

@@ -811,3 +811,120 @@ body {
 .notizia.ufficiale { font-weight: 600; }
 .notizia.rumor { color: var(--testo-attenuato); font-style: italic; }
 .notizia.avviso { color: var(--accento); font-weight: 700; }
+
+/* ---- Trattativa col giocatore e spogliatoio (M7) ---- */
+
+.riepilogo-offerta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  background: var(--accento-tenue);
+  border: 1px solid var(--accento);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  margin: 0.8rem 0;
+}
+
+.termometro {
+  margin-left: auto;
+  padding: 0.15rem 0.7rem;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.termometro.caldo { background: #27ae60; }
+.termometro.tiepido { background: #e0a800; }
+.termometro.freddo { background: #c0392b; }
+
+.fattori summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--testo-attenuato);
+  margin-bottom: 0.4rem;
+}
+
+.fattori ul {
+  list-style: none;
+  font-size: 0.88rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0.4rem 0 0.8rem;
+}
+
+.battute {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.8rem 0;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.battuta {
+  padding: 0.5rem 0.8rem;
+  border-radius: 10px;
+  font-size: 0.93rem;
+  max-width: 85%;
+}
+
+.battuta.allenatore {
+  background: var(--accento-tenue);
+  align-self: flex-end;
+}
+
+.battuta.giocatore {
+  background: var(--sfondo);
+  border: 1px solid var(--bordo);
+  align-self: flex-start;
+}
+
+.campo-discorso {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--bordo);
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
+  background: var(--superficie);
+  color: var(--testo);
+}
+
+.scelte-promesse {
+  display: flex;
+  gap: 0.4rem 1.4rem;
+  flex-wrap: wrap;
+  margin: 0.6rem 0;
+}
+
+.impostazioni-llm {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.impostazioni-llm summary {
+  cursor: pointer;
+  color: var(--testo-attenuato);
+}
+
+.spogliatoio {
+  background: var(--superficie);
+  border: 1px solid var(--bordo);
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.spogliatoio h3 {
+  margin: 0 0 0.5rem;
+}
+
+.msg-spogliatoio {
+  font-size: 0.9rem;
+  padding: 0.2rem 0;
+}
+
+.msg-spogliatoio.negativo strong { color: #c0392b; }
+.msg-spogliatoio.positivo strong { color: #27ae60; }

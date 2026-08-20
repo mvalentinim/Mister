@@ -89,6 +89,38 @@ export interface Prestito {
   obbligo: boolean // true = riscatto obbligatorio a fine stagione
 }
 
+// ── Comportamento giocatori e promesse (M7, FRD §6.3 e §7) ────────────────
+
+/** Statistiche stagionali di un giocatore della rosa dell'utente. */
+export interface StatisticheGiocatore {
+  presenze: number
+  sommaVoti: number
+  gol: number
+  /** ultima giornata (1-based) in cui è sceso in campo, 0 = mai */
+  ultimaPresenza: number
+}
+
+/** Una promessa fatta in trattativa, con verifica automatica nel tempo. */
+export interface Promessa {
+  id: number
+  giocatoreId: number
+  tipo: 'titolarita' | 'centralita' | 'progetto'
+  descrizione: string
+  annoCreazione: number
+  giornataCreazione: number
+  presenzeAllaCreazione: number
+  stato: 'attiva' | 'mantenuta' | 'tradita'
+}
+
+/** Un messaggio dallo spogliatoio (reazioni dei giocatori, FRD §7). */
+export interface MessaggioGiocatore {
+  anno: number
+  giornata: number
+  giocatoreNome: string
+  testo: string
+  tono: 'positivo' | 'negativo' | 'neutro'
+}
+
 /** Lo stato del mercato nella carriera. */
 export interface StatoMercato {
   aperto: boolean
@@ -131,7 +163,7 @@ export interface CronacaPartita {
 /** Lo stato completo di una carriera. */
 export interface Carriera {
   id: string
-  versioneSchema: 4 // per le migrazioni dei salvataggi (FRD §11)
+  versioneSchema: 5 // per le migrazioni dei salvataggi (FRD §11)
   /** le ROSE della carriera: club → id dei giocatori. Fotografate alla
       creazione dal DB statico, poi mosse dai trasferimenti (M6). */
   rose: Record<number, number[]>
@@ -144,6 +176,20 @@ export interface Carriera {
   /** prestiti in corso */
   prestiti: Prestito[]
   mercato: StatoMercato
+  // ── M7: comportamento e promesse ──
+  /** morale dei giocatori dell'utente (0-100, default 50) */
+  morale: Record<number, number>
+  /** statistiche stagionali dei giocatori dell'utente */
+  statistiche: Record<number, StatisticheGiocatore>
+  /** registro delle promesse (FRD §6.3: fondamentale) */
+  promesse: Promessa[]
+  prossimaPromessaId: number
+  /** promesse tradite in carriera: i giocatori "sanno" (FRD §6.3) */
+  promesseTradite: number
+  /** fama dell'allenatore (0-100; il sistema completo arriva in M8) */
+  famaAllenatore: number
+  /** messaggi dallo spogliatoio */
+  messaggi: MessaggioGiocatore[]
   /** seme della carriera: con lo stesso seme le partite sono riproducibili */
   seme: number
   /** cronaca dell'ultima partita giocata dalla squadra dell'utente */

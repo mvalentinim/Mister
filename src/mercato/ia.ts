@@ -297,13 +297,21 @@ export function valutaProposta(db: Database, carriera: Carriera, p: Proposta): R
 }
 
 /** Esegue l'acquisto (o il prestito) concordato. Restituisce un eventuale
-    errore di budget, altrimenti null. */
-export function eseguiAcquisto(db: Database, carriera: Carriera, p: Proposta): string | null {
+    errore di budget, altrimenti null. `contrattoNegoziato` arriva dalla
+    trattativa col giocatore (M7); senza, stipendio attuale +10%. */
+export function eseguiAcquisto(
+  db: Database,
+  carriera: Carriera,
+  p: Proposta,
+  contrattoNegoziato?: { stipendio: number; durataAnni: number },
+): string | null {
   const g = giocatoriPerId(db, [p.giocatoreId])[0]
   const venditoreId = clubDiGiocatore(carriera, p.giocatoreId)!
   const venditore = carriera.club.find((c) => c.id === venditoreId)!
   const vecchioContratto = carriera.contratti[p.giocatoreId]
-  const nuovoStipendio = Math.round((vecchioContratto?.stipendio ?? 300_000) * 1.1)
+  const nuovoStipendio =
+    contrattoNegoziato?.stipendio ?? Math.round((vecchioContratto?.stipendio ?? 300_000) * 1.1)
+  const scadenzaNegoziata = carriera.anno + (contrattoNegoziato?.durataAnni ?? 4)
 
   const costoCartellino = p.prestito ? 0 : p.prezzo
   if (costoCartellino > carriera.budget.mercato) {
@@ -343,7 +351,7 @@ export function eseguiAcquisto(db: Database, carriera: Carriera, p: Proposta): s
   } else {
     spostaGiocatore(carriera, p.giocatoreId, carriera.clubId, {
       stipendio: nuovoStipendio,
-      scadenza: carriera.anno + 4,
+      scadenza: scadenzaNegoziata,
     })
     aggiungiNotizia(
       carriera,
@@ -445,14 +453,28 @@ export function rinnovaContratto(carriera: Carriera, giocatoreId: number): strin
   return null
 }
 
-/** Ingaggio di uno svincolato (gratis, pesa solo sugli stipendi). */
-export function ingaggiaSvincolato(db: Database, carriera: Carriera, giocatoreId: number): string | null {
+/** Lo stipendio che uno svincolato si aspetta (per aprire la trattativa). */
+export function stipendioAttesoSvincolato(carriera: Carriera, g: GiocatoreRiga): number {
+  return Math.round(Math.max(200_000, valoreInCarriera(carriera, g) * 0.08))
+}
+
+/** Ingaggio di uno svincolato (gratis, pesa solo sugli stipendi).
+    Il contratto arriva dalla trattativa col giocatore (M7). */
+export function ingaggiaSvincolato(
+  db: Database,
+  carriera: Carriera,
+  giocatoreId: number,
+  contratto?: { stipendio: number; durataAnni: number },
+): string | null {
   const g = giocatoriPerId(db, [giocatoreId])[0]
-  const stipendio = Math.round(Math.max(200_000, valoreInCarriera(carriera, g) * 0.08))
+  const stipendio = contratto?.stipendio ?? stipendioAttesoSvincolato(carriera, g)
   if (monteStipendi(carriera) + stipendio > carriera.budget.stipendi) {
     return 'Monte stipendi insufficiente.'
   }
-  spostaGiocatore(carriera, giocatoreId, carriera.clubId, { stipendio, scadenza: carriera.anno + 2 })
+  spostaGiocatore(carriera, giocatoreId, carriera.clubId, {
+    stipendio,
+    scadenza: carriera.anno + (contratto?.durataAnni ?? 2),
+  })
   aggiungiNotizia(carriera, `UFFICIALE: ${g.nome} ${g.cognome} firma da svincolato!`, 'ufficiale')
   return null
 }

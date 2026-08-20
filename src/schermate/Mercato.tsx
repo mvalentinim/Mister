@@ -15,7 +15,11 @@ import {
 import {
   anniContratto, clubDiGiocatore, giocatoriPerId, monteStipendi, rosaClub, valoreInCarriera,
 } from '../mercato/stato.ts'
+import { stipendioAttesoSvincolato } from '../mercato/ia.ts'
 import { euro } from '../mercato/valore.ts'
+import { registraPromessa } from '../comportamento/comportamento.ts'
+import type { OffertaIngaggio } from '../trattativa/interesse.ts'
+import DialogoIngaggio from './DialogoIngaggio.tsx'
 
 interface Props {
   db: Database
@@ -44,6 +48,12 @@ function Mercato({ db, carriera, onModificata }: Props) {
   const [filtroRuolo, setFiltroRuolo] = useState('')
   const [trattativa, setTrattativa] = useState<Trattativa | null>(null)
   const [avviso, setAvviso] = useState<string | null>(null)
+  // trattativa col GIOCATORE (M7): dopo l'accordo col club, o per gli svincolati
+  const [ingaggio, setIngaggio] = useState<
+    | { tipo: 'acquisto'; proposta: Proposta; giocatore: GiocatoreRiga }
+    | { tipo: 'svincolato'; giocatore: GiocatoreRiga }
+    | null
+  >(null)
 
   const miaRosa = rosaClub(db, carriera, carriera.clubId)
     .sort((a, b) => mediaComplessiva(b) - mediaComplessiva(a))
@@ -94,13 +104,12 @@ function Mercato({ db, carriera, onModificata }: Props) {
     }
     const risposta: Risposta = valutaProposta(db, carriera, proposta)
     if (risposta.esito === 'accettata') {
-      const errore = eseguiAcquisto(db, carriera, proposta)
-      if (errore) {
-        setTrattativa({ ...t, storia: [...t.storia, `⚠️ ${errore}`] })
-        return
-      }
-      await applica(() => {})
-      setTrattativa({ ...t, chiusa: true, storia: [...t.storia, `✅ Accordo trovato! ${t.giocatore.cognome} è tuo.`] })
+      // accordo tra club trovato: ora serve il SÌ del giocatore (M7, FRD §6.3)
+      setTrattativa({
+        ...t, chiusa: true,
+        storia: [...t.storia, `🤝 Accordo tra i club! Ora devi convincere ${t.giocatore.cognome} a firmare.`],
+      })
+      setIngaggio({ tipo: 'acquisto', proposta, giocatore: t.giocatore })
     } else if (risposta.esito === 'contro') {
       setTrattativa({
         ...t,
@@ -112,6 +121,30 @@ function Mercato({ db, carriera, onModificata }: Props) {
     } else {
       setTrattativa({ ...t, chiusa: true, storia: [...t.storia, `❌ ${risposta.motivo}`] })
     }
+  }
+
+  /** Chiusura della trattativa col giocatore: firma (con promesse registrate)
+      o rifiuto. Il contratto è quello negoziato nel dialogo. */
+  async function concludiIngaggio(esito: { firmato: boolean; offerta: OffertaIngaggio }) {
+    await applica(() => {
+      if (!ingaggio || !esito.firmato) return
+      const contratto = { stipendio: esito.offerta.stipendio, durataAnni: esito.offerta.durataAnni }
+      const errore =
+        ingaggio.tipo === 'acquisto'
+          ? eseguiAcquisto(db, carriera, ingaggio.proposta, contratto)
+          : ingaggiaSvincolato(db, carriera, ingaggio.giocatore.id, contratto)
+      if (errore) {
+        setAvviso(errore)
+        return
+      }
+      // le promesse fatte diventano impegni verificabili (FRD §6.3)
+      for (const leva of esito.offerta.leve) {
+        if (leva !== 'fascia') registraPromessa(carriera, ingaggio.giocatore.id, leva)
+      }
+      carriera.morale[ingaggio.giocatore.id] = 65 // arriva carico
+    })
+    setIngaggio(null)
+    setTrattativa(null)
   }
 
   const RUOLI = ['POR', 'DC', 'TD', 'TS', 'MED', 'CC', 'TRQ', 'ED', 'ES', 'PC']
@@ -258,8 +291,24 @@ function Mercato({ db, carriera, onModificata }: Props) {
         </div>
       )}
 
+      {/* ── trattativa col giocatore (M7) ── */}
+      {ingaggio && (
+        <DialogoIngaggio
+          db={db}
+          carriera={carriera}
+          giocatore={ingaggio.giocatore}
+          stipendioIniziale={
+            ingaggio.tipo === 'svincolato'
+              ? stipendioAttesoSvincolato(carriera, ingaggio.giocatore)
+              : Math.round((carriera.contratti[ingaggio.giocatore.id]?.stipendio ?? 300_000) * 1.15)
+          }
+          titolo={`Convinci ${ingaggio.giocatore.nome} ${ingaggio.giocatore.cognome} a firmare`}
+          onEsito={(esito) => void concludiIngaggio(esito)}
+        />
+      )}
+
       {/* ── ricerca giocatori ── */}
-      {m.aperto && !trattativa && (
+      {m.aperto && !trattativa && !ingaggio && (
         <>
           <h3>🔎 Cerca un rinforzo</h3>
           <div className="riga-bottoni">
@@ -295,7 +344,7 @@ function Mercato({ db, carriera, onModificata }: Props) {
       )}
 
       {/* ── svincolati ── */}
-      {m.aperto && svincolati.length > 0 && !trattativa && (
+      {m.aperto && svincolati.length > 0 && !trattativa && !ingaggio && (
         <>
           <h3>🆓 Svincolati</h3>
           <table className="tabella">
@@ -308,8 +357,8 @@ function Mercato({ db, carriera, onModificata }: Props) {
                   <td className="num evidenza">{mediaComplessiva(g)}</td>
                   <td className="num">
                     <button className="bottone-secondario"
-                      onClick={() => void applica(() => setAvviso(ingaggiaSvincolato(db, carriera, g.id)))}>
-                      Ingaggia
+                      onClick={() => setIngaggio({ tipo: 'svincolato', giocatore: g })}>
+                      Tratta l'ingaggio
                     </button>
                   </td>
                 </tr>
