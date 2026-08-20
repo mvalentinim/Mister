@@ -385,6 +385,53 @@ export function accettaOfferta(db: Database, carriera: Carriera, offertaId: numb
   m.offerteRicevute = m.offerteRicevute.filter((o) => o.id !== offertaId)
 }
 
+/**
+ * L'utente PROPONE un suo giocatore ai club IA (vendita o prestito).
+ * Se un club interessato esiste (ruolo utile + budget), la sua offerta
+ * arriva tra le "offerte ricevute"; altrimenti si spiega il perché.
+ */
+export function proponiCessione(
+  db: Database,
+  carriera: Carriera,
+  giocatoreId: number,
+  tipo: 'vendita' | 'prestito',
+): string | null {
+  const m = carriera.mercato
+  if (!m.aperto) return 'Il mercato è chiuso.'
+  const g = giocatoriPerId(db, [giocatoreId])[0]
+  const valore = valoreInCarriera(carriera, g)
+  const rng = creaRng(semeDaStringa(`proposta-${carriera.seme}-${carriera.anno}-${m.giorniRimasti}-${giocatoreId}-${tipo}`))
+
+  // club interessati: hanno quel reparto scoperto (o quasi) e i soldi
+  const interessati = carriera.club.filter((c) => {
+    if (c.id === carriera.clubId) return false
+    if (tipo === 'vendita' && c.budgetMercato < valore * 0.8) return false
+    const analisi = analizzaRosa(db, carriera, c.id)
+    const reparto = REPARTO[g.ruolo]
+    return (
+      analisi.scoperti.includes(reparto) ||
+      (!analisi.esuberi.some((e) => REPARTO[e.ruolo] === reparto) && rng.evento(0.4))
+    )
+  })
+  if (interessati.length === 0) {
+    return `Per ora nessun club cerca un ${g.ruolo}: riprova nei prossimi giorni o abbassa le pretese.`
+  }
+  const offerente = interessati[rng.intero(interessati.length)]
+  m.offerteRicevute.push({
+    id: m.prossimaOffertaId++,
+    clubId: offerente.id,
+    giocatoreId,
+    tipo: tipo === 'vendita' ? 'acquisto' : 'prestito-diritto',
+    prezzo: Math.round(valore * (tipo === 'vendita' ? 0.85 + rng.numero() * 0.2 : 1.05)),
+  })
+  aggiungiNotizia(
+    carriera,
+    `Il ${offerente.nome} risponde alla tua proposta per ${g.nome} ${g.cognome}: offerta in arrivo.`,
+    'rumor',
+  )
+  return null
+}
+
 /** Rinnovo semplice di un contratto (FRD: M6 base, la trattativa vera è M7). */
 export function rinnovaContratto(carriera: Carriera, giocatoreId: number): string | null {
   const contratto = carriera.contratti[giocatoreId]

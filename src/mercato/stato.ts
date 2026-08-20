@@ -72,7 +72,7 @@ export function aggiungiNotizia(carriera: Carriera, testo: string, tipo: Notizia
       }`
     : `stagione ${carriera.anno}-${String((carriera.anno + 1) % 100).padStart(2, '0')}`
   m.notizie.unshift({ testo, tipo, quando })
-  if (m.notizie.length > 60) m.notizie.length = 60 // il notiziario non cresce all'infinito
+  if (m.notizie.length > 80) m.notizie.length = 80 // il notiziario non cresce all'infinito
 }
 
 // ── Inizializzazione (creazione carriera e migrazione dei salvataggi) ─────
@@ -132,6 +132,11 @@ export function spostaGiocatore(
   if (daClubId !== null) {
     carriera.rose[daClubId] = carriera.rose[daClubId].filter((id) => id !== giocatoreId)
   }
+  // se l'utente cede un titolare, lo slot in tattica si libera (-1 = vuoto:
+  // il motore ripiega sul miglior sostituto, la schermata Tattica lo mostra)
+  if (daClubId === carriera.clubId && versoClubId !== carriera.clubId && carriera.tattica) {
+    carriera.tattica.titolari = carriera.tattica.titolari.map((id) => (id === giocatoreId ? -1 : id))
+  }
   carriera.svincolati = carriera.svincolati.filter((id) => id !== giocatoreId)
   if (versoClubId !== null) {
     carriera.rose[versoClubId] = [...(carriera.rose[versoClubId] ?? []), giocatoreId]
@@ -160,6 +165,11 @@ export function fineStagioneMercato(db: Database, carriera: Carriera): void {
     if (riscatta && p.diritto !== null) {
       // il cartellino passa all'ospitante (il giocatore è già lì)
       if (p.proprietarioId === carriera.clubId) carriera.budget.mercato += p.diritto
+      if (ospitante) ospitante.budgetMercato -= p.diritto
+      carriera.contratti[p.giocatoreId] = {
+        stipendio: Math.round((carriera.contratti[p.giocatoreId]?.stipendio ?? 300_000) * 1.1),
+        scadenza: carriera.anno + 3,
+      }
       aggiungiNotizia(
         carriera,
         `${ospitante?.nome} riscatta ${g.nome} ${g.cognome} per ${euro(p.diritto)}.`,

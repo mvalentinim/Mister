@@ -10,7 +10,7 @@ import { salvaCarriera } from '../carriera/salvataggio.ts'
 import { calcolaEta, mediaComplessiva, type GiocatoreRiga } from '../db/tipi.ts'
 import {
   accettaOfferta, eseguiAcquisto, giornoDiMercato, ingaggiaSvincolato,
-  rinnovaContratto, valutaProposta, type Proposta, type Risposta,
+  proponiCessione, rinnovaContratto, valutaProposta, type Proposta, type Risposta,
 } from '../mercato/ia.ts'
 import {
   anniContratto, clubDiGiocatore, giocatoriPerId, monteStipendi, rosaClub, valoreInCarriera,
@@ -349,6 +349,19 @@ function Mercato({ db, carriera, onModificata }: Props) {
                     })}>
                     {cedibile ? 'Non cedibile' : 'Cedibile'}
                   </button>
+                  {m.aperto && (
+                    <>
+                      {' '}
+                      <button className="bottone-secondario"
+                        onClick={() => void applica(() => setAvviso(proponiCessione(db, carriera, g.id, 'vendita')))}>
+                        Vendi
+                      </button>{' '}
+                      <button className="bottone-secondario"
+                        onClick={() => void applica(() => setAvviso(proponiCessione(db, carriera, g.id, 'prestito')))}>
+                        Prestito
+                      </button>
+                    </>
+                  )}
                 </td>
               </tr>
             )
@@ -359,7 +372,7 @@ function Mercato({ db, carriera, onModificata }: Props) {
       {/* ── notiziario ── */}
       <h3>📰 Notiziario</h3>
       <ul className="notiziario">
-        {m.notizie.slice(0, 25).map((n, i) => (
+        {m.notizie.slice(0, 40).map((n, i) => (
           <li key={i} className={`notizia ${n.tipo}`}>
             <span className="nota">[{n.quando}]</span> {n.testo}
           </li>

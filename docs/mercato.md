@@ -38,7 +38,9 @@ scadenza (in scadenza ×0.3), piccolo premio fama del club.
   ("serviva un rinforzo in attacco"). Trattative saltate → rumor.
 - L'IA bussa anche alla porta dell'utente: offerte di **acquisto** o di
   **prestito con diritto** (più probabili per i giocatori marcati cedibili),
-  da accettare o rifiutare.
+  da accettare o rifiutare. E l'utente può **proporre attivamente** un suo
+  giocatore in vendita o in prestito ("Vendi"/"Prestito" nella rosa): se un
+  club ha quel ruolo scoperto e i soldi, l'offerta arriva subito.
 
 ## La trattativa dell'utente (FRD §6.2)
 

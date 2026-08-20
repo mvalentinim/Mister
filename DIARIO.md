@@ -252,3 +252,18 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - Decisioni e semplificazioni in `docs/mercato.md` (la volontà del giocatore arriva in M7).
 
 **Prossima sessione proposta:** M7 — Trattativa conversazionale (cervello deterministico + LLM) e comportamento giocatori.
+
+---
+
+## Sessione 14 — 2026-08-20 — M6 completata
+
+**Obiettivo dichiarato:** chiudere i pezzi rimasti di M6 e collaudare il giro di stagione completo col mercato.
+
+**Fatto:**
+- **Cessione attiva**: bottoni "Vendi" e "Prestito" nella rosa del mercato — l'utente propone un giocatore ai club IA; se un club ha quel ruolo scoperto e il budget, l'offerta arriva subito tra le ricevute (con rifiuto spiegato in caso contrario). La DoD "cede in prestito con diritto" è ora sempre esercitabile.
+- **Pulizia tattica**: cedere un titolare libera il suo slot (il motore ripiega sul miglior sostituto, la schermata Tattica mostra lo slot vuoto).
+- **Riscatto prestiti rifinito**: contratto nuovo per il club che riscatta, budget dell'ospitante scalato.
+- Notiziario allargato (40 notizie visibili, 80 conservate): le risoluzioni dei prestiti non spariscono sotto gli svincoli di fine stagione.
+- **Collaudo del giro completo**: prestito con diritto ceduto (Ceccaroni al Pisa per 1,7M) ✓, finestra invernale aperta a metà stagione ✓, stagione conclusa, nuova stagione con mercato estivo aperto ✓, 24 svincoli a fine stagione ✓. Build, lint e calibrazione verdi.
+
+**M6 CHIUSA.** Prossima: M7 — Trattativa conversazionale (cervello deterministico + LLM con fallback offline) e comportamento giocatori.
