@@ -106,3 +106,167 @@ body {
   font-size: 0.8rem;
   opacity: 0.6;
 }
+
+/* ---- Voce di menu attiva (Database) ---- */
+
+.voce-menu.attiva {
+  border-color: var(--oro);
+  background: rgb(232 197 71 / 12%);
+}
+
+.voce-menu:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ---- Schermate del database ---- */
+
+.schermata {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.schermata h2 {
+  color: var(--oro);
+  margin-bottom: 1rem;
+}
+
+.schermata h3 {
+  margin: 1.5rem 0 0.6rem;
+}
+
+.titolo-competizione {
+  border-bottom: 2px solid var(--oro);
+  padding-bottom: 0.3rem;
+}
+
+.barra-navigazione {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  background: rgb(0 0 0 / 35%);
+}
+
+.bottone-indietro {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--bianco);
+  font: inherit;
+  cursor: pointer;
+}
+
+.bottone-indietro:hover {
+  border-color: var(--oro);
+}
+
+/* ---- Tabelle (squadre, rose) ---- */
+
+.tabella {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgb(0 0 0 / 30%);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.tabella th,
+.tabella td {
+  padding: 0.55rem 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+}
+
+.tabella th {
+  background: rgb(0 0 0 / 40%);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
+}
+
+.tabella th.ordinabile {
+  cursor: pointer;
+}
+
+.tabella th.ordinabile:hover {
+  color: var(--oro);
+}
+
+.riga-cliccabile {
+  cursor: pointer;
+}
+
+.riga-cliccabile:hover {
+  background: rgb(232 197 71 / 12%);
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.grassetto {
+  font-weight: 700;
+}
+
+.evidenza {
+  color: var(--oro);
+  font-weight: 700;
+}
+
+.nota {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+/* ---- Scheda giocatore ---- */
+
+.riga-info {
+  margin-bottom: 1rem;
+}
+
+.etichetta-ruolo {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  background: var(--oro);
+  color: var(--verde-scuro);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.griglia-attributi {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.5rem 1.5rem;
+}
+
+.attributo {
+  display: grid;
+  grid-template-columns: 110px 1fr 2.2rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.attributo-barra {
+  height: 0.6rem;
+  border-radius: 3px;
+  background: rgb(0 0 0 / 40%);
+  overflow: hidden;
+}
+
+.attributo-riempimento {
+  height: 100%;
+  /* il colore viene impostato dal componente in base al valore */
+}
+
+.attributo-valore {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
