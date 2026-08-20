@@ -9,7 +9,7 @@ import { calcolaEta, mediaComplessiva, type GiocatoreRiga } from '../db/tipi.ts'
 
 interface Props {
   db: Database
-  clubId: number
+  squadra: { tipo: 'club' | 'nazionale'; id: number }
   onApriGiocatore: (giocatoreId: number) => void
 }
 
@@ -29,12 +29,26 @@ type ChiaveColonna = (typeof COLONNE)[number]['chiave']
 // Ordine "naturale" dei ruoli nelle rose: portieri, difesa, centrocampo, attacco
 const ORDINE_RUOLI = ['POR', 'DC', 'TD', 'TS', 'MED', 'CC', 'TRQ', 'ED', 'ES', 'PC']
 
-function Rosa({ db, clubId, onApriGiocatore }: Props) {
+function Rosa({ db, squadra, onApriGiocatore }: Props) {
   const [colonnaOrdine, setColonnaOrdine] = useState<ChiaveColonna>('ruolo')
   const [discendente, setDiscendente] = useState(false)
 
-  const nomeClub = interrogaUna<{ nome: string }>(db, 'SELECT nome FROM club WHERE id = ?', [clubId])?.nome
-  const giocatori = interroga<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE club_id = ?', [clubId])
+  // Club e nazionali usano tabelle diverse: la rosa di un club è "giocatori
+  // con quel club_id", quella di una nazionale passa dalle convocazioni
+  const nomeClub =
+    squadra.tipo === 'club'
+      ? interrogaUna<{ nome: string }>(db, 'SELECT nome FROM club WHERE id = ?', [squadra.id])?.nome
+      : interrogaUna<{ nome: string }>(db, 'SELECT nome FROM nazionale WHERE id = ?', [squadra.id])?.nome
+  const giocatori =
+    squadra.tipo === 'club'
+      ? interroga<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE club_id = ?', [squadra.id])
+      : interroga<GiocatoreRiga>(
+          db,
+          `SELECT g.* FROM giocatore g
+           JOIN convocazione cv ON cv.giocatore_id = g.id
+           WHERE cv.nazionale_id = ?`,
+          [squadra.id],
+        )
 
   // Ordina la copia dell'elenco secondo la colonna scelta
   const colonna = COLONNE.find((c) => c.chiave === colonnaOrdine)!

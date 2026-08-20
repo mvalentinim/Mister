@@ -66,3 +66,26 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - Verificato: build pulita, screenshot delle schermate col nuovo tema.
 
 **Prossima sessione proposta:** verifica concreta di copertura e licenze delle fonti (openfootball, Kaggle, football-data.org) e primo script di importazione per l'Italia.
+
+---
+
+## Sessione 4 — 2026-08-20 — M1: verifica fonti e IMPORT DATI REALI
+
+**Obiettivo dichiarato:** verificare le fonti dati e importare le rose reali del perimetro FRD §5.2 (10 leghe top europee) + nazionali.
+
+**Verifica fonti (protocollo risorse esterne):**
+- Kaggle e HuggingFace non raggiungibili direttamente da questo ambiente; football-data.org richiede registrazione e niente seconde divisioni nel piano free.
+- Scelta: dataset **"FIFA 23 Players"** (origine Kaggle, mirror pubblico GitHub) — copertura verificata club per club: **tutte e 10 le leghe complete** + rose nazionali licenziate. openfootball per i gironi del Mondiale 2026.
+
+**Fatto:**
+- **Pipeline di importazione** (`npm run importa-dati`): script 01 scarica le fonti in `data/fonti/` (fuori git), script 02 costruisce `public/mister.sqlite` con report di verifica. Mappatura campo-per-campo documentata in `docs/dati.md`.
+- **Schema esteso**: tabelle `nazionale` e `convocazione`; colonna `giocatore.club_esterno` per i convocati che giocano fuori perimetro.
+- **Importati: 6.112 giocatori reali, 202 club, 10 competizioni, 43 nazionali** (31 qualificate al Mondiale 2026, 8 con rosa a selezione automatica dichiarata), 5.762 contratti. Zero duplicati; esclusa la squadra fittizia "AFC Richmond"; scartate 79 righe doppie della fonte.
+- **App collegata al database reale** (con ripiego sui dati di esempio se il file manca); schermata Squadre riorganizzata per nazione+competizione con sezione Nazionali; scheda giocatore mostra nazionale e club esterno.
+- Verificato nel browser: rose reali (es. Palermo 2022-23 con Brunori e Di Mariano; Italia con Barella e Chiesa), build e lint puliti.
+
+**Compromessi dichiarati (in docs/dati.md):** rose stagione 2022-23 (la più recente con copertura completa in fonte aperta); età ancorate al 2026 con date di nascita sintetiche; scadenze contratti traslate +4 anni; attributi comportamentali generati proceduralmente (deterministici); convocazioni ufficiali Mondiale 2026 non ancora pubblicate in fonti aperte.
+
+**Resta per chiudere M1 (DoD):** lo sviluppatore esegue di persona `npm run importa-dati` e verifica il report — da fare quando avrà accesso al Mac (insieme alla DoD di M0, ancora in sospeso).
+
+**Prossima sessione proposta:** M2 — Carriera minima giocabile (flusso nuova carriera: nazione → profilo allenatore → offerte dalla seconda divisione).

@@ -16,10 +16,21 @@ export interface ClubRiga {
   numero_giocatori: number  // conteggio calcolato nella query
 }
 
+/** Una riga della tabella nazionale, con il conteggio dei convocati. */
+export interface NazionaleRiga {
+  id: number
+  nome: string
+  fama: number
+  mondiale_2026: number // SQLite non ha i booleani: 0 = no, 1 = sì
+  generata: number
+  numero_giocatori: number
+}
+
 /** Una riga della tabella giocatore (gli attributi opzionali possono essere null). */
 export interface GiocatoreRiga {
   id: number
   club_id: number | null
+  club_esterno: string | null
   nome: string
   cognome: string
   data_nascita: string

@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Fonti dati di terze parti: riscaricabili con `npm run importa-dati`
+data/fonti/

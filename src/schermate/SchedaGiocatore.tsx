@@ -46,7 +46,16 @@ function SchedaGiocatore({ db, giocatoreId }: Props) {
   const g = interrogaUna<GiocatoreRiga>(db, 'SELECT * FROM giocatore WHERE id = ?', [giocatoreId])
   if (!g) return <p>Giocatore non trovato.</p>
 
+  // Il club può essere: uno dei nostri, uno fuori perimetro (club_esterno),
+  // o nessuno (svincolato)
   const club = interrogaUna<{ nome: string }>(db, 'SELECT nome FROM club WHERE id = ?', [g.club_id])
+  const nomeClub = club?.nome ?? g.club_esterno
+  const nazionale = interrogaUna<{ nome: string }>(
+    db,
+    `SELECT n.nome FROM nazionale n JOIN convocazione cv ON cv.nazionale_id = n.id
+     WHERE cv.giocatore_id = ? AND n.generata = 0`,
+    [giocatoreId],
+  )
   const contratto = interrogaUna<{ stipendio: number; scadenza: string }>(
     db, 'SELECT stipendio, scadenza FROM contratto WHERE giocatore_id = ?', [giocatoreId],
   )
@@ -58,8 +67,9 @@ function SchedaGiocatore({ db, giocatoreId }: Props) {
       <h2>{g.nome} {g.cognome}</h2>
       <p className="riga-info">
         <span className="etichetta-ruolo">{g.ruolo}</span>
-        {' '}· {club?.nome ?? 'Svincolato'} · {calcolaEta(g.data_nascita)} anni · {g.nazionalita} ·
+        {' '}· {nomeClub ?? 'Svincolato'} · {calcolaEta(g.data_nascita)} anni · {g.nazionalita} ·
         piede {g.piede} · <strong>media {mediaComplessiva(g)}</strong> · potenziale {g.potenziale}
+        {nazionale && <> · 🏆 nazionale: {nazionale.nome}</>}
       </p>
 
       <h3>Attributi</h3>

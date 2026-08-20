@@ -46,11 +46,14 @@ CREATE TABLE club (
 -- opzionali è la soluzione più semplice da interrogare (docs/database.md).
 CREATE TABLE giocatore (
   id            INTEGER PRIMARY KEY,
-  club_id       INTEGER REFERENCES club(id),  -- NULL = svincolato
+  club_id       INTEGER REFERENCES club(id),  -- NULL = svincolato o club fuori perimetro
+  club_esterno  TEXT,                         -- nome del club reale se fuori dal perimetro
+                                              -- importato (es. convocato in nazionale che
+                                              -- gioca in una lega non inclusa)
   nome          TEXT NOT NULL,
   cognome       TEXT NOT NULL,
   data_nascita  TEXT NOT NULL,                -- formato ISO: "2001-05-14"
-  nazionalita   TEXT NOT NULL,                -- sigla, es. "ITA"
+  nazionalita   TEXT NOT NULL,                -- nome del paese (es. "Italy"; i18n più avanti)
   ue            INTEGER NOT NULL DEFAULT 1,   -- 1 = comunitario (status UE/extra-UE)
   ruolo         TEXT NOT NULL,                -- ruolo primario: POR DC TD TS MED CC TRQ ED ES PC
   ruoli_secondari TEXT,                       -- eventuali altri ruoli, separati da virgola
@@ -81,6 +84,24 @@ CREATE TABLE giocatore (
   potenziale  INTEGER NOT NULL DEFAULT 50     -- margine di crescita (FRD §7)
   -- valore_mercato NON è una colonna: è CALCOLATO da attributi, età, scadenza,
   -- fama del club e rendimento (FRD §6.1). Arriva con M6.
+);
+
+-- Le squadre nazionali. Un giocatore resta tesserato nel suo club: il legame
+-- con la nazionale è una "convocazione" (tabella sotto), non un contratto.
+CREATE TABLE nazionale (
+  id            INTEGER PRIMARY KEY,
+  nome          TEXT NOT NULL UNIQUE,      -- "Italia", "Brasile"...
+  fama          INTEGER NOT NULL DEFAULT 50,
+  mondiale_2026 INTEGER NOT NULL DEFAULT 0, -- 1 = qualificata al Mondiale 2026
+  generata      INTEGER NOT NULL DEFAULT 0  -- 1 = rosa selezionata automaticamente
+                                            --     per nazionalità (non ufficiale)
+);
+
+-- Convocazione: quale giocatore fa parte di quale nazionale
+CREATE TABLE convocazione (
+  nazionale_id INTEGER NOT NULL REFERENCES nazionale(id),
+  giocatore_id INTEGER NOT NULL REFERENCES giocatore(id),
+  PRIMARY KEY (nazionale_id, giocatore_id)
 );
 
 -- Il contratto che lega un giocatore a un club

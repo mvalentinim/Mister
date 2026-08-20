@@ -12,13 +12,16 @@ import ElencoSquadre from './schermate/ElencoSquadre.tsx'
 import Rosa from './schermate/Rosa.tsx'
 import SchedaGiocatore from './schermate/SchedaGiocatore.tsx'
 
+// Una squadra sfogliabile: un club oppure una nazionale
+type Squadra = { tipo: 'club' | 'nazionale'; id: number }
+
 // Le viste possibili dell'app. Ogni voce porta con sé i dati che le servono
-// (es. per la rosa serve sapere QUALE club mostrare).
+// (es. per la rosa serve sapere QUALE squadra mostrare).
 type Vista =
   | { tipo: 'menu' }
   | { tipo: 'squadre' }
-  | { tipo: 'rosa'; clubId: number }
-  | { tipo: 'giocatore'; giocatoreId: number; clubId: number }
+  | { tipo: 'rosa'; squadra: Squadra }
+  | { tipo: 'giocatore'; giocatoreId: number; squadra: Squadra }
 
 // Voci del menu non ancora attive, con la milestone in cui arriveranno
 const VOCI_FUTURE = [
@@ -112,7 +115,7 @@ function App() {
         {(vista.tipo === 'rosa' || vista.tipo === 'giocatore') && (
           <button
             className="bottone-indietro"
-            onClick={() => setVista({ tipo: 'rosa', clubId: vista.clubId })}
+            onClick={() => setVista({ tipo: 'rosa', squadra: vista.squadra })}
           >
             Rosa
           </button>
@@ -120,14 +123,14 @@ function App() {
       </header>
 
       {vista.tipo === 'squadre' && (
-        <ElencoSquadre db={db} onApriRosa={(clubId) => setVista({ tipo: 'rosa', clubId })} />
+        <ElencoSquadre db={db} onApriRosa={(squadra) => setVista({ tipo: 'rosa', squadra })} />
       )}
       {vista.tipo === 'rosa' && (
         <Rosa
           db={db}
-          clubId={vista.clubId}
+          squadra={vista.squadra}
           onApriGiocatore={(giocatoreId) =>
-            setVista({ tipo: 'giocatore', giocatoreId, clubId: vista.clubId })
+            setVista({ tipo: 'giocatore', giocatoreId, squadra: vista.squadra })
           }
         />
       )}

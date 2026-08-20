@@ -18,18 +18,29 @@ import seedSql from '../../data/seed-esempio.sql?raw'
 // chiamata lo costruisce, le successive riusano la stessa istanza.
 let istanza: Database | null = null
 
-/** Apre (o riusa) il database, creando tabelle e dati di esempio. */
+/** Apre (o riusa) il database del gioco.
+ *  Prima scelta: public/mister.sqlite, il database REALE costruito dalla
+ *  pipeline di importazione (npm run importa-dati).
+ *  Ripiego: se il file non c'è, costruisce in memoria il piccolo database
+ *  di esempio da data/*.sql (così l'app funziona anche appena clonata). */
 export async function apriDatabase(): Promise<Database> {
   if (istanza) return istanza
 
-  // Carica il "motore" SQLite (il file .wasm) e crea un database vuoto
+  // Carica il "motore" SQLite (il file WebAssembly)
   const SQL = await initSqlJs({ locateFile: () => sqlWasmUrl })
+
+  // BASE_URL = radice del sito (di solito "/"): lì Vite serve i file di public/
+  const risposta = await fetch(`${import.meta.env.BASE_URL}mister.sqlite`)
+  if (risposta.ok) {
+    const contenuto = new Uint8Array(await risposta.arrayBuffer())
+    istanza = new SQL.Database(contenuto)
+    return istanza
+  }
+
+  console.warn('mister.sqlite non trovato: uso i dati di esempio. Esegui `npm run importa-dati`.')
   const db = new SQL.Database()
-
-  // Esegue i nostri file SQL: prima lo schema (le tabelle), poi i dati
-  db.run(schemaSql)
-  db.run(seedSql)
-
+  db.run(schemaSql) // le tabelle...
+  db.run(seedSql) // ...e i dati di esempio
   istanza = db
   return db
 }

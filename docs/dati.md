@@ -42,11 +42,102 @@ Nessuna fonte da sola basta: la strategia è una **combinazione**, confermata da
 
 > ⚠️ **Protocollo risorse esterne (FRD §0.2):** nessun download è ancora stato fatto. Prima di importare, Claude Code presenta allo sviluppatore la fonte scelta con link e licenza, e l'import si esegue e si verifica insieme.
 
+## Fonti scelte e verificate (sessione 4)
+
+La verifica concreta ha ridimensionato i piani iniziali (Kaggle e HuggingFace non
+sono raggiungibili direttamente da questo ambiente; football-data.org richiede
+registrazione e non copre le seconde divisioni nel piano gratuito) e ha trovato
+una combinazione migliore:
+
+1. **Dataset "FIFA 23 Players"** (origine Kaggle, autore sanjeetsinghnaik;
+   usato tramite il mirror pubblico GitHub `miraehab/FIFA-23-ML-Project`):
+   `players_fifa23.csv` (18.539 giocatori, attributi già in scala 1-99) +
+   `teams_fifa23.csv` (leghe, prestigio, budget). **Copre per intero tutte e
+   10 le leghe del perimetro** (verificato club per club) e include le rose
+   delle nazionali licenziate nel gioco. Stagione di riferimento: 2022-23.
+2. **openfootball/worldcup**: gironi del Mondiale 2026 → elenco delle 48
+   qualificate. Le *convocazioni ufficiali* 2026 non sono ancora pubblicate
+   in nessuna fonte aperta verificata.
+
+**Nota licenza**: gli attributi derivano dal videogioco EA FIFA 23 via dataset
+pubblico Kaggle — uso privato e non commerciale, come da FRD. Nessun dato
+proviene da mod di terze parti. La squadra fittizia "AFC Richmond" (bonus del
+gioco) viene esclusa dall'import.
+
+## Come si esegue l'import
+
+```bash
+npm run importa-dati
+```
+
+che esegue in sequenza: `data/importa/01-scarica-fonti.mjs` (scarica le fonti
+in `data/fonti/`, fuori da git) e `data/importa/02-costruisci-db.mjs`
+(costruisce `public/mister.sqlite` e stampa il report di verifica).
+
+## Mappatura campo per campo (fonte → nostro schema)
+
+| Nostro campo | Fonte (players_fifa23.csv) | Note |
+|---|---|---|
+| `giocatore.id` | `ID` | l'ID della fonte garantisce l'unicità |
+| `nome`, `cognome` | `Name` ("K. De Bruyne") | diviso al primo spazio: nome "K.", cognome "De Bruyne" |
+| `data_nascita` | `Age` | **sintetica**: `(2026 − Age)-07-01`. Le età sono ancorate al 2026 (vedi sotto) |
+| `nazionalita` | `Nationality` | nome del paese in inglese (i18n più avanti) |
+| `ruolo` | `BestPosition` | mappa GK→POR, CB→DC, RB/RWB→TD, LB/LWB→TS, CDM→MED, CM→CC, CAM→TRQ, RM/RW→ED, LM/LW→ES, ST/CF→PC |
+| `ruoli_secondari` | `Positions` | stessa mappa, senza il primario |
+| `piede` | `PreferredFoot` | Left→sinistro, altrimenti destro |
+| `velocita` | `PaceTotal` (`SprintSpeed` per i portieri) | |
+| `resistenza` | `Stamina` | |
+| `tecnica` | `BallControl` | |
+| `passaggio` | `ShortPassing` | |
+| `tiro` | `ShootingTotal` | |
+| `dribbling` | `DribblingTotal` | |
+| `colpo_testa` | `HeadingAccuracy` | |
+| `marcatura` | `Marking` | |
+| `contrasto` | `StandingTackle` | |
+| `posizionamento` | `Positioning` | |
+| `visione` | `Vision` | |
+| `calci_piazzati` | `FKAccuracy` | |
+| `riflessi`/`presa`/`uscite`/`rinvio` | `GKReflexes`/`GKHandling`/`GKPositioning`/`GKKicking` | solo portieri |
+| comportamentali (7) | — assenti nella fonte — | **generati** in modo deterministico (seme = ID giocatore), 50±30; l'ambizione cresce col margine `Potential−Overall`. Provvisori: raffinabili con l'editor |
+| `potenziale` | `Potential` | |
+| `contratto.stipendio` | `WageEUR` | la fonte è **settimanale** → ×52 per l'annuale |
+| `contratto.scadenza` | `ContractUntil` | **traslata di +4 anni** (vedi sotto) |
+| `club.fama` | `DomesticPrestige`, `IntPrestige` (teams) | `dom×7 + int×3`, scala 1-10 → 1-99 |
+| `club.budget_mercato` | `TransferBudget` (teams) | |
+| `club.budget_stipendi` | — calcolato — | somma stipendi rosa +15% |
+| `nazionale` + `convocazione` | `NationalTeam` | rose ufficiali FIFA 23 |
+
+**Ancoraggio temporale al 2026.** La fonte fotografa la stagione 2022-23. Per
+avere un mondo coerente con l'avvio delle carriere nel 2026: le età valgono
+"oggi" (date di nascita sintetiche) e le scadenze contrattuali sono traslate
+di +4 anni. Le rose restano quelle 2022-23: è il compromesso dichiarato finché
+non esisterà una fonte aperta più recente con pari copertura.
+
+**Nazionali e Mondiale 2026.** Le rose nazionali ufficiali della fonte (35
+squadre licenziate) sono importate così come sono; le qualificate al Mondiale
+2026 senza rosa ufficiale ricevono una **selezione automatica** dei migliori
+giocatori di quella nazionalità presenti nel database (flag `generata = 1`,
+dichiarato anche nell'interfaccia). 17 qualificate restano senza rosa perché i
+loro giocatori militano fuori dalle 10 leghe importate (es. Arabia Saudita,
+Giordania): si aggiungeranno quando ci sarà una fonte con le convocazioni 2026
+o tramite editor.
+
+## Risultato dell'import (report del 2026-08-20)
+
+- **6.112 giocatori**, **202 club**, 10 competizioni, 5 nazioni
+- **43 nazionali** (31 al Mondiale 2026, di cui 8 a selezione automatica), 980 convocazioni
+- 5.762 contratti; nessun club sotto i 18 giocatori; nessun duplicato di ID
+  (79 righe ripetute nella fonte scartate); 11 casi di omonimia (giocatori
+  diversi con stesso nome breve e anno di nascita — verificati, sono persone diverse)
+- Database: `public/mister.sqlite`, 1,2 MB
+
 ## Stato
 
-- [x] Valutazione preliminare delle fonti (questo documento)
-- [x] Strategia e perimetro approvati dallo sviluppatore (top 5 leghe europee, nazionali fino al Mondiale 2026, canale Legends)
-- [ ] Verifica concreta di copertura e licenze delle fonti candidate
-- [ ] Estensione schema per le nazionali
-- [ ] Script di importazione + mappatura attributi documentata campo per campo
-- [ ] Verifica dei totali (squadre, giocatori, duplicati)
+- [x] Valutazione preliminare delle fonti
+- [x] Strategia e perimetro approvati dallo sviluppatore
+- [x] Verifica concreta di copertura (club per club) e provenienza delle fonti
+- [x] Estensione schema per le nazionali (`nazionale`, `convocazione`)
+- [x] Script di importazione + mappatura documentata campo per campo
+- [x] Verifica dei totali (squadre, giocatori, duplicati) — report sopra
+- [ ] Convocazioni ufficiali Mondiale 2026 (nessuna fonte aperta le pubblica ancora)
+- [ ] Calendari reali (football-data.org, richiede registrazione — serve per M2)
