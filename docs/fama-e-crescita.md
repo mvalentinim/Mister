@@ -117,14 +117,10 @@ della tua rosa.
 
 ## Salvataggio
 
-VersioneSchema **7**: `fiducia`, `crescita`, `coppa`, `eventiFama`,
-`trofei`, `esoneri`, `offerteSpeciali`. I salvataggi vecchi migrano da soli
-(coppa dalla stagione successiva).
-
-## Cosa resta di M8 (prossima sessione)
-
-Competizioni continentali semplificate e panchine delle nazionali oltre la
-soglia di fama alta (ciclo qualificazioni/torneo).
+VersioneSchema **9** (v7: fiducia, crescita, coppa, registro fama, trofei,
+esoneri, offerte; v8: Coppa Europa e contratto dell'allenatore; v9: la
+nazionale). I salvataggi vecchi migrano da soli (coppa dalla stagione
+successiva).
 
 ## La panchina della nazionale (M8 parte 3, FRD §4.3)
 
