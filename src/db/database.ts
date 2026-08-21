@@ -7,6 +7,7 @@
 // verranno resi persistenti (IndexedDB), come da FRD §11.
 
 import initSqlJs, { type Database } from 'sql.js'
+import { caricaDatabaseUtente } from './persistenza.ts'
 
 // Vite: "?url" importa il percorso del file WebAssembly di SQLite,
 // "?raw" importa il contenuto testuale dei file .sql.
@@ -28,6 +29,13 @@ export async function apriDatabase(): Promise<Database> {
 
   // Carica il "motore" SQLite (il file WebAssembly)
   const SQL = await initSqlJs({ locateFile: () => sqlWasmUrl })
+
+  // 0. il DATABASE PERSONALIZZATO dell'editor (M9), se esiste, vince su tutto
+  const personalizzato = await caricaDatabaseUtente()
+  if (personalizzato) {
+    istanza = new SQL.Database(personalizzato)
+    return istanza
+  }
 
   // BASE_URL = radice del sito (di solito "/"): lì Vite serve i file di public/
   const risposta = await fetch(`${import.meta.env.BASE_URL}mister.sqlite`)

@@ -386,3 +386,22 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 **M8 CHIUSA** — per il piano è il traguardo 🎮 **GIOCO COMPLETO (v1)**: carriera lunga con fama, fiducia, esoneri, coppe, Europa, crescita giocatori, panchine estere e nazionali. Collaudo di persona dello sviluppatore in sospeso come sempre.
 
 **Prossima milestone:** M9 — Editor e squadre Legends (FRD §5.4).
+
+---
+
+## Sessione 20 — 2026-08-21 — Piano aggiornato + M9 sessione 1: l'editor del database
+
+**Obiettivo dichiarato:** aggiornare il piano su decisione dello sviluppatore (M12 fuori perimetro; M11 = gioco completo e finito, con UI professionale e ciclo di vita save/game over) e aprire M9 con le fondamenta dell'editor (FRD §5.4).
+
+**Piano aggiornato** (`piano-di-progetto-MISTER.md`):
+- **M12 fuori perimetro**: resta descritto come estensione opzionale futura; il gioco è completo e finito con M11.
+- **M10** ora include l'**approfondimento game over / restart / save / upload**: regole del fine carriera (da confermare col design: il FRD §4.4 esclude un fine forzato), restart e slot multipli, salvataggio manuale, caricamento da file.
+- **M11 ridefinita**: "Rifinitura videogame" — riprogettazione visiva di TUTTE le schermate (design system, layout immersivi, transizioni: deve sembrare un videogame del 2026, non un database), più la verifica multi-nazione (l'espansione leghe è di fatto arrivata con M6-M8) e le rifiniture finali. Traguardo: 🎮 GIOCO COMPLETO E FINITO.
+
+**Fatto (editor, sessione 1 di M9):**
+- **Persistenza** (`src/db/persistenza.ts`): al salvataggio l'intero DB modificato va in IndexedDB; all'avvio l'app carica quello (se esiste) al posto di `public/mister.sqlite`; banner sempre visibile e "Ripristina il database originale". Le carriere in corso NON cambiano (FRD §5.4: fotografano il DB alla creazione).
+- **Schermata Editor** (voce di menu finalmente attiva): ricerca per nome/club/ruolo/categoria (normale/icon/hero); scheda giocatore completa (anagrafica, categoria, potenziale, club, 12 attributi tecnici, set portiere, 7 di personalità; vuoto = NULL); **modifica di massa** (±N a un attributo per tutti i filtrati, limiti 1-99); **modifica club** (nome, fama, budget).
+- **Collaudo end-to-end**: tiro di Vicari 27→95 salvato e ancora lì dopo la ricarica ✓; +5 velocità ai 4 attaccanti del Monza in un colpo ✓; Monza rinominato "AC Monza 1912" e persistito ✓; filtro Icon mostra le leggende (primo: Bobby Moore) ✓; ripristino → tiro di nuovo 27 ✓. Curiosità dal collaudo: il filtro testuale di Playwright inciampava sul Südtirol cercando "Tiro" — il bug era nel test, non nel gioco. Build, lint e tsc verdi.
+- Decisioni in `docs/editor.md`.
+
+**Prossima sessione:** M9 sessione 2 — wizard "Crea squadra Legend", creazione giocatori/club da zero, prime squadre Legends.

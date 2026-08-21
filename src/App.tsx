@@ -10,6 +10,7 @@ import type { Database } from 'sql.js'
 import { apriDatabase } from './db/database.ts'
 import { caricaCarriere, eliminaCarriera, salvaCarriera } from './carriera/salvataggio.ts'
 import { etichettaStagione, type Carriera } from './carriera/tipi.ts'
+import Editor from './schermate/Editor.tsx'
 import ElencoSquadre from './schermate/ElencoSquadre.tsx'
 import NuovaCarriera from './schermate/NuovaCarriera.tsx'
 import Rosa from './schermate/Rosa.tsx'
@@ -29,6 +30,7 @@ type Vista =
   | { tipo: 'nuova-carriera' }
   | { tipo: 'carica-carriera' }
   | { tipo: 'carriera'; carriera: Carriera }
+  | { tipo: 'editor' }
 
 function App() {
   const [vista, setVista] = useState<Vista>({ tipo: 'menu' })
@@ -78,9 +80,9 @@ function App() {
               {db ? 'Sfoglia squadre, nazionali e leggende' : erroreDb ?? 'Caricamento database…'}
             </span>
           </button>
-          <button className="voce-menu" disabled>
+          <button className="voce-menu attiva" disabled={!db} onClick={() => setVista({ tipo: 'editor' })}>
             <span className="voce-etichetta">Editor</span>
-            <span className="voce-descrizione">Arriverà con la milestone M9</span>
+            <span className="voce-descrizione">Modifica giocatori e club, crea le tue leggende (M9)</span>
           </button>
         </nav>
 
@@ -130,6 +132,8 @@ function App() {
         />
       )}
       {vista.tipo === 'giocatore' && <SchedaGiocatore db={db} giocatoreId={vista.giocatoreId} />}
+
+      {vista.tipo === 'editor' && <Editor db={db} />}
 
       {vista.tipo === 'nuova-carriera' && (
         <NuovaCarriera db={db} onCarrieraCreata={avviaCarriera} />

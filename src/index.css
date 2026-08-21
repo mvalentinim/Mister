@@ -763,6 +763,43 @@ body {
   white-space: nowrap;
 }
 
+/* l'editor del database (M9) */
+.scheda-editor {
+  border: 1px solid var(--bordo);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  background: var(--superficie);
+}
+
+.scheda-editor h4 {
+  margin: 0.9rem 0 0.4rem;
+}
+
+.griglia-editor {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 0.5rem 0.9rem;
+}
+
+.griglia-editor label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.82rem;
+  color: var(--testo-attenuato);
+  gap: 0.15rem;
+}
+
+.griglia-editor input,
+.griglia-editor select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--bordo);
+  border-radius: 6px;
+  font: inherit;
+  background: var(--superficie);
+  color: var(--testo);
+}
+
 /* il riquadro della coppa nazionale (M8) */
 .riquadro-coppa {
   border: 1px solid var(--bordo);

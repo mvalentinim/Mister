@@ -171,34 +171,35 @@ Attività:
 
 ---
 
-## M10 — SALVATAGGI PORTABILI E APP DESKTOP (≈ 3–4 sessioni)
-**Obiettivo:** persistenza definitiva del FRD §11.
+## M10 — SALVATAGGI PORTABILI E CICLO DI VITA DELLA CARRIERA (≈ 3–4 sessioni)
+**Obiettivo:** persistenza definitiva del FRD §11 + le regole del ciclo di vita del gioco.
 
 Attività:
+- **Approfondimento game over / restart / save / upload** *(aggiunto il 2026-08-21)*: progettare e implementare con chiarezza — quando (e se) esiste un "game over" (es. fama a zero e nessuna offerta? il FRD §4.4 esclude un fine forzato: da confermare col design); ricominciare una carriera (restart) e gestire più carriere in parallelo (slot); salvataggio manuale oltre all'automatico; caricamento/upload di salvataggi da file.
 - Esportazione/importazione carriera come singolo file `.mister` con versione schema e migrazioni.
 - Gestione differenze DB statico ↔ carriera (avvisi chiari).
 - Packaging **Tauri**: app macOS nativa con salvataggi su file system; build spiegata passo passo.
 - Guida sincronizzazione via cartella cloud dell'utente.
 
-**DoD:** lo sviluppatore esporta una carriera dal browser, la importa nell'app desktop (o su un altro browser/dispositivo) e continua a giocare senza perdere nulla.
+**DoD:** lo sviluppatore esporta una carriera dal browser, la importa su un altro browser/dispositivo e continua a giocare senza perdere nulla; le regole di game over/restart sono documentate e collaudate.
 
 ---
 
-## M11 — ESPANSIONE CONTENUTI: TOP LEAGUE EUROPEE (≈ 3–5 sessioni)
-**Obiettivo:** Fase A completa del FRD §5.2: Inghilterra, Spagna, Germania, Francia (prima e, dove possibile, seconda divisione), carriere avviabili da più nazioni.
+## M11 — RIFINITURA "VIDEOGAME": UI PROFESSIONALE E GIOCO FINITO (≈ 4–6 sessioni)
+**Obiettivo:** *(ridefinita il 2026-08-21)* — il traguardo finale: MISTER deve **sembrare un videogame del 2026, non un grande database**. Con la chiusura di M11 il gioco è COMPLETO E FINITO.
 
 Attività:
-- Estensione pipeline di importazione alle nuove leghe (le fondamenta di M1 rendono questa milestone soprattutto esecutiva).
-- Regole nazionali (promozioni/retrocessioni, finestre mercato) parametrizzate.
-- Ricalibrazione del motore sulle nuove leghe.
+- **Riprogettazione visiva di tutte le schermate**: design system coerente (tipografia, colori, spaziature, componenti), layout da videogame (schermate immersive, non tabelle), transizioni e micro-animazioni, feedback visivi, icone/stemmi, cura di Match Day, mercato, trattativa e Spogliatoio come momenti "di scena".
+- Verifica finale multi-nazione (l'espansione delle leghe è di fatto arrivata con M6-M8: mercato mondiale e panchine estere): regole nazionali rifinite dove serve, ricalibrazione del motore sulle 10 leghe.
+- Rifiniture di coerenza (es. nomi delle nazionalità in italiano), collaudo complessivo del gioco.
 
-**🔗 Risorse esterne:** stesse fonti dati di M1, estese.
-
-**DoD:** una carriera completa avviata dalla seconda divisione inglese (o altra nazione) gira in modo credibile quanto quella italiana.
+**DoD:** lo sviluppatore attraversa tutte le schermate e le giudica all'altezza di un videogame moderno; una carriera completa gira in qualunque nazione senza stonature.
 
 ---
 
-## M12 — MATCH ENGINE INTERATTIVO STILE SWOS (≈ 8–12 sessioni)
+## M12 — MATCH ENGINE INTERATTIVO STILE SWOS (FUORI PERIMETRO — OPZIONALE)
+*(aggiornato il 2026-08-21: su decisione dello sviluppatore, M12 esce dal perimetro del progetto. Il gioco si considera completo e finito con M11. Questa milestone resta descritta qui come possibile estensione futura, se e quando lo sviluppatore vorrà.)*
+
 **Obiettivo:** la partita giocabile del FRD §10. Milestone volutamente ultima: arricchisce un gioco già completo.
 
 Attività:
@@ -228,9 +229,9 @@ Attività:
 | M7 Trattativa LLM | 5–7 | 🎮 **L'ESPERIENZA DISTINTIVA** |
 | M8 Fama e carriera lunga | 4–6 | 🎮 **GIOCO COMPLETO (v1)** |
 | M9 Editor e Legends | 4–5 | Contenuti tuoi |
-| M10 Salvataggi e desktop | 3–4 | Portabilità totale |
-| M11 Espansione leghe | 3–5 | Europa giocabile |
-| M12 Motore SWOS | 8–12 | 🎮 **VISIONE COMPLETA** |
+| M10 Salvataggi e ciclo di vita | 3–4 | Portabilità totale |
+| M11 UI professionale e rifinitura | 4–6 | 🎮 **GIOCO COMPLETO E FINITO** |
+| M12 Motore SWOS *(fuori perimetro, opzionale)* | 8–12 | Estensione futura |
 
 **Totale indicativo: ~57–77 sessioni.** A un ritmo di 3 sessioni a settimana, la prima versione giocabile (M2) arriva in ~3–4 settimane e il gioco completo v1 (M8) in ~4–5 mesi. Le stime serviranno soprattutto a misurare i progressi, non come scadenze.
 
