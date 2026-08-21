@@ -114,64 +114,114 @@ export function Ritratto({ giocatoreId, colori, lato = 120 }: Props) {
     </g>
   )
 
-  // ── gli occhi a mandorla, con palpebra e iride piccola ──
-  const occhio = (x: number, specchio: number) => (
-    <g>
-      <path
-        d={`M ${x - 5} ${occhiY} Q ${x} ${occhiY - 3.6} ${x + 5} ${occhiY - 0.6} Q ${x} ${occhiY + 2.8} ${x - 5} ${occhiY} Z`}
-        fill="#fdf8ee" stroke={INK} strokeWidth="1.1"
-        transform={specchio < 0 ? `scale(-1,1) translate(${-2 * x},0)` : undefined}
-      />
-      {/* la palpebra: il tratto più marcato sopra l'occhio */}
-      <path
-        d={`M ${x - 5.4} ${occhiY - 0.4} Q ${x} ${occhiY - 4.2} ${x + 5.4} ${occhiY - 1}`}
-        fill="none" stroke={INK} strokeWidth="1.8" strokeLinecap="round"
-        transform={specchio < 0 ? `scale(-1,1) translate(${-2 * x},0)` : undefined}
-      />
-      <circle cx={specchio < 0 ? 2 * 50 - x - 1 : x + 1} cy={occhiY - 0.7} r="1.7" fill={INK} />
-    </g>
-  )
+  // ── GLI OCCHI: ovali ALTI ed espressivi alla Guybrush — bianchi grandi,
+  //    pupilla importante, palpebra che decide l'espressione ──
+  const distOcchi = 7.5 + rng.intero(3)         // distanza dal centro del viso
+  const occhioLarg = 2.9 + rng.intero(3) * 0.5  // mezzo asse orizzontale
+  const occhioAlt = occhioLarg + 1 + rng.intero(4) * 0.6 // SEMPRE più alti che larghi
+  const pupillaR = 1.6 + rng.intero(3) * 0.35
+  const palpebra = [0.1, 0.28, 0.45][rng.intero(3)] // quanto la palpebra scende
+  const sguardo = (rng.intero(3) - 1) * 0.9      // pupille verso sx/centro/dx
+  const uid = `v${giocatoreId}` // id univoci per i clip (più ritratti in pagina)
 
-  // ── le sopracciglia: piene, arcuate o dritte, mai simmetriche del tutto ──
+  const occhio = (ex: number, lato: 'l' | 'r') => {
+    const ey = occhiY - 1
+    const coperchioY = ey - occhioAlt + palpebra * occhioAlt * 2
+    return (
+      <g>
+        <clipPath id={`${uid}-${lato}`}>
+          <ellipse cx={ex} cy={ey} rx={occhioLarg} ry={occhioAlt} />
+        </clipPath>
+        <ellipse cx={ex} cy={ey} rx={occhioLarg} ry={occhioAlt} fill="#fdf8ee" stroke={INK} strokeWidth="1.2" />
+        {/* la pupilla, grande, appesa alla palpebra */}
+        <circle
+          cx={ex + sguardo} cy={Math.max(ey - 0.4, coperchioY + pupillaR * 0.8)} r={pupillaR}
+          fill={INK} clipPath={`url(#${uid}-${lato})`}
+        />
+        {/* la palpebra: pelle che scende sull'ovale, col suo tratto */}
+        <path
+          d={`M ${ex - occhioLarg - 1} ${ey - occhioAlt - 1} L ${ex + occhioLarg + 1} ${ey - occhioAlt - 1} L ${ex + occhioLarg + 1} ${coperchioY - 0.6} Q ${ex} ${coperchioY + 1.4} ${ex - occhioLarg - 1} ${coperchioY - 0.6} Z`}
+          fill={pelle} clipPath={`url(#${uid}-${lato})`}
+        />
+        <path
+          d={`M ${ex - occhioLarg} ${coperchioY - 0.4} Q ${ex} ${coperchioY + 1.6} ${ex + occhioLarg} ${coperchioY - 0.4}`}
+          fill="none" stroke={INK} strokeWidth="1.5" strokeLinecap="round"
+        />
+      </g>
+    )
+  }
+
+  // ── le sopracciglia: sottili e arcuate in alto (preoccupato, alla
+  //    Guybrush), piene e dritte (neutro) o calate all'interno (severo) ──
+  const espressione = rng.intero(3) // 0 preoccupato, 1 neutro, 2 severo
+  const spessoreCiglio = sopraccigliaArcuate ? 1.6 : 2.6
+  const cigliaY = occhiY - occhioAlt - 4 - (espressione === 0 ? 2.5 : 0)
+  const internoDy = espressione === 0 ? 2.2 : espressione === 2 ? -2 : 0.4
   const sopracciglia = (
     <g fill={chiomaOmbra}>
-      <path d={sopraccigliaArcuate
-        ? `M ${cx - 16} ${occhiY - 7} Q ${cx - 10} ${occhiY - 11.5} ${cx - 4} ${occhiY - 8.5} L ${cx - 4.5} ${occhiY - 6.8} Q ${cx - 10} ${occhiY - 9.4} ${cx - 15.4} ${occhiY - 5.6} Z`
-        : `M ${cx - 15.6} ${occhiY - 6.4} L ${cx - 4} ${occhiY - 8.6} L ${cx - 4.2} ${occhiY - 6.6} L ${cx - 15.2} ${occhiY - 4.6} Z`} />
-      <path d={sopraccigliaArcuate
-        ? `M ${cx + 4} ${occhiY - 9} Q ${cx + 10} ${occhiY - 12.5} ${cx + 16} ${occhiY - 7.5} L ${cx + 15.4} ${occhiY - 6} Q ${cx + 10} ${occhiY - 10.2} ${cx + 4.5} ${occhiY - 7.2} Z`
-        : `M ${cx + 4} ${occhiY - 8.8} L ${cx + 15.6} ${occhiY - 6.2} L ${cx + 15.2} ${occhiY - 4.4} L ${cx + 4.2} ${occhiY - 6.8} Z`} />
+      {/* sinistro: dall'esterno all'interno (l'interno segue l'espressione) */}
+      <path d={`M ${cx - distOcchi - occhioLarg - 1.5} ${cigliaY + 1.5}
+        Q ${cx - distOcchi} ${cigliaY - 1.5} ${cx - 3} ${cigliaY + internoDy}
+        L ${cx - 3.2} ${cigliaY + internoDy + spessoreCiglio}
+        Q ${cx - distOcchi} ${cigliaY - 1.5 + spessoreCiglio} ${cx - distOcchi - occhioLarg - 1.2} ${cigliaY + 1.5 + spessoreCiglio * 0.7} Z`} />
+      <path d={`M ${cx + distOcchi + occhioLarg + 1.5} ${cigliaY + 1.5}
+        Q ${cx + distOcchi} ${cigliaY - 1.5} ${cx + 3} ${cigliaY + internoDy}
+        L ${cx + 3.2} ${cigliaY + internoDy + spessoreCiglio}
+        Q ${cx + distOcchi} ${cigliaY - 1.5 + spessoreCiglio} ${cx + distOcchi + occhioLarg + 1.2} ${cigliaY + 1.5 + spessoreCiglio * 0.7} Z`} />
     </g>
   )
 
-  // ── il naso: una curva sola, lunga e decisa ──
+  // ── IL NASO: una FORMA piena con la sua silhouette, non un filo ──
   const nasoTipY = occhiY + nasoLungo
-  const NASI = [
-    /* dritto a punta, alla Guybrush */
-    <path key="n" d={`M ${cx - 0.5} ${occhiY - 2} C ${cx + 2.5} ${occhiY + 4}, ${cx + 5} ${nasoTipY - 4}, ${cx + 4.5} ${nasoTipY - 1} Q ${cx + 3.5} ${nasoTipY + 1.5} ${cx + 0.5} ${nasoTipY} Q ${cx - 1} ${nasoTipY - 0.5} ${cx - 1} ${nasoTipY - 1.5}`}
-      fill="none" stroke={INK} strokeWidth="1.5" strokeLinecap="round" />,
-    /* aquilino, con la gobbetta */
-    <path key="n" d={`M ${cx - 0.5} ${occhiY - 2} Q ${cx + 3.5} ${occhiY + 2} ${cx + 3} ${occhiY + 6} Q ${cx + 6} ${nasoTipY - 5} ${cx + 5} ${nasoTipY - 1} Q ${cx + 3.5} ${nasoTipY + 1.5} ${cx + 0.5} ${nasoTipY - 0.5}`}
-      fill="none" stroke={INK} strokeWidth="1.5" strokeLinecap="round" />,
-    /* piccolo all'insù */
-    <path key="n" d={`M ${cx} ${occhiY + 1} C ${cx + 2} ${occhiY + 5}, ${cx + 3.5} ${nasoTipY - 6}, ${cx + 2} ${nasoTipY - 4} Q ${cx - 0.5} ${nasoTipY - 3} ${cx - 1} ${nasoTipY - 4.5}`}
-      fill="none" stroke={INK} strokeWidth="1.5" strokeLinecap="round" />,
-  ]
-  /* l'ombra lungo il naso, lato destro */
-  const ombraNaso = <path d={`M ${cx + 1.5} ${occhiY + 2} Q ${cx + 4} ${nasoTipY - 6} ${cx + 3} ${nasoTipY - 2} L ${cx + 2} ${nasoTipY - 2} Q ${cx + 2.5} ${nasoTipY - 6} ${cx + 0.8} ${occhiY + 2} Z`} fill={pelleOmbra} opacity="0.7" />
+  const nasoW = 3 + rng.intero(3) * 0.8 // la larghezza della punta
+  const nasoForma = (() => {
+    switch (stileNaso) {
+      case 0: /* il cuneo lungo alla Guybrush: dritto, punta tonda in basso */
+        return `M ${cx - 1.5} ${occhiY + 0.5}
+          C ${cx - 2} ${occhiY + nasoLungo * 0.45}, ${cx - nasoW - 0.5} ${nasoTipY - 3.5}, ${cx - nasoW} ${nasoTipY - 0.8}
+          Q ${cx - nasoW + 0.5} ${nasoTipY + 2}, ${cx - 0.8} ${nasoTipY + 1.7}
+          Q ${cx + 1.6} ${nasoTipY + 2.6}, ${cx + nasoW + 0.7} ${nasoTipY + 0.7}
+          Q ${cx + nasoW + 1.2} ${nasoTipY - 2.6}, ${cx + 2.1} ${occhiY + nasoLungo * 0.42}
+          C ${cx + 1.9} ${occhiY + 3}, ${cx + 1.7} ${occhiY + 1.5}, ${cx + 1.5} ${occhiY + 0.5}`
+      case 1: /* aquilino: la gobba sul dorso e la punta che scende */
+        return `M ${cx - 1.5} ${occhiY + 0.5}
+          C ${cx - 3.2} ${occhiY + 4.5}, ${cx - 1.2} ${occhiY + nasoLungo * 0.5}, ${cx - nasoW - 0.8} ${nasoTipY - 2}
+          Q ${cx - nasoW - 0.6} ${nasoTipY + 1.6}, ${cx - 0.5} ${nasoTipY + 2.2}
+          Q ${cx + 1.8} ${nasoTipY + 2.8}, ${cx + nasoW + 0.4} ${nasoTipY + 0.4}
+          Q ${cx + nasoW + 0.8} ${nasoTipY - 2.8}, ${cx + 2.3} ${occhiY + nasoLungo * 0.45}
+          C ${cx + 3.4} ${occhiY + 4.5}, ${cx + 1.7} ${occhiY + 1.5}, ${cx + 1.5} ${occhiY + 0.5}`
+      default: /* bulboso: il patatone tondo in punta */
+        return `M ${cx - 1.4} ${occhiY + 0.5}
+          C ${cx - 1.8} ${occhiY + nasoLungo * 0.4}, ${cx - nasoW - 1.4} ${nasoTipY - 4.5}, ${cx - nasoW - 1} ${nasoTipY - 1}
+          C ${cx - nasoW - 0.6} ${nasoTipY + 2.6}, ${cx + nasoW + 1} ${nasoTipY + 2.8}, ${cx + nasoW + 1.3} ${nasoTipY - 0.8}
+          C ${cx + nasoW + 1.5} ${nasoTipY - 4.2}, ${cx + 2} ${occhiY + nasoLungo * 0.38}, ${cx + 1.4} ${occhiY + 0.5}`
+    }
+  })()
+  const naso = (
+    <g>
+      <path d={nasoForma} fill={pelle} stroke={INK} strokeWidth="1.5" strokeLinejoin="round" />
+      {/* l'ombra sul lato destro del dorso, dentro la silhouette */}
+      <path
+        d={`M ${cx + 1.3} ${occhiY + 3} Q ${cx + 2.6} ${nasoTipY - 5} ${cx + nasoW - 0.4} ${nasoTipY - 0.6} Q ${cx + 1} ${nasoTipY} ${cx + 0.4} ${nasoTipY - 1.2} Q ${cx + 1.2} ${nasoTipY - 5} ${cx + 0.3} ${occhiY + 3} Z`}
+        fill={pelleOmbra} opacity="0.8"
+      />
+      {/* le narici, appena accennate */}
+      <path d={`M ${cx - nasoW + 0.6} ${nasoTipY - 0.2} Q ${cx - nasoW + 1.4} ${nasoTipY + 0.9} ${cx - 1.4} ${nasoTipY + 0.7}`} fill="none" stroke={INK} strokeWidth="1.1" strokeLinecap="round" />
+      <path d={`M ${cx + nasoW - 0.4} ${nasoTipY + 0.2} Q ${cx + nasoW - 1} ${nasoTipY + 1.1} ${cx + 1.8} ${nasoTipY + 1.1}`} fill="none" stroke={INK} strokeWidth="1.1" strokeLinecap="round" />
+    </g>
+  )
 
-  // ── la bocca: un sorrisetto storto, o il sorriso coi denti ──
-  const boccaY = nasoTipY + 6.5
+  // ── la bocca: piccola e storta, sotto il naso ──
+  const boccaY = nasoTipY + 5.5 + rng.intero(2)
+  const boccaW = 5 + rng.intero(3)
   const BOCCHE = [
-    <path key="b" d={`M ${cx - 6} ${boccaY} Q ${cx + sorrisoAsimmetrico * 3} ${boccaY + 3} ${cx + 7} ${boccaY - 1.5}`} fill="none" stroke={INK} strokeWidth="1.6" strokeLinecap="round" />,
-    <path key="b" d={`M ${cx - 5.5} ${boccaY + 0.5} Q ${cx + 1} ${boccaY + 1.5} ${cx + 6} ${boccaY}`} fill="none" stroke={INK} strokeWidth="1.6" strokeLinecap="round" />,
-    <g key="b">
-      <path d={`M ${cx - 6.5} ${boccaY - 0.5} Q ${cx} ${boccaY + 5.5} ${cx + 7.5} ${boccaY - 2} Q ${cx + 1} ${boccaY + 1} ${cx - 6.5} ${boccaY - 0.5} Z`} fill="#fdf8ee" stroke={INK} strokeWidth="1.3" strokeLinejoin="round" />
-    </g>,
+    <path key="b" d={`M ${cx - boccaW} ${boccaY} Q ${cx + sorrisoAsimmetrico * 3} ${boccaY + 2.6} ${cx + boccaW + 1} ${boccaY - 1.6}`} fill="none" stroke={INK} strokeWidth="1.6" strokeLinecap="round" />,
+    <path key="b" d={`M ${cx - boccaW + 0.5} ${boccaY + 0.5} Q ${cx + 1} ${boccaY + 1.4} ${cx + boccaW} ${boccaY}`} fill="none" stroke={INK} strokeWidth="1.6" strokeLinecap="round" />,
+    <path key="b" d={`M ${cx - boccaW - 0.5} ${boccaY - 0.5} Q ${cx} ${boccaY + 5} ${cx + boccaW + 1.5} ${boccaY - 2} Q ${cx + 1} ${boccaY + 0.8} ${cx - boccaW - 0.5} ${boccaY - 0.5} Z`} fill="#fdf8ee" stroke={INK} strokeWidth="1.3" strokeLinejoin="round" />,
   ]
   /* il labbro inferiore accennato, quando la bocca è chiusa */
   const labbro = stileBocca !== 2
-    ? <path d={`M ${cx - 2.5} ${boccaY + 3.4} Q ${cx + 0.5} ${boccaY + 4.4} ${cx + 3.5} ${boccaY + 3.2}`} fill="none" stroke={pelleOmbra} strokeWidth="1.4" strokeLinecap="round" />
+    ? <path d={`M ${cx - 2.5} ${boccaY + 3.2} Q ${cx + 0.5} ${boccaY + 4.2} ${cx + 3.5} ${boccaY + 3}`} fill="none" stroke={pelleOmbra} strokeWidth="1.4" strokeLinecap="round" />
     : null
 
   // ── le orecchie, discrete, con l'orecchino da pirata a sorte ──
@@ -235,11 +285,10 @@ export function Ritratto({ giocatoreId, colori, lato = 120 }: Props) {
       <path d={profiloViso} fill={pelle} stroke={INK} strokeWidth="1.9" strokeLinejoin="round" />
       <path d={ombraViso} fill={pelleOmbra} />
       {orecchie}
-      {ombraNaso}
-      {occhio(cx - 9, 1)}
-      {occhio(cx + 9, 1)}
+      {occhio(cx - distOcchi, 'l')}
+      {occhio(cx + distOcchi, 'r')}
       {sopracciglia}
-      {NASI[stileNaso]}
+      {naso}
       {barba ? BOCCHE[1] : BOCCHE[stileBocca]}
       {labbro}
       {peloFacciale}

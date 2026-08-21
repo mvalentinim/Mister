@@ -607,3 +607,14 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - Verificato il risultato dentro la Figurina. Build, lint, tsc verdi. Match Day invariato (già approvato).
 
 **Prossimo passo:** propagazione dello stile alle altre schermate nell'ordine del §6, una per sessione.
+
+---
+
+## Sessione 29-ter — 2026-08-21 — Occhi e nasi rifatti (bocciatura motivata)
+
+**Obiettivo dichiarato:** lo sviluppatore ha bocciato i volti — occhi tutti uguali (e brutti), naso a filo di china — mostrando il ritratto di Guybrush come metro. Due lezioni: gli OCCHI sono ovali alti ed espressivi (è nella palpebra che vive l'espressione), il NASO è una FORMA piena con la sua silhouette.
+
+**Fatto:**
+- **Occhi ricostruiti**: ovali sempre più alti che larghi, bianchi grandi, pupilla importante appesa alla palpebra (clip SVG per giocatore), palpebra a tre livelli (sveglio/velato/assonnato), sguardo a sinistra/centro/destra — e TRE espressioni di sopracciglia (preoccupato con l'arco alto e sottile alla Guybrush, neutro pieno, severo calato all'interno).
+- **Nasi come silhouette piene**: cuneo lungo alla Guybrush, aquilino con la gobba, patatone tondo — chiusi, con ombra sul dorso e narici accennate; larghezza e lunghezza variabili. Bocche con larghezza e asimmetria variabili.
+- Due giri sul banco di prova a 16 seed: adesso ogni faccia ha la sua espressione. Verificato nella Figurina; build, lint, tsc verdi.
