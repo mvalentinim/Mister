@@ -87,7 +87,7 @@ Regole: gerarchia estrema (i titoli sono 3–4 volte il corpo, come un giornale 
 
 ### 4.2 La Figurina (scheda giocatore — componente eroe)
 - Card verticale con cornice spessa nei colori del club, nome in `--font-heading` maiuscolo, ruolo come badge pieno, numero di maglia gigante in `--font-display`.
-- Ritratto: **avatar procedurale in pixel art** (generato da seed del giocatore: carnagione, capelli, barba) — coerente, senza licenze, perfettamente in stile. In alternativa silhouette su fondo colori club.
+- Ritratto: **avatar procedurale in stile cartoon "Day of the Tentacle"** *(deciso dallo sviluppatore il 2026-08-21: più definito della pixel art, che resta solo come accento nei punti previsti dal §3)* — vettoriale con contorni neri spessi, colori piatti e tratti esagerati, generato da seed del giocatore (carnagione, capelli, barba); coerente, senza licenze.
 - Attributi come barre piene squadrate con numero grande a fianco, colorati per fascia (§2.4).
 - La stessa figurina, in formato mini, è la rappresentazione del giocatore ovunque (mercato, tattica, formazioni).
 

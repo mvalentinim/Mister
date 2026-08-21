@@ -11,3 +11,13 @@ export function fascia(valore: number): 1 | 2 | 3 | 4 | 5 {
   if (valore <= 87) return 4
   return 5
 }
+
+/** La stessa scala, tarata sui VOTI in pagella (0-10): la sufficienza
+    è neutra, non "scarsa" — il 6 è inchiostro, dal 7 si va in verde. */
+export function fasciaVoto(voto: number): 1 | 2 | 3 | 4 | 5 {
+  if (voto < 5.5) return 1
+  if (voto < 6) return 2
+  if (voto < 7) return 3
+  if (voto < 8.5) return 4
+  return 5
+}

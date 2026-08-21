@@ -20,6 +20,9 @@ import type { Carriera } from '../carriera/tipi.ts'
 import { creaPartita, type PartitaInCorso, type VotiLive } from '../motore/partita.ts'
 import { creaRng, semeDaStringa, type Rng } from '../motore/rng.ts'
 import type { EventoPartita, RisultatoPartita, SquadraMotore } from '../motore/tipi.ts'
+import { coloriClub, numeroMaglia } from '../design/colori-club.ts'
+import { fasciaVoto } from '../design/fasce.ts'
+import './matchday.css'
 
 interface Props {
   db: Database
@@ -134,7 +137,7 @@ interface RigaCronaca {
 function MatchDay({ db, carriera, onFine }: Props) {
   // La partita a tappe: stesso seme del campionato → senza interventi è
   // identica a quella che verrebbe simulata in blocco
-  const { casa, trasferta, partita, latoMio } = useMemo(() => {
+  const { casa, trasferta, partita, latoMio, casaId, trasfertaId } = useMemo(() => {
     const p = partitaUtenteCorrente(carriera)!
     const casa = squadraPerMotore(db, carriera, p.casaId)
     const trasferta = squadraPerMotore(db, carriera, p.trasfertaId)
@@ -142,7 +145,10 @@ function MatchDay({ db, carriera, onFine }: Props) {
       casa, trasferta,
       semePartita(carriera, carriera.giornata, p.casaId, p.trasfertaId),
     )
-    return { casa, trasferta, partita, latoMio: (p.casaId === carriera.clubId ? 'casa' : 'trasferta') as 'casa' | 'trasferta' }
+    return {
+      casa, trasferta, partita, casaId: p.casaId, trasfertaId: p.trasfertaId,
+      latoMio: (p.casaId === carriera.clubId ? 'casa' : 'trasferta') as 'casa' | 'trasferta',
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -257,9 +263,17 @@ function MatchDay({ db, carriera, onFine }: Props) {
       const evidenziato = protagonista === g.id
       return (
         <g key={g.id} className="gettone">
-          <circle cx={x} cy={y} r={evidenziato ? 2.6 : 1.9} fill={colore}
-            stroke={evidenziato ? '#e8c547' : '#ffffff'} strokeWidth={evidenziato ? 0.7 : 0.35} />
-          <text x={x} y={y + 4.6} textAnchor="middle" className="nome-gettone">{cognome(g.nome)}</text>
+          <circle cx={x} cy={y} r={evidenziato ? 2.7 : 2.1} fill={colore}
+            stroke={evidenziato ? '#e8c547' : '#ffffff'} strokeWidth={evidenziato ? 0.7 : 0.4} />
+          {/* il numero di maglia dentro il gettone, alla Championship Manager;
+              i nomi: casa sotto, ospiti SOPRA — così a centrocampo non si
+              accavallano mai */}
+          <text x={x} y={y + 0.62} textAnchor="middle" className="numero-gettone">
+            {numeroMaglia(g.id, g.ruolo)}
+          </text>
+          <text x={x} y={lato === 'casa' ? y + 4.3 : y - 3.2} textAnchor="middle" className="nome-gettone">
+            {cognome(g.nome)}
+          </text>
         </g>
       )
     })
@@ -283,141 +297,196 @@ function MatchDay({ db, carriera, onFine }: Props) {
     }
   }
 
+  // i colori sociali delle due squadre (per casacche-spia e pedine);
+  // se il primario si confonde col prato o con l'avversario, si ripiega
+  const kitCasa = coloriClub(casaId)
+  const kitTrasferta = coloriClub(trasfertaId)
+  const VERDE_PRATO = '#2e7d32'
+  const colorePedineCasa = kitCasa.primario === VERDE_PRATO ? kitCasa.secondario : kitCasa.primario
+  let colorePedineTrasferta = kitTrasferta.primario === VERDE_PRATO ? kitTrasferta.secondario : kitTrasferta.primario
+  if (colorePedineTrasferta === colorePedineCasa) colorePedineTrasferta = kitTrasferta.secondario
+
+  // il ticker mostra l'ultima riga di cronaca; gli eventi clou lo accendono
+  const ultimaRiga = cronaca[0]
+
   return (
-    <section className="schermata matchday">
-      {/* Intestazione: punteggio, cronometro, controlli velocità */}
-      <div className="md-intestazione">
-        <h2>
-          {casa.nome} <span className="md-punteggio">{punteggio.casa} - {punteggio.trasferta}</span> {trasferta.nome}
-        </h2>
-        <div className="md-controlli">
-          <span className="md-minuto">{Math.min(minuto, 90)}'</span>
-          {!finita && (
-            <>
-              <button className={pausa ? 'md-bottone attivo' : 'md-bottone'} onClick={() => setPausa(!pausa)}>
-                {pausa ? '▶' : '⏸'}
+    <section className="plancia-md">
+      {/* ── LO SCOREBOARD in font pixel (§4.5) ── */}
+      <div
+        className={`md-scoreboard${punteggio.casa + punteggio.trasferta > 0 ? ' lampeggia' : ''}`}
+        key={`${punteggio.casa}-${punteggio.trasferta}`}
+      >
+        <div className="md-sq">
+          <span className="md-casacca" style={{ background: kitCasa.primario }} />
+          <span className="nome-sq">{casa.nome}</span>
+        </div>
+        <div className="md-cifre">
+          <span className="md-gol">{punteggio.casa}</span>
+          <span className="md-divisore">-</span>
+          <span className="md-gol">{punteggio.trasferta}</span>
+          <span className="md-cronometro">{Math.min(minuto, 90)}'</span>
+        </div>
+        <div className="md-sq destra">
+          <span className="nome-sq">{trasferta.nome}</span>
+          <span className="md-casacca" style={{ background: kitTrasferta.primario }} />
+        </div>
+      </div>
+
+      <div className="md-plancia-corpo">
+        {/* ── IL CAMPO, in un pannello con barra del titolo ── */}
+        <div className="pannello-md pannello-campo">
+          <div className="pannello-md-titolo">
+            <span>La partita</span>
+            <span>{possessoCasa ? `possesso ${casa.nome}` : `possesso ${trasferta.nome}`}</span>
+          </div>
+          <div className="corpo-campo">
+            <svg className="md-campo2" viewBox="0 0 105 68" preserveAspectRatio="xMidYMid meet">
+              <rect x="0" y="0" width="105" height="68" fill="#4a7c4e" />
+              {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                <rect key={i} x={i * 15} y="0" width="7.5" height="68" fill="#457548" />
+              ))}
+              <g stroke="#e8efe9" strokeWidth="0.45" fill="none">
+                <rect x="1" y="1" width="103" height="66" />
+                <line x1="52.5" y1="1" x2="52.5" y2="67" />
+                <circle cx="52.5" cy="34" r="9.15" />
+                <rect x="1" y="13.85" width="16.5" height="40.3" />
+                <rect x="87.5" y="13.85" width="16.5" height="40.3" />
+                <rect x="1" y="24.85" width="5.5" height="18.3" />
+                <rect x="98.5" y="24.85" width="5.5" height="18.3" />
+              </g>
+              {gettoni(casa, 'casa', colorePedineCasa)}
+              {gettoni(trasferta, 'trasferta', colorePedineTrasferta)}
+              <circle className="md-palla" cx={palla[0]} cy={palla[1]} r="1.1" fill="#ffffff" stroke="#222" strokeWidth="0.3" />
+            </svg>
+
+            {/* il TICKER televideo: un rigo alla volta, sopra il campo */}
+            {ultimaRiga && (
+              <div key={cronaca.length} className={`md-ticker${ultimaRiga.evidenza ? ' clou' : ''}`}>
+                {ultimaRiga.minuto}' — {ultimaRiga.testo}
+              </div>
+            )}
+          </div>
+
+          {/* ── IL PANNELLO PAUSA sopra il campo: cambi e regolazioni ── */}
+          {pausa && !finita && (
+            <div className="md-pannello-pausa">
+              <div className="pannello-md-titolo"><span>La panchina — cambi e regolazioni</span></div>
+              <div className="corpo-pausa">
+                <div className="gruppo">
+                  <span className="etichetta-almanacco">Sostituzioni ({cambiRimasti})</span>
+                  <select value={esceId} onChange={(e) => setEsceId(Number(e.target.value))}>
+                    <option value="">Chi esce…</option>
+                    {inCampoMiei.map(({ giocatore: g }) => (
+                      <option key={g.id} value={g.id}>{g.nome} ({g.ruolo})</option>
+                    ))}
+                  </select>
+                  <select value={entraId} onChange={(e) => setEntraId(Number(e.target.value))}>
+                    <option value="">Chi entra…</option>
+                    {panchinaMia.map((g) => (
+                      <option key={g.id} value={g.id}>{g.nome} ({g.ruolo})</option>
+                    ))}
+                  </select>
+                  <button
+                    className="bottone-almanacco secondario"
+                    disabled={cambiRimasti === 0 || esceId === '' || entraId === ''}
+                    onClick={effettuaCambio}
+                  >
+                    Cambio
+                  </button>
+                </div>
+                <div className="gruppo">
+                  <span className="etichetta-almanacco">Mentalità</span>
+                  <select
+                    defaultValue={carriera.tattica.istruzioni.mentalita}
+                    onChange={(e) => partita.regola(latoMio, { mentalita: Number(e.target.value) })}
+                  >
+                    <option value={-2}>Molto difensiva</option>
+                    <option value={-1}>Difensiva</option>
+                    <option value={0}>Equilibrata</option>
+                    <option value={1}>Offensiva</option>
+                    <option value={2}>Molto offensiva</option>
+                  </select>
+                  <span className="etichetta-almanacco">Ritmo</span>
+                  <select
+                    defaultValue={carriera.tattica.istruzioni.ritmo === 'alto' ? 1.12 : carriera.tattica.istruzioni.ritmo === 'basso' ? 0.9 : 1}
+                    onChange={(e) => partita.regola(latoMio, { ritmo: Number(e.target.value) })}
+                  >
+                    <option value={0.9}>Basso</option>
+                    <option value={1}>Medio</option>
+                    <option value={1.12}>Alto</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── LA COLONNA: telecronaca completa + pagelle live ── */}
+        <div className="md-colonna-info">
+          <div className="pannello-md pannello-telecronaca">
+            <div className="pannello-md-titolo"><span>Telecronaca</span></div>
+            <div className="md-righe">
+              {cronaca.map((r, i) => (
+                <p key={cronaca.length - i} className={r.evidenza ? 'md-riga2 evidenza' : 'md-riga2'}>
+                  <span className="minuto">{r.minuto}'</span> {r.testo}
+                </p>
+              ))}
+              {cronaca.length === 0 && <p className="md-riga2">Le squadre entrano in campo...</p>}
+            </div>
+          </div>
+
+          <div className="pannello-md pannello-pagelle">
+            <div className="pannello-md-titolo"><span>Pagelle live</span></div>
+            <div className="md-pagelle2">
+              {voti.map((v) => (
+                <span key={v.id} className="md-pagella2">
+                  <span className="nome-pagella">{cognome(v.nome)}</span>
+                  <strong className={`voto fascia-${fasciaVoto(v.voto)}`}>{v.voto.toFixed(1)}</strong>
+                </span>
+              ))}
+              {voti.length === 0 && <span className="md-pagella2"><span className="nome-pagella">In attesa del fischio…</span></span>}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── LA PULSANTIERA (§4.5): comandi fisici a segmenti ── */}
+      <div className="md-pulsantiera">
+        {!finita && (
+          <>
+            <span className="md-etichetta-tasti">Comandi</span>
+            <div className="md-gruppo-tasti">
+              <button className={pausa ? 'md-tasto attivo' : 'md-tasto'} onClick={() => setPausa(!pausa)}>
+                {pausa ? '▶ Riprendi' : '⏸ Pausa'}
               </button>
+            </div>
+            <span className="md-etichetta-tasti">Velocità</span>
+            <div className="md-gruppo-tasti">
               {([1, 2, 3, 5] as const).map((v) => (
-                <button key={v} className={velocita === v ? 'md-bottone attivo' : 'md-bottone'} onClick={() => setVelocita(v)}>
+                <button key={v} className={velocita === v ? 'md-tasto attivo' : 'md-tasto'} onClick={() => setVelocita(v)}>
                   {v}x
                 </button>
               ))}
-            </>
-          )}
-          {finita && (
-            <button className="bottone-primario" onClick={() => onFine(partita.risultatoFinale())}>
-              Torna alla stagione →
-            </button>
-          )}
-        </div>
+            </div>
+          </>
+        )}
+        {finita && (() => {
+          const r = partita.risultatoFinale()
+          return (
+            <span className="md-statistiche-finali">
+              POSSESSO {r.statistiche.casa.possesso}%-{r.statistiche.trasferta.possesso}% ·
+              TIRI {r.statistiche.casa.tiri}-{r.statistiche.trasferta.tiri} ·
+              IN PORTA {r.statistiche.casa.tiriInPorta}-{r.statistiche.trasferta.tiriInPorta} ·
+              GOL ATTESI {r.statistiche.casa.golAttesi.toFixed(2)}-{r.statistiche.trasferta.golAttesi.toFixed(2)}
+            </span>
+          )
+        })()}
+        {finita && (
+          <button className="bottone-almanacco" style={{ marginLeft: 'auto' }} onClick={() => onFine(partita.risultatoFinale())}>
+            Torna alla stagione →
+          </button>
+        )}
       </div>
-
-      {/* Pannello di pausa: cambi e regolazioni (FRD §9.3) */}
-      {pausa && !finita && (
-        <div className="md-pannello">
-          <div className="md-cambi">
-            <strong>Sostituzioni ({cambiRimasti} rimaste)</strong>
-            <select value={esceId} onChange={(e) => setEsceId(Number(e.target.value))}>
-              <option value="">Chi esce…</option>
-              {inCampoMiei.map(({ giocatore: g }) => (
-                <option key={g.id} value={g.id}>{g.nome} ({g.ruolo})</option>
-              ))}
-            </select>
-            <select value={entraId} onChange={(e) => setEntraId(Number(e.target.value))}>
-              <option value="">Chi entra…</option>
-              {panchinaMia.map((g) => (
-                <option key={g.id} value={g.id}>{g.nome} ({g.ruolo})</option>
-              ))}
-            </select>
-            <button className="bottone-secondario" disabled={cambiRimasti === 0 || esceId === '' || entraId === ''} onClick={effettuaCambio}>
-              Effettua cambio
-            </button>
-          </div>
-          <div className="md-regolazioni">
-            <strong>Regolazioni</strong>
-            <label>
-              Mentalità{' '}
-              <select
-                defaultValue={carriera.tattica.istruzioni.mentalita}
-                onChange={(e) => partita.regola(latoMio, { mentalita: Number(e.target.value) })}
-              >
-                <option value={-2}>Molto difensiva</option>
-                <option value={-1}>Difensiva</option>
-                <option value={0}>Equilibrata</option>
-                <option value={1}>Offensiva</option>
-                <option value={2}>Molto offensiva</option>
-              </select>
-            </label>
-            <label>
-              Ritmo{' '}
-              <select
-                defaultValue={carriera.tattica.istruzioni.ritmo === 'alto' ? 1.12 : carriera.tattica.istruzioni.ritmo === 'basso' ? 0.9 : 1}
-                onChange={(e) => partita.regola(latoMio, { ritmo: Number(e.target.value) })}
-              >
-                <option value={0.9}>Basso</option>
-                <option value={1}>Medio</option>
-                <option value={1.12}>Alto</option>
-              </select>
-            </label>
-          </div>
-        </div>
-      )}
-
-      <div className="md-corpo">
-        {/* Il campo schematico */}
-        <svg className="md-campo" viewBox="0 0 105 68">
-          <rect x="0" y="0" width="105" height="68" rx="1.5" fill="#4a7c4e" />
-          {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-            <rect key={i} x={i * 15} y="0" width="7.5" height="68" fill="#457548" />
-          ))}
-          <g stroke="#e8efe9" strokeWidth="0.45" fill="none">
-            <rect x="1" y="1" width="103" height="66" />
-            <line x1="52.5" y1="1" x2="52.5" y2="67" />
-            <circle cx="52.5" cy="34" r="9.15" />
-            <rect x="1" y="13.85" width="16.5" height="40.3" />
-            <rect x="87.5" y="13.85" width="16.5" height="40.3" />
-            <rect x="1" y="24.85" width="5.5" height="18.3" />
-            <rect x="98.5" y="24.85" width="5.5" height="18.3" />
-          </g>
-          {gettoni(casa, 'casa', 'var(--accento)')}
-          {gettoni(trasferta, 'trasferta', '#37424d')}
-          <circle className="md-palla" cx={palla[0]} cy={palla[1]} r="1.1" fill="#ffffff" stroke="#222" strokeWidth="0.3" />
-        </svg>
-
-        <div className="md-colonna">
-          {/* La telecronaca, riga più recente in alto */}
-          <div className="md-telecronaca">
-            {cronaca.map((r, i) => (
-              <p key={cronaca.length - i} className={r.evidenza ? 'md-riga evidenza' : 'md-riga'}>
-                <span className="minuto">{r.minuto}'</span> {r.testo}
-              </p>
-            ))}
-            {cronaca.length === 0 && <p className="md-riga">Le squadre entrano in campo...</p>}
-          </div>
-
-          {/* Pagelle live della mia squadra (FRD §9.5) */}
-          <div className="md-voti">
-            {voti.map((v) => (
-              <span key={v.id} className="pagella">
-                {cognome(v.nome)} <strong>{v.voto.toFixed(1)}</strong>
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {finita && (() => {
-        const r = partita.risultatoFinale()
-        return (
-          <p className="nota">
-            Possesso {r.statistiche.casa.possesso}%-{r.statistiche.trasferta.possesso}% ·
-            tiri {r.statistiche.casa.tiri}-{r.statistiche.trasferta.tiri} ·
-            in porta {r.statistiche.casa.tiriInPorta}-{r.statistiche.trasferta.tiriInPorta} ·
-            gol attesi {r.statistiche.casa.golAttesi.toFixed(2)}-{r.statistiche.trasferta.golAttesi.toFixed(2)}
-            {' '}— highlights e pagelle complete nella schermata Partite.
-          </p>
-        )
-      })()}
     </section>
   )
 }

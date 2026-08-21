@@ -10,7 +10,7 @@ import type { GiocatoreRiga } from '../db/tipi.ts'
 import { mediaComplessiva, calcolaEta } from '../db/tipi.ts'
 import { coloriClub, numeroMaglia } from './colori-club.ts'
 import { fascia } from './fasce.ts'
-import { RitrattoPixel } from './pixelart.tsx'
+import { Ritratto } from './ritratto.tsx'
 import './figurina.css'
 
 const ATTRIBUTI_MOVIMENTO: Array<[keyof GiocatoreRiga, string]> = [
@@ -64,7 +64,7 @@ export function Figurina({ giocatore: g, nomeClub, clubId }: Props) {
       {/* il ritratto, con numero di maglia gigante e media in medaglione */}
       <div className="fig-ritratto retino-punti">
         <span className="fig-numero-maglia">{numero}</span>
-        <RitrattoPixel giocatoreId={g.id} colori={colori} lato={120} />
+        <Ritratto giocatoreId={g.id} colori={colori} lato={130} />
         <span className={`fig-media fascia-${fascia(media)}`}>
           {media}
           <small>MEDIA</small>

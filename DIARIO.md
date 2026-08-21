@@ -579,3 +579,18 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - Build, lint, tsc verdi. Lo stile della sessione 27 resta sulle altre schermate FINCHÉ la Figurina non è approvata: poi la propagazione lo sostituirà (metodo del campione, §0.3).
 
 **In attesa:** l'approvazione dello sviluppatore sulla Figurina (§7 punto 2). Poi: Match Day (§4.5), quindi propagazione schermata per schermata (§6). Annotato: nessuna skill di frontend design disponibile nella sessione — il documento stesso ha fatto da brief vincolante.
+
+---
+
+## Sessione 29 — 2026-08-21 — M11: il Match Day diventa la schermata Hero (plancia da videogame)
+
+**Obiettivo dichiarato:** con gli screenshot di riferimento forniti dallo sviluppatore (Championship Manager, PC Calcio, FM storici) rifare il Match Day come vera schermata da videogame — una PLANCIA, non una pagina — e sostituire la pixel art delle figurine con ritratti cartoon più definiti, stile "Day of the Tentacle".
+
+**Fatto:**
+- **La lezione dei riferimenti**: lo schermo è un cockpit — tutto incorniciato, tutto dentro la finestra, niente scroll. Il Match Day ora è: SCOREBOARD in font pixel su barra inchiostro (nomi squadre, casacche-spia coi colori sociali, gol in giallo tabellone, cronometro in verde fosforo, LAMPEGGIO a scatti sul gol), pannelli con barra del titolo verde ("La partita" con l'indicatore del possesso, "Telecronaca", "Pagelle live"), TICKER televideo sovrapposto al campo (un rigo alla volta, oro sugli eventi clou), PULSANTIERA fisica a segmenti (pausa + 1x/2x/3x/5x, il tasto attivo è "premuto"), pannello "LA PANCHINA" sopra il campo in pausa, statistiche finali in mono nella barra comandi.
+- **Gettoni alla CM**: numero di maglia dentro il gettone, colori sociali delle due squadre (con ripiego se si confondono col prato o tra loro), nomi degli ospiti SOPRA e dei padroni di casa SOTTO (mai più accavallamenti a centrocampo), pagelle colorate con una scala fasce dedicata ai voti (il 6 è neutro, dal 7 verde, 8.5+ oro).
+- **Ritratti cartoon** (`src/design/ritratto.tsx`, sostituisce la pixel art): vettoriali con contorni spessi, colori piatti e tratti esagerati da avventura grafica — forma della testa, mento, orecchie a sventola, 6 capigliature, nasi importanti, bocche, barba/baffi, sopracciglia; maglia coi colori e il motivo del club. Deterministici dal seed. DESIGN-MISTER.md §4.2 annotato con la decisione.
+- La logica di gioco del Match Day non è stata toccata: stesso motore a tappe, stesso seme, stessi cambi/regolazioni.
+- **Giro di critica su screenshot** (§0.4): corretti i nomi accavallati e la scala voti; verificate partita intera (2-2 al 90' con ticker del triplice fischio), pausa e finale. Build, lint, tsc verdi.
+
+**Prossimo passo del §7:** approvazione dello sviluppatore sul Match Day (punto 3), poi propagazione alle altre schermate nell'ordine del §6, una per sessione.
