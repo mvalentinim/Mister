@@ -111,16 +111,39 @@ svincolati) riceve un delta dagli attributi, in base a **quattro fattori**:
 Il DB statico non si tocca mai: il delta vive in `carriera.crescita`
 (giocatoreId → punti) e si applica **in lettura** a tutti gli attributi
 tecnici/fisici (la personalità resta fissa), ovunque: motore, rosa, tattica,
-mercato, valore. Declino massimo accumulabile: −12. Deterministico (stesso
-seme → stessa evoluzione). Il riepilogo di fine stagione mostra i movimenti
-della tua rosa.
+mercato, valore. Declino massimo accumulabile: −12 (il fondo però non
+"risucchia in su" chi parte più in basso, vedi i rigenerati). Deterministico
+(stesso seme → stessa evoluzione). Il riepilogo di fine stagione mostra i
+movimenti della tua rosa.
+
+## Ritiri per età e RIGENERATI (`src/carriera/ritiri.ts`)
+
+A fine stagione i giocatori **normali** anziani appendono le scarpe:
+
+- **38+**: ritiro certo; **35-37**: probabilità crescente (25% / 50% / 75%);
+  uno **svincolato di 35+** smette sempre (nessuno lo vuole più).
+- Il ritirato sparisce da rose, svincolati, contratti, prestiti e promesse;
+  finisce nel registro `carriera.ritirati` col suo **picco** (la media al
+  momento del ritiro, crescita inclusa).
+
+Dopo **una stagione di pausa** arriva la **rinascita**: il ritirato torna
+nel mercato come **free agent SEDICENNE** — stesso giocatore del DB, ma con
+identità nuova (anno di nascita e **potenziale = picco della carriera
+precedente**, sovrascritti in lettura via `carriera.rinati`) e abilità
+riportate a livello da ragazzo (media ≈ picco − 22, minimo 35, con un delta
+in `carriera.crescita`). Ambizioni, stipendio e valore si adeguano da soli:
+dipendono tutti da età e media, ora quelle di un sedicenne. Da lì la
+normale crescita di M8 lo fa risalire, un passo alla volta, verso il
+campione che era. Si rinasce **una volta sola**; le **leggende** ritirate
+non rinascono (hanno il loro ritiro dopo 5 stagioni, vedi mercato.md).
 
 ## Salvataggio
 
-VersioneSchema **9** (v7: fiducia, crescita, coppa, registro fama, trofei,
+VersioneSchema **12** (v7: fiducia, crescita, coppa, registro fama, trofei,
 esoneri, offerte; v8: Coppa Europa e contratto dell'allenatore; v9: la
-nazionale). I salvataggi vecchi migrano da soli (coppa dalla stagione
-successiva).
+nazionale; v10: impronta del DB; v11: leggende free agent e registro
+ritirati; v12: ritiri per età e rigenerati). I salvataggi vecchi migrano
+da soli (coppa dalla stagione successiva).
 
 ## La panchina della nazionale (M8 parte 3, FRD §4.3)
 

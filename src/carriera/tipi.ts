@@ -250,7 +250,11 @@ export interface OfferteSpeciali {
 /** Lo stato completo di una carriera. */
 export interface Carriera {
   id: string
-  versioneSchema: 11 // per le migrazioni dei salvataggi (FRD §11)
+  versioneSchema: 12 // per le migrazioni dei salvataggi (FRD §11)
+  /** i giocatori RIGENERATI (post-ritiro): id → identità nuova di 16enne.
+      L'anno di nascita e il potenziale sovrascrivono quelli del DB in
+      lettura (come la crescita): il resto del gioco li vede giovanissimi. */
+  rinati: Record<number, { annoNascita: number; potenziale: number }>
   /** le LEGGENDE nel mercato come free agent (M9, opzione di carriera):
       null = opzione spenta. daAnno = la stagione in cui entrano;
       annoIngresso/ids si riempiono all'ingresso; dopo 5 stagioni si ritirano. */
@@ -260,8 +264,17 @@ export interface Carriera {
     annoIngresso: number | null
     ids: number[]
   } | null
-  /** i giocatori ritirati in questa carriera (base per il post-ritiro) */
-  ritirati: Array<{ giocatoreId: number; nome: string; anno: number }>
+  /** i giocatori ritirati in questa carriera. `picco` = la media al momento
+      del ritiro (diventa il potenziale del rigenerato); `rinato` marca chi
+      è già tornato (si rinasce una volta sola). */
+  ritirati: Array<{
+    giocatoreId: number
+    nome: string
+    anno: number
+    picco?: number
+    categoria?: string
+    rinato?: boolean
+  }>
   /** l'impronta del database con cui è nata la carriera (0 = originale,
       -1 = sconosciuta nei salvataggi vecchi). Se il DB attuale è diverso,
       l'app avvisa: nomi e attributi potrebbero non corrispondere. */

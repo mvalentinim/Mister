@@ -476,3 +476,18 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **A scadenza tornano free agent**: `fineStagioneMercato` non rinnova mai le leggende dei club IA (i giocatori normali importanti sì) — il ciclo free agent → contratto → free agent continua fino al ritiro dei 5 anni.
 - **Nazionali**: verificato sul DB — zero leggende nelle convocazioni (vale per costruzione, ora dichiarato nei documenti).
 - **Collaudo end-to-end**: finestra estiva → colpi IA ("Bobby Moore da svincolato alla Juventus a parametro zero", contratto 1,7M fino al 2028) ✓; Moore cercato nel mercato: cartellino 43M ✅ e trattativa col club apribile ✓; contratto portato a scadenza → di nuovo tra gli svincolati (nessun rinnovo IA) ✓. Build, lint, tsc verdi.
+
+---
+
+## Sessione 24 — 2026-08-21 — Ritiri per età e giocatori RIGENERATI (richiesta esplicita)
+
+**Obiettivo dichiarato:** un giocatore normale che si ritira rientra nel mercato dopo una stagione di pausa come versione identica ma SEDICENNE, con il potenziale per ridiventare il campione che era e abilità (quindi ambizioni, stipendio, valore) proporzionate all'età nuova. Il rigenerato è un free agent con stipendio iniziale.
+
+**Fatto:**
+- **Ritiro per età dei normali** (`src/carriera/ritiri.ts`, agganciato a fine stagione nei club e nel ciclo del CT): certo a 38+, probabile dai 35 (25/50/75%), sempre per uno svincolato di 35+. Deterministico col seme. Il ritirato sparisce da rose/svincolati/contratti/prestiti/promesse e finisce nel registro `ritirati` col suo **picco** (media al ritiro, crescita inclusa). Notizia aggregata con l'evidenza dei ritirati della TUA rosa.
+- **La rinascita, una stagione dopo**: identità nuova in `carriera.rinati` (anno di nascita = 16 anni, **potenziale = picco**), applicata in lettura da `applicaCrescita` come la crescita — il DB non si tocca mai. Le abilità partono da media ≈ picco − 22 (minimo 35) con un delta in `carriera.crescita`; stipendio e valore si adeguano da soli (età + media da ragazzo → `stipendioAttesoSvincolato` basso). Si rinasce UNA volta sola; le leggende non rinascono.
+- **Correzione al fondo del declino** in `crescita.ts`: il tetto −12 non deve "risucchiare in su" un rigenerato che parte da −24 — ora il fondo è `min(−12, delta attuale)` e la risalita è graduale.
+- Salvataggi a **versioneSchema 12** (migrazione v11→12).
+- **Collaudo end-to-end** (2 script Playwright, profilo persistente): stagione 1 chiusa → 206 ritirati normali col picco, notizia, rimossi ovunque, zero rinascite immediate ✓; stagione 2 chiusa → tutti e 206 rinati: Modrić 16enne, potenziale 74 (= picco), free agent, delta −24, notizia "RIGENERATI", flag anti-doppia-rinascita ✓; stagione 3 → il delta sale di +2 (niente salto a −12) e il 17enne resta in circolazione (niente ri-ritiro dalla data del DB) ✓. Build, lint, tsc e calibrazione verdi.
+
+**Debito personale (senza Mac):** vedere un rigenerato in gioco e provare a ingaggiarlo di persona.

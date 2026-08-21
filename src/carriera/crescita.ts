@@ -44,9 +44,22 @@ export function applicaDelta(
   })
 }
 
-/** Come applicaDelta, ma leggendo il registro dalla carriera. */
+/** Come applicaDelta, ma leggendo il registro dalla carriera — e applicando
+    anche l'identità dei RIGENERATI (post-ritiro): anno di nascita nuovo e
+    potenziale pari al picco della carriera precedente. */
 export function applicaCrescita(carriera: Carriera, righe: GiocatoreRiga[]): GiocatoreRiga[] {
-  return applicaDelta(carriera.crescita, righe)
+  const conDelta = applicaDelta(carriera.crescita, righe)
+  const rinati = carriera.rinati
+  if (!rinati || Object.keys(rinati).length === 0) return conDelta
+  return conDelta.map((g) => {
+    const rinascita = rinati[g.id]
+    if (!rinascita) return g
+    return {
+      ...g,
+      data_nascita: `${rinascita.annoNascita}-07-01`,
+      potenziale: rinascita.potenziale,
+    }
+  })
 }
 
 /** L'età "di gioco" a fine stagione: gli anni della carriera avanzano
@@ -120,10 +133,14 @@ export function crescitaFineStagione(db: Database, carriera: Carriera): NotaCres
         if (stat && stat.presenze >= 5 && stat.sommaVoti / stat.presenze >= 6.4) delta += 1 // e bene
       }
 
-      // la crescita non supera il potenziale, il declino ha un fondo
+      // la crescita non supera il potenziale, il declino ha un fondo.
+      // Il fondo però non "risucchia in su": un RIGENERATO parte con un
+      // delta ben sotto -12 e deve risalire un passo alla volta, non
+      // scattare al fondo standard alla prima stagione.
       if (delta > 0) delta = Math.min(delta, Math.max(0, margine))
       const attuale = carriera.crescita[g.id] ?? 0
-      const nuovo = Math.max(DECLINO_MASSIMO, attuale + delta)
+      const fondo = Math.min(DECLINO_MASSIMO, attuale)
+      const nuovo = Math.max(fondo, attuale + delta)
       if (nuovo === attuale) continue
       carriera.crescita[g.id] = nuovo
 

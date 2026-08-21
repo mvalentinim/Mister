@@ -114,6 +114,11 @@ function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: nu
     salvataggio.ritirati = []
     caricato.versioneSchema = 11
   }
+  if (caricato.versioneSchema === 11) {
+    // v11 → v12: ritiri per età e giocatori rigenerati
+    salvataggio.rinati = {}
+    caricato.versioneSchema = 12
+  }
   return salvataggio
 }
 

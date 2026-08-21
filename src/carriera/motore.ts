@@ -23,6 +23,7 @@ import { crescitaFineStagione, type NotaCrescita } from './crescita.ts'
 import { avanzaNazionale, offertaNazionale } from './nazionale.ts'
 import { rosaLegendIds, squadreLegend } from '../db/legends.ts'
 import { ingressoLeggendeSeDovuto, ritiroLeggendeSeDovuto } from './leggende.ts'
+import { rinasciteFineStagione, ritiriFineStagione } from './ritiri.ts'
 import { giocatoriPerId } from '../mercato/stato.ts'
 import { mediaComplessiva } from '../db/tipi.ts'
 import { GIORNI_FINESTRA_INVERNALE } from '../mercato/stato.ts'
@@ -206,7 +207,8 @@ export function creaCarriera(
   )
   const carriera: Carriera = {
     id: `carriera-${Date.now()}`,
-    versioneSchema: 11,
+    versioneSchema: 12,
+    rinati: {}, // i rigenerati post-ritiro (sessione 24)
     dbImpronta: improntaDbCorrente(), // il DB con cui nasce la carriera
     leggendeMercato: leggendeDaAnno === undefined
       ? null
@@ -506,6 +508,10 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
   // le leggende free agent: ritiro dopo 5 stagioni e/o ingresso (M9)
   ritiroLeggendeSeDovuto(db, carriera)
   ingressoLeggendeSeDovuto(db, carriera)
+  // i giocatori normali anziani si ritirano; i ritirati dell'anno scorso
+  // RINASCONO sedicenni nel mercato (sessione 24)
+  ritiriFineStagione(db, carriera)
+  rinasciteFineStagione(db, carriera)
   // la Coppa Europa esiste solo se ci si è qualificati (M8 parte 2)
   carriera.coppaEuropa = carriera.qualificatoEuropa ? creaCoppaEuropa(carriera) : null
 

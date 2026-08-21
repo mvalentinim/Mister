@@ -20,6 +20,7 @@ import type { SquadraMotore } from '../motore/tipi.ts'
 import { aggiungiNotizia, fineStagioneMercato } from '../mercato/stato.ts'
 import { offerteFineStagione, variaFama } from './fama.ts'
 import { crescitaFineStagione } from './crescita.ts'
+import { rinasciteFineStagione, ritiriFineStagione } from './ritiri.ts'
 import { generaCalendario } from './calendario.ts'
 import type { Carriera, IncaricoNazionale, TurnoCoppa } from './tipi.ts'
 
@@ -289,6 +290,9 @@ function chiudiCicloNazionale(db: Database, carriera: Carriera): void {
   carriera.giornata = 0
   crescitaFineStagione(db, carriera)
   fineStagioneMercato(db, carriera)
+  // ritiri per età e rinascite: il tempo passa anche mentre fai il CT
+  ritiriFineStagione(db, carriera)
+  rinasciteFineStagione(db, carriera)
   carriera.mercato.aperto = false // il mercato ti riguarderà quando avrai un club
   carriera.mercato.finestra = null
 
