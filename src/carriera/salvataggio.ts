@@ -37,8 +37,9 @@ export async function salvaCarriera(carriera: Carriera): Promise<void> {
 
 /** Migra un salvataggio di una versione vecchia alla versione corrente.
     È il meccanismo previsto dal FRD §11: i salvataggi dichiarano la loro
-    versione e vengono aggiornati al caricamento, mai buttati. */
-function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: number }): Carriera {
+    versione e vengono aggiornati al caricamento, mai buttati.
+    Esportata perché serve anche all'import dei file .mister (M10). */
+export function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: number }): Carriera {
   const salvataggio = caricato as Carriera
   if (caricato.versioneSchema === 1) {
     // v1 → v2 (M3): arrivano il seme del motore e la cronaca

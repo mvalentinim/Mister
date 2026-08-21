@@ -5,10 +5,14 @@
 // dice quale schermata mostrare (e con quali dati, es. quale club).
 // Quando servirà qualcosa di più ricco valuteremo un router vero.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Database } from 'sql.js'
-import { apriDatabase } from './db/database.ts'
+import { apriDatabase, improntaDbCorrente } from './db/database.ts'
+import { caricaDatabaseUtente, salvaBytesDatabase } from './db/persistenza.ts'
 import { caricaCarriere, eliminaCarriera, salvaCarriera } from './carriera/salvataggio.ts'
+import {
+  duplicaCarriera, leggiFileMister, nomeFileMister, serializzaCarriera,
+} from './carriera/portabile.ts'
 import { etichettaStagione, type Carriera } from './carriera/tipi.ts'
 import Amichevole from './schermate/Amichevole.tsx'
 import Editor from './schermate/Editor.tsx'
@@ -58,6 +62,54 @@ function App() {
   async function apriCaricaCarriera() {
     setCarriereSalvate(await caricaCarriere())
     setVista({ tipo: 'carica-carriera' })
+  }
+
+  // ── M10: salvataggi portabili (.mister), copie manuali ──
+  const inputImporta = useRef<HTMLInputElement>(null)
+
+  /** Scarica la carriera come file .mister. Se gioca con un DB
+      personalizzato, il database viaggia DENTRO il file. */
+  async function esportaSuFile(c: Carriera) {
+    const serveDb = c.dbImpronta !== 0 && improntaDbCorrente() === c.dbImpronta
+    const dbUtente = serveDb ? await caricaDatabaseUtente() : null
+    const blob = new Blob([serializzaCarriera(c, dbUtente)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = nomeFileMister(c)
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  /** Importa un file .mister: migra la carriera, evita di sovrascrivere
+      slot esistenti e — se il file porta con sé un DB personalizzato che
+      qui manca — offre di installarlo. */
+  async function importaDaFile(file: File) {
+    try {
+      const { carriera, dbUtente } = leggiFileMister(await file.text())
+      const esistenti = await caricaCarriere()
+      if (esistenti.some((x) => x.id === carriera.id)) {
+        carriera.id = `carriera-${Date.now()}` // mai sovrascrivere uno slot
+        carriera.nomeSlot = carriera.nomeSlot ?? 'Importata'
+      }
+      if (dbUtente && carriera.dbImpronta !== 0 && improntaDbCorrente() !== carriera.dbImpronta) {
+        const installa = confirm(
+          'Questa carriera gioca con un DATABASE PERSONALIZZATO, incluso nel file.\n' +
+            'Installarlo ora? Sostituirà l\'eventuale database personalizzato di questo browser ' +
+            'e la pagina si ricaricherà.',
+        )
+        if (installa) {
+          await salvaBytesDatabase(dbUtente)
+          await salvaCarriera(carriera)
+          location.reload()
+          return
+        }
+      }
+      await salvaCarriera(carriera)
+      setCarriereSalvate(await caricaCarriere())
+    } catch (errore) {
+      alert(errore instanceof Error ? errore.message : String(errore))
+    }
   }
 
   // ── Schermata titolo / menu ──
@@ -150,6 +202,28 @@ function App() {
       {vista.tipo === 'carica-carriera' && (
         <section className="schermata">
           <h2>Carica carriera</h2>
+          <p className="nota">
+            Ogni carriera si salva da sola a ogni azione. Da qui puoi fare una{' '}
+            <strong>copia</strong> (uno slot manuale, per tornare a questo momento),{' '}
+            <strong>esportare</strong> una carriera come file <code>.mister</code> da portare su
+            un altro computer, o <strong>importare</strong> un file .mister.
+          </p>
+          <p>
+            <button className="bottone-secondario" onClick={() => inputImporta.current?.click()}>
+              ⬆ Importa da file (.mister)
+            </button>
+            <input
+              ref={inputImporta}
+              type="file"
+              accept=".mister,application/json"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) void importaDaFile(file)
+                e.target.value = '' // permette di reimportare lo stesso file
+              }}
+            />
+          </p>
           {carriereSalvate?.length === 0 && (
             <p className="nota">Nessuna carriera salvata: inizia una nuova carriera dal menu.</p>
           )}
@@ -158,17 +232,44 @@ function App() {
               <div key={c.id} className="voce-salvataggio">
                 <button className="voce-menu" onClick={() => setVista({ tipo: 'carriera', carriera: c })}>
                   <span className="voce-etichetta">
-                    {c.allenatore.nome} — {c.club.find((x) => x.id === c.clubId)?.nome}
+                    {c.allenatore.nome} — {c.nazionale
+                      ? `CT ${c.nazionale.nome}`
+                      : c.club.find((x) => x.id === c.clubId)?.nome}
+                    {c.nomeSlot ? ` · 📌 ${c.nomeSlot}` : ''}
                   </span>
                   <span className="voce-descrizione">
                     {c.nazione.nome} · stagione {etichettaStagione(c.anno)} · giornata{' '}
                     {Math.min(c.giornata + 1, c.calendario.length)}/{c.calendario.length} · salvata il{' '}
                     {new Date(c.aggiornataIl).toLocaleString('it-IT')}
+                    {c.dbImpronta !== 0 ? ' · DB personalizzato' : ''}
                   </span>
                 </button>
                 <button
                   className="bottone-secondario"
+                  title="Crea una copia di questa carriera come nuovo slot"
                   onClick={async () => {
+                    const etichetta = prompt(
+                      'Nome della copia (per riconoscerla nella lista):',
+                      `Copia del ${new Date().toLocaleDateString('it-IT')}`,
+                    )
+                    if (etichetta === null) return
+                    await salvaCarriera(duplicaCarriera(c, etichetta))
+                    setCarriereSalvate(await caricaCarriere())
+                  }}
+                >
+                  Duplica
+                </button>
+                <button
+                  className="bottone-secondario"
+                  title="Scarica questa carriera come file .mister"
+                  onClick={() => void esportaSuFile(c)}
+                >
+                  Esporta
+                </button>
+                <button
+                  className="bottone-secondario"
+                  onClick={async () => {
+                    if (!confirm(`Eliminare per sempre la carriera di ${c.allenatore.nome}?`)) return
                     await eliminaCarriera(c.id)
                     setCarriereSalvate(await caricaCarriere())
                   }}

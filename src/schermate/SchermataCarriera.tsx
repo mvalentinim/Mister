@@ -12,6 +12,7 @@ import { interroga } from '../db/query.ts'
 import { improntaDbCorrente } from '../db/database.ts'
 import type { GiocatoreRiga } from '../db/tipi.ts'
 import { salvaCarriera } from '../carriera/salvataggio.ts'
+import { duplicaCarriera } from '../carriera/portabile.ts'
 import {
   DESCRIZIONE_OBIETTIVO, etichettaStagione, type Carriera, type CronacaPartita,
   type Offerta, type Partita,
@@ -458,7 +459,22 @@ function SchermataCarriera({ db, carriera }: Props) {
         {carriera.trofei && carriera.trofei.length > 0 && <> · 🏆 {carriera.trofei.length}</>} ·
         obiettivo: {DESCRIZIONE_OBIETTIVO[carriera.obiettivo]} ·
         giornata {Math.min(carriera.giornata + 1, carriera.calendario.length)} di {carriera.calendario.length}
-        {' '}· salvataggio automatico attivo
+        {' '}· salvataggio automatico attivo{' '}
+        <button
+          className="bottone-secondario"
+          title="Crea subito una copia di questa carriera come slot separato (utile prima di una decisione rischiosa)"
+          onClick={async () => {
+            const etichetta = prompt(
+              'Nome della copia di sicurezza:',
+              `Prima della giornata ${Math.min(carriera.giornata + 1, carriera.calendario.length)}`,
+            )
+            if (etichetta === null) return
+            await salvaCarriera(duplicaCarriera(carriera, etichetta))
+            alert('Copia creata: la trovi in "Carica carriera".')
+          }}
+        >
+          💾 Copia di sicurezza
+        </button>
       </p>
 
       {/* coerenza carriera ↔ database (FRD §11): se il DB attuale non è

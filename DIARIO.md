@@ -516,3 +516,19 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Nuovo test CLI** (`tsx` sui moduli veri e sul DB vero): Modrić ritirato e rinato — età 16 ✓, potenziale visto dal gioco 83 ✓, delta −15 esatto ✓, media 61 = target ✓, free agent ✓. Collaudo E2E Playwright rifatto: 208 ritirati, 208 rinati, identità = solo anno di nascita ✓, crescita graduale +2 senza risucchi ✓. Build, lint, tsc e calibrazione verdi.
 
 **In lista (2026-08-21):** curve di crescita/declino personalizzate dalla personalità del giocatore (professionalità, ambizione) — annotata tra le attività di M11 nel piano.
+
+---
+
+## Sessione 25 — 2026-08-21 — M10 (nucleo): file .mister, copie manuali, regole di game over/restart
+
+**Obiettivo dichiarato:** il cuore di M10 — la carriera come singolo file portabile `.mister` (col DB personalizzato incluso quando serve), il salvataggio manuale a copie, e le regole documentate del ciclo di vita (game over/restart).
+
+**Fatto:**
+- **File `.mister`** (`src/carriera/portabile.ts`): JSON con tipo, formato, la carriera completa e — se la carriera è nata con un DB personalizzato — il database intero in base64. L'import passa dalle STESSE migrazioni dei salvataggi (un file esportato oggi si aprirà nelle versioni future) e crea sempre un nuovo slot: mai sovrascrivere (id già occupato → id nuovo).
+- **Import col DB incluso**: se la carriera è nata con un DB personalizzato diverso da quello attivo e il file lo contiene, il gioco offre di installarlo (conferma + ricarica). Rifiutando si gioca comunque, con l'avviso di incoerenza già esistente.
+- **Copie manuali**: "💾 Copia di sicurezza" nella schermata carriera e "Duplica" nella lista — nuovo slot con etichetta 📌 (`nomeSlot`, campo facoltativo: niente migrazione). Il salvataggio resta automatico a ogni azione; la copia congela un momento.
+- **Elimina con conferma** (prima cancellava al primo click!) e lista slot arricchita (CT, DB personalizzato, etichetta).
+- **Regole di design documentate** (`docs/salvataggi.md`): NIENTE game over forzato (FRD §4.4) — esonero con offerte dal fondo, offerta di casa garantita, rinnovo sempre; restart = nuova carriera o ritorno a una copia; formato .mister e coerenza DB.
+- **Collaudo end-to-end**: DB personalizzato creato dall'editor → carriera con impronta 29999045 → copia di sicurezza (2 slot) → export .mister (DB incluso, 1.5MB base64) → eliminati gli slot e ripristinato il DB originale → import: carriera tornata con lo stesso id, DB installato, NESSUN avviso di incoerenza → re-import: secondo slot con id diverso ✓. Build, lint e tsc verdi (motore non toccato).
+
+**Resta di M10:** packaging Tauri (app macOS) e guida alla sincronizzazione cloud.

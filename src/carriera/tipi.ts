@@ -250,6 +250,10 @@ export interface OfferteSpeciali {
 /** Lo stato completo di una carriera. */
 export interface Carriera {
   id: string
+  /** etichetta dello slot per le COPIE manuali (M10): assente nelle
+      carriere normali, la mette duplicaCarriera. Facoltativa: i vecchi
+      salvataggi non ne hanno bisogno. */
+  nomeSlot?: string
   versioneSchema: 13 // per le migrazioni dei salvataggi (FRD §11)
   /** i giocatori RIGENERATI (post-ritiro): id → l'anno di nascita nuovo,
       che sovrascrive quello del DB in lettura (come la crescita): il resto
