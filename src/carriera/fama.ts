@@ -18,6 +18,7 @@ import { tatticaDefault } from '../motore/preparazione.ts'
 import { GIORNI_FINESTRA_ESTIVA, aggiungiNotizia, rosaClub } from '../mercato/stato.ts'
 import { generaCalendario } from './calendario.ts'
 import { creaCoppa } from './coppa.ts'
+import { ingressoLeggendeSeDovuto } from './leggende.ts'
 import type { Carriera, ClubCarriera, Obiettivo, Offerta, RigaClassifica } from './tipi.ts'
 
 /** Sotto questa fiducia (e dopo qualche giornata) scatta l'esonero. */
@@ -224,6 +225,7 @@ export function accettaOffertaPanchina(db: Database, carriera: Carriera, offerta
     carriera.mercato.aperto = true
     carriera.mercato.finestra = 'estiva'
     carriera.mercato.giorniRimasti = GIORNI_FINESTRA_ESTIVA
+    ingressoLeggendeSeDovuto(db, carriera) // M9: anche al rientro dalla nazionale
   }
 
   // budget del nuovo club

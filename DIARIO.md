@@ -450,3 +450,16 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Collaudo end-to-end**: "Nuovo Fenomeno" creato e cercabile ✓; "Real Collaudo" creato in Serie B ✓; JSON esportato → ripristino originale (Fenomeno sparito) → import → Fenomeno tornato ✓; torneo fantasy a 4 vinto dalle Leggende d'Italia ✓; carriera con le Leggende d'Italia in Serie B (forza 77, 15 giocatori; il sostituito, ironia, era proprio il debole Real Collaudo) → prima giornata: le Leggende in vetta con un 5-0 ✓. Build, lint, tsc, calibrazione e test tattiche verdi.
 
 **M9 CHIUSA.** Il DoD (creare una squadra Legend senza aiuto e affrontarla in amichevole) resta da esercitare di persona col solito debito da Mac. Prossima milestone: **M10 — salvataggi portabili e ciclo di vita** (file .mister, game over/restart/slot, upload).
+
+---
+
+## Sessione 23 — 2026-08-21 — Le leggende nel mercato come free agent (richiesta esplicita)
+
+**Obiettivo dichiarato:** opzione di carriera per far entrare le leggende nel mercato come SINGOLI free agent (non squadre), dalla stagione scelta, con ingaggio guidato dalla prospettiva del progetto e ritiro dopo 5 stagioni.
+
+**Fatto:**
+- **Opzione alla creazione carriera**: "Leggende nel mercato come free agent?" — No / da subito / dopo la 1ª / 2ª / 3ª stagione. Entrano alla PRIMA finestra estiva della stagione scelta (`src/carriera/leggende.ts`, agganciato a creazione, fine stagione e rientro dalla nazionale), con notiziona dedicata.
+- **Free agent veri**: niente cartellino (sono svincolati), ma stipendio atteso "da leggenda" (curva del valore sulla media, senza lo sconto dell'età anagrafica: Sawa media 88 → 5,9M/anno).
+- **Il progetto decide** (`punteggioInteresse`, ramo dedicato alle leggende): forza del club, palcoscenico (la B vale −10), reputazione dell'allenatore, promessa di progetto a peso doppio; il denaro è solo "rispetto del nome" (±poco). L'IA non le ingaggia (dichiarato): aspettano il TUO progetto.
+- **Ritiro dopo 5 stagioni** dall'ingresso, ovunque siano (anche dalla tua rosa), a prescindere dall'età: rimossi da rose/svincolati/contratti/prestiti/promesse, notizia, e registro `carriera.ritirati` (id, nome, anno) — la base per la gestione del post-ritiro in arrivo. Salvataggi a **versioneSchema 11**.
+- **Collaudo end-to-end**: opzione "dopo la 1ª stagione" → alla creazione zero svincolati ✓; nell'estate della stagione 2 entrano le 166 leggende (⭐ in lista) ✓; dialogo con Homare Sawa: fattori del progetto in chiaro, interesse 47 dalla Serie B → la firma arriva SOLO con la promessa di progetto (62) ✓; ritiro forzato a +5 stagioni: tutte via (una dalla mia rosa), 166 nel registro ritirati, notizia col conteggio ✓. Build, lint, tsc e calibrazione verdi.

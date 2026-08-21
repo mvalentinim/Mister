@@ -64,6 +64,46 @@ export function punteggioInteresse(
   const clubAttualeId = clubDiGiocatore(carriera, giocatore.id)
   const clubAttuale = carriera.club.find((c) => c.id === clubAttualeId)
 
+  // ── LE LEGGENDE ragionano diversamente (M9, richiesta esplicita):
+  // niente cartellino, ingaggio alto, ma a convincerle è la PROSPETTIVA
+  // DEL PROGETTO — non i soldi, non il minutaggio, non l'età. ──
+  if (giocatore.categoria !== 'normale') {
+    let punteggioLeggenda = 30
+    const aggiungi = (nome: string, contributo: number) =>
+      fattori.push({ nome, contributo: Math.round(contributo) })
+
+    // il progetto: la forza del club e il palcoscenico contano più di tutto
+    aggiungi('Prospettiva del progetto (forza del club)', limita((mioClub.forza - 68) * 1.6, -25, 30))
+    aggiungi(mioClub.livello === 1 ? 'Il grande palcoscenico (prima divisione)' : 'La seconda divisione è un palcoscenico piccolo', mioClub.livello === 1 ? 8 : -10)
+    aggiungi('La reputazione dell’allenatore', limita((carriera.famaAllenatore - 30) * 0.4, -10, 25))
+
+    // le promesse: il progetto pesa il doppio, il resto poco
+    for (const leva of offerta.leve) {
+      if (leva === 'progetto') aggiungi('Un progetto da leggenda (promesso)', 15)
+      else if (leva === 'titolarita') aggiungi('Promessa di titolarità', 6)
+      else if (leva === 'fascia') aggiungi('Fascia di capitano', 5)
+      else aggiungi('Centralità nel progetto', 4)
+    }
+    if (carriera.promesseTradite > 0 && offerta.leve.length > 0) {
+      aggiungi('Le leggende sanno delle tue promesse tradite', -limita(carriera.promesseTradite * 4, 4, 16))
+    }
+
+    // il denaro: da leggenda pretende un ingaggio da leggenda, ma è solo
+    // una questione di rispetto — non sposta la decisione
+    const attesoLeggenda = Math.max(1_500_000, Math.round(Math.exp(12.6 + 0.171 * (mediaComplessiva(giocatore) - 50)) * 0.03))
+    const rispetto = offerta.stipendio / attesoLeggenda
+    aggiungi(rispetto >= 1 ? 'Un ingaggio all’altezza del nome' : 'Un ingaggio che non rispetta il nome',
+      limita((rispetto - 1) * 12, -14, 5))
+
+    for (const f of fattori) punteggioLeggenda += f.contributo
+    const negativiLeggenda = fattori.filter((f) => f.contributo < 0).sort((a, b) => a.contributo - b.contributo)
+    return {
+      punteggio: Math.round(limita(punteggioLeggenda, 0, 100)),
+      fattori,
+      ostacolo: negativiLeggenda[0] ?? null,
+    }
+  }
+
   // base neutra
   let punteggio = 45
 

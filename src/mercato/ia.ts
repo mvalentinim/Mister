@@ -132,7 +132,9 @@ export function giornoDiMercato(db: Database, carriera: Carriera): void {
     for (const altro of venditori) {
       candidati.push(...analizzaRosa(db, carriera, altro.id).esuberi.filter((g) => REPARTO[g.ruolo] === reparto))
     }
-    const svincolatiReparto = giocatoriPerId(db, carriera.svincolati, carriera).filter((g) => REPARTO[g.ruolo] === reparto)
+    // le LEGGENDE aspettano un progetto: l'IA non le ingaggia (per ora, M9)
+    const svincolatiReparto = giocatoriPerId(db, carriera.svincolati, carriera)
+      .filter((g) => REPARTO[g.ruolo] === reparto && g.categoria === 'normale')
     candidati.push(...svincolatiReparto)
 
     const acquistabili = candidati
@@ -465,8 +467,13 @@ export function rinnovaContratto(carriera: Carriera, giocatoreId: number): strin
   return null
 }
 
-/** Lo stipendio che uno svincolato si aspetta (per aprire la trattativa). */
+/** Lo stipendio che uno svincolato si aspetta (per aprire la trattativa).
+    Le LEGGENDE (M9) non hanno cartellino ma pretendono un ingaggio da
+    leggenda: la curva usa la media SENZA lo sconto dell'età anagrafica. */
 export function stipendioAttesoSvincolato(carriera: Carriera, g: GiocatoreRiga): number {
+  if (g.categoria !== 'normale') {
+    return Math.max(1_500_000, Math.round(Math.exp(12.6 + 0.171 * (mediaComplessiva(g) - 50)) * 0.03))
+  }
   return Math.round(Math.max(200_000, valoreInCarriera(carriera, g) * 0.08))
 }
 

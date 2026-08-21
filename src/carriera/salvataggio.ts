@@ -108,6 +108,12 @@ function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: nu
     salvataggio.dbImpronta = -1
     caricato.versioneSchema = 10
   }
+  if (caricato.versioneSchema === 10) {
+    // v10 → v11 (M9): leggende free agent nel mercato + registro ritirati
+    salvataggio.leggendeMercato = null
+    salvataggio.ritirati = []
+    caricato.versioneSchema = 11
+  }
   return salvataggio
 }
 

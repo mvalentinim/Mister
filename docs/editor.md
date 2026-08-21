@@ -72,6 +72,27 @@ col motore vero, cronaca e pagelle; il risultato non tocca le carriere.
   ricostruisce le squadre Legend elencate. È il formato di condivisione;
   il .sqlite resta il backup totale.
 
+## Le leggende nel mercato come free agent
+
+Opzione alla creazione della carriera: dalla stagione scelta (subito, dopo
+la 1ª, la 2ª o la 3ª) tutte le leggende non impegnate entrano nel **mercato
+estivo come svincolati**. Regole:
+
+- **Niente cartellino** (sono free agent), ma un **ingaggio da leggenda**:
+  lo stipendio atteso usa la curva del valore sulla media, SENZA lo sconto
+  dell'età anagrafica.
+- **A convincerle è la prospettiva del progetto**, non i soldi: nel cervello
+  della trattativa (M7) le leggende hanno fattori dedicati — forza del club,
+  palcoscenico (prima o seconda divisione), reputazione dell'allenatore,
+  promessa di progetto (pesa il doppio); il denaro è solo "rispetto del
+  nome" e sposta poco.
+- **Niente crescita né declino** (fuori dal tempo), ma **dopo 5 stagioni
+  dall'ingresso si ritirano**, ovunque si trovino (anche dalla tua rosa),
+  a prescindere dall'età. I ritirati finiscono nel registro
+  `carriera.ritirati` (la base per la gestione del post-ritiro).
+- L'IA non le ingaggia (per ora, semplificazione dichiarata): le leggende
+  aspettano il TUO progetto.
+
 ## Torneo fantasy e Legend nel campionato
 
 - **Torneo fantasy** (schermata Amichevole): 4 o 8 squadre a scelta (Legend

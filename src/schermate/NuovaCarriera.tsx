@@ -17,6 +17,8 @@ interface Props {
 function NuovaCarriera({ db, onCarrieraCreata }: Props) {
   // la squadra Legend da inserire nel campionato (M9, opzionale)
   const [legendScelta, setLegendScelta] = useState<number | ''>('')
+  // le leggende free agent: '' = no, altrimenti dopo quante stagioni entrano
+  const [leggendeOffset, setLeggendeOffset] = useState<number | ''>('')
   const legends = squadreLegend(db)
   const nazioni = nazioniDisponibili(db)
 
@@ -88,6 +90,19 @@ function NuovaCarriera({ db, onCarrieraCreata }: Props) {
         {offerte.length} club di seconda divisione hanno bussato alla tua porta.
         Stagione {etichettaStagione(ANNO_INIZIO_CARRIERA)}.
       </p>
+      {/* le LEGGENDE nel mercato come free agent (M9): opzionale */}
+      <p className="nota">
+        ⭐ Leggende nel mercato come free agent?{' '}
+        <select value={leggendeOffset} onChange={(e) => setLeggendeOffset(e.target.value === '' ? '' : Number(e.target.value))}>
+          <option value="">No</option>
+          <option value={0}>Sì, da subito</option>
+          <option value={1}>Sì, dopo la 1ª stagione</option>
+          <option value={2}>Sì, dopo la 2ª stagione</option>
+          <option value={3}>Sì, dopo la 3ª stagione</option>
+        </select>{' '}
+        Entrano nel mercato estivo senza cartellino; le convince il progetto,
+        non i soldi. Si ritirano dopo 5 stagioni.
+      </p>
       {/* la Legend nel campionato (M9, FRD §5.3): opzionale */}
       {legends.length > 0 && (
         <p className="nota">
@@ -107,7 +122,8 @@ function NuovaCarriera({ db, onCarrieraCreata }: Props) {
             onClick={() =>
               onCarrieraCreata(
                 creaCarriera(db, { nome: nome.trim(), nazionalita, eta }, nazione, o,
-                  legendScelta === '' ? undefined : legendScelta),
+                  legendScelta === '' ? undefined : legendScelta,
+                  leggendeOffset === '' ? undefined : ANNO_INIZIO_CARRIERA + leggendeOffset),
               )
             }
           >

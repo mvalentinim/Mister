@@ -250,7 +250,18 @@ export interface OfferteSpeciali {
 /** Lo stato completo di una carriera. */
 export interface Carriera {
   id: string
-  versioneSchema: 10 // per le migrazioni dei salvataggi (FRD §11)
+  versioneSchema: 11 // per le migrazioni dei salvataggi (FRD §11)
+  /** le LEGGENDE nel mercato come free agent (M9, opzione di carriera):
+      null = opzione spenta. daAnno = la stagione in cui entrano;
+      annoIngresso/ids si riempiono all'ingresso; dopo 5 stagioni si ritirano. */
+  leggendeMercato: {
+    daAnno: number
+    entrate: boolean
+    annoIngresso: number | null
+    ids: number[]
+  } | null
+  /** i giocatori ritirati in questa carriera (base per il post-ritiro) */
+  ritirati: Array<{ giocatoreId: number; nome: string; anno: number }>
   /** l'impronta del database con cui è nata la carriera (0 = originale,
       -1 = sconosciuta nei salvataggi vecchi). Se il DB attuale è diverso,
       l'app avvisa: nomi e attributi potrebbero non corrispondere. */

@@ -22,6 +22,7 @@ import { aggiornaFiducia, controllaEsonero, famaFineStagione, obiettivoDelClub, 
 import { crescitaFineStagione, type NotaCrescita } from './crescita.ts'
 import { avanzaNazionale, offertaNazionale } from './nazionale.ts'
 import { rosaLegendIds, squadreLegend } from '../db/legends.ts'
+import { ingressoLeggendeSeDovuto, ritiroLeggendeSeDovuto } from './leggende.ts'
 import { giocatoriPerId } from '../mercato/stato.ts'
 import { mediaComplessiva } from '../db/tipi.ts'
 import { GIORNI_FINESTRA_INVERNALE } from '../mercato/stato.ts'
@@ -160,6 +161,7 @@ export function creaCarriera(
   nazione: { id: number; nome: string },
   offerta: Offerta,
   legendSquadraId?: number,
+  leggendeDaAnno?: number, // M9: le leggende free agent entrano da questa stagione
 ): Carriera {
   const nomi = interroga<{ livello: 1 | 2; nome: string }>(
     db,
@@ -204,8 +206,12 @@ export function creaCarriera(
   )
   const carriera: Carriera = {
     id: `carriera-${Date.now()}`,
-    versioneSchema: 10,
+    versioneSchema: 11,
     dbImpronta: improntaDbCorrente(), // il DB con cui nasce la carriera
+    leggendeMercato: leggendeDaAnno === undefined
+      ? null
+      : { daAnno: leggendeDaAnno, entrate: false, annoIngresso: null, ids: [] },
+    ritirati: [],
     // ── M8: fama completa, fiducia, coppa, crescita ──
     fiducia: 60,
     crescita: {},
@@ -273,6 +279,7 @@ export function creaCarriera(
   carriera.budget.mercato = offerta.budgetMercato
   carriera.budget.stipendi = Math.max(carriera.budget.stipendi, offerta.budgetStipendi)
   carriera.coppa = creaCoppa(carriera) // la coppa nazionale (M8)
+  ingressoLeggendeSeDovuto(db, carriera) // "da subito" = già in questo mercato estivo (M9)
   return carriera
 }
 
@@ -496,6 +503,9 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
     clubNazione(carriera).filter((c) => c.livello === nuovoLivello).map((c) => c.id),
   )
   carriera.coppa = creaCoppa(carriera) // nuovo tabellone di coppa (M8)
+  // le leggende free agent: ritiro dopo 5 stagioni e/o ingresso (M9)
+  ritiroLeggendeSeDovuto(db, carriera)
+  ingressoLeggendeSeDovuto(db, carriera)
   // la Coppa Europa esiste solo se ci si è qualificati (M8 parte 2)
   carriera.coppaEuropa = carriera.qualificatoEuropa ? creaCoppaEuropa(carriera) : null
 
