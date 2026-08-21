@@ -116,30 +116,30 @@ function App() {
 
         <nav className="menu">
           <button className="voce-menu attiva" disabled={!db} onClick={() => setVista({ tipo: 'nuova-carriera' })}>
-            <span className="voce-etichetta">Nuova carriera</span>
+            <span className="voce-etichetta">⚽ Nuova carriera</span>
             <span className="voce-descrizione">Scegli una nazione e inizia la scalata dalla seconda divisione</span>
           </button>
           <button className="voce-menu attiva" disabled={!db} onClick={apriCaricaCarriera}>
-            <span className="voce-etichetta">Carica carriera</span>
+            <span className="voce-etichetta">📂 Carica carriera</span>
             <span className="voce-descrizione">Riprendi una carriera salvata</span>
           </button>
           <button className="voce-menu attiva" disabled={!db && !erroreDb} onClick={() => setVista({ tipo: 'squadre' })}>
-            <span className="voce-etichetta">Database</span>
+            <span className="voce-etichetta">🌍 Database</span>
             <span className="voce-descrizione">
               {db ? 'Sfoglia squadre, nazionali e leggende' : erroreDb ?? 'Caricamento database…'}
             </span>
           </button>
           <button className="voce-menu attiva" disabled={!db} onClick={() => setVista({ tipo: 'amichevole' })}>
-            <span className="voce-etichetta">Amichevole</span>
+            <span className="voce-etichetta">🏟 Amichevole</span>
             <span className="voce-descrizione">Sfide libere: le squadre Legend contro chiunque</span>
           </button>
           <button className="voce-menu attiva" disabled={!db} onClick={() => setVista({ tipo: 'editor' })}>
-            <span className="voce-etichetta">Editor</span>
+            <span className="voce-etichetta">🛠 Editor</span>
             <span className="voce-descrizione">Modifica giocatori e club, crea le tue leggende (M9)</span>
           </button>
         </nav>
 
-        <footer className="versione">M2 — Carriera · versione 0.2.0</footer>
+        <footer className="versione">versione 0.10 · M10 — salvataggi portabili</footer>
       </main>
     )
   }

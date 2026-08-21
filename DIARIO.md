@@ -546,3 +546,19 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Verifiche**: build/lint/tsc verdi; collaudo E2E .mister rieseguito dopo il refactor (tutto ok); la parte Rust è stata verificata davvero: `cargo check` completato SENZA errori nell'ambiente remoto (librerie GUI installate apposta) — compila l'involucro nativo e, con la generazione del contesto, valida anche tauri.conf.json e le capabilities. Su Mac resta solo la build vera.
 
 **M10 CHIUSA** (con debito da Mac: `npm run tauri:dev` di persona, export con "Salva con nome" nativa, e il DoD del giro browser→altro dispositivo via .mister). Prossima milestone: **M11 — rifinitura "videogame"**.
+
+---
+
+## Sessione 27 — 2026-08-21 — M11 parte 1: il design system "videogame"
+
+**Obiettivo dichiarato:** la prima parte di M11 — trasformare l'aspetto "da grande database" in quello di un videogame del 2026, restando sul tema chiaro grigio scelto all'inizio.
+
+**Fatto:**
+- **Design system in index.css**: tutti gli stili ora partono da token (scala di verdi del calcio, oro per le leggende, tre livelli di ombra, raggi e transizioni uniformi). Siccome l'app usava già classi condivise, il restyling ha investito TUTTE le schermate in un colpo solo.
+- **Tipografia vera**: Inter per i testi, Outfit per i titoli — font variabili impacchettati nell'app (niente rete, funzionerà anche nell'app nativa).
+- **Schermata titolo da videogame**: logo con gradiente verde-nero, bandierina tricolore sotto il sottotitolo, cerchio di centrocampo in filigrana, voci del menu con icona, banda verde laterale e ingresso animato in sequenza.
+- **Componenti "da gioco"**: bottoni con gradiente/ombra/sollevamento al passaggio, linguette a pillola stile console, tabelle con angoli morbidi e intestazioni curate, riga della mia squadra con bordo-bandiera, barra di navigazione sticky con sfocatura, animazione d'ingresso per ogni schermata, fuoco da tastiera uniforme e rispetto di prefers-reduced-motion.
+- **Ritocchi**: icone nel menu del titolo, versione in calce aggiornata (era ferma a "M2"!), lista salvataggi a tutta larghezza coi bottoni allineati.
+- **Collaudo visivo**: screenshot Playwright di titolo, carriera, mercato, tattica, lista salvataggi e Match Day — giudicati e corretti (il difetto della lista slot è emerso proprio così). Build, lint e tsc verdi.
+
+**Resta di M11:** la cura "di scena" di Match Day/trattativa/spogliatoio (momenti da regia), la verifica multi-nazione con ricalibrazione, le nazionalità in italiano, e le curve di crescita personali annotate in lista.

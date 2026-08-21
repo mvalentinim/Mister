@@ -4,6 +4,9 @@
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+// i font del design system (M11), impacchettati nell'app: niente rete
+import '@fontsource-variable/inter'
+import '@fontsource-variable/outfit'
 import './index.css'
 import App from './App.tsx'
 
