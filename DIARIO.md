@@ -502,3 +502,15 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - Nuovo registro `carriera.crescitaMassima` (giocatore → il delta di crescita più alto mai toccato, solo se positivo), aggiornato dalla crescita di fine stagione. Al ritiro il **picco = media di fabbrica del DB + massimo storico**: l'apice, comunque sia andato il declino. Per chi parte già anziano nel DB (Modrić 39enne) il picco è la sua media di partenza, non quella declinata dal gioco.
 - Salvataggi a **versioneSchema 13** (migrazione v12→13).
 - **Collaudo end-to-end rifatto**: Modrić cala di −2 in stagione ma il picco registrato è 76 (l'apice), non 74; rinasce 16enne con potenziale 76 e delta di rinascita ESATTAMENTE −22 (= media di fabbrica − 22, la formula verificata al punto); il registro dei massimi si popola con 1.987 voci positive (i giovani cresciuti) ✓; terza stagione: risalita graduale +3, niente salto a −12, niente ri-ritiro ✓. Build, lint, tsc e calibrazione verdi.
+
+---
+
+## Sessione 24-ter — 2026-08-21 — Semplificazione: il potenziale del rigenerato è quello del DB
+
+**Obiettivo dichiarato:** semplificare — il valore che conta per il rigenerato è il POTENZIALE del DB. Per i campioni over 30 il DB conserva il potenziale alto (verificato sui dati veri: Modrić 83 con valore attuale 76, Salah 91, Lewandowski 88, Messi 86); un over 30 non cresce più verso il potenziale (già così nel motore: dai 29 anni niente crescita), quindi nella carriera "vecchia" non lo raggiungerà mai — ma il rigenerato 16enne riparte con valori bassi e può crescere fino al potenziale pieno.
+
+**Fatto:**
+- **Eliminato il registro `crescitaMassima`** della 24-bis (mai rilasciato): il potenziale del rigenerato non si ricostruisce più dal picco osservato, si legge dal DB. `carriera.rinati` ora contiene solo l'anno di nascita nuovo; il potenziale visto dal gioco resta quello del DB (che è anche editabile nell'editor: alzarlo cambia il futuro del rigenerato).
+- Media di partenza del sedicenne = **potenziale DB − 22** (minimo 35). Modrić: fabbrica 76, potenziale 83, si ritira a 74 → rinasce con media 61 e può salire fino a 83, oltre il 76 della carriera precedente. `picco` nel registro ritirati resta come dato informativo (media al ritiro).
+- versioneSchema resta 13 (migrazione v12→13 ora è un semplice avanzamento).
+- **Nuovo test CLI** (`tsx` sui moduli veri e sul DB vero): Modrić ritirato e rinato — età 16 ✓, potenziale visto dal gioco 83 ✓, delta −15 esatto ✓, media 61 = target ✓, free agent ✓. Collaudo E2E Playwright rifatto: 208 ritirati, 208 rinati, identità = solo anno di nascita ✓, crescita graduale +2 senza risucchi ✓. Build, lint, tsc e calibrazione verdi.

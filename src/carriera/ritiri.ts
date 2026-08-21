@@ -4,11 +4,14 @@
 // La regola: a fine stagione i giocatori normali troppo avanti con l'età
 // appendono le scarpe. Dopo UNA stagione di pausa il ritirato "rinasce":
 // torna nel mercato come free agent, versione identica di sé stesso ma
-// SEDICENNE, con il POTENZIALE pari al picco della carriera precedente e
-// le abilità riportate a livello da sedicenne. Ambizioni, stipendio e
-// valore si adeguano da soli: dipendono tutti da età e media, che ora
-// sono quelle di un ragazzo (vedi valoreMercato e stipendioAtteso).
-// Da lì in poi ci pensa la crescita di M8 a farlo risalire verso il picco.
+// SEDICENNE. Il POTENZIALE è quello del DB, che per i campioni anziani
+// resta alto (Modrić: potenziale 83 anche se al ritiro valeva 76): il
+// rigenerato riparte con abilità da ragazzo e può crescere fino a
+// diventare il campione "sulla carta", anche se la carriera precedente —
+// iniziata da over 30, quando non si cresce più — non gliel'ha permesso.
+// Ambizioni, stipendio e valore si adeguano da soli: dipendono tutti da
+// età e media, che ora sono quelle di un ragazzo (vedi valoreMercato e
+// stipendioAtteso). Da lì in poi ci pensa la crescita di M8.
 // Si rinasce UNA volta sola. Le leggende ritirate NON rinascono.
 
 import type { Database } from 'sql.js'
@@ -25,7 +28,7 @@ export const ETA_RITIRO_CERTO = 38
 export const ETA_RITIRO_POSSIBILE = 35
 /** L'età con cui il rigenerato torna in campo. */
 export const ETA_RINASCITA = 16
-/** Quanto sotto il picco partono le abilità del sedicenne. */
+/** Quanto sotto il POTENZIALE partono le abilità del sedicenne. */
 const DIVARIO_SEDICENNE = 22
 /** La media di partenza non scende comunque sotto questo valore. */
 const MEDIA_MINIMA_RINATO = 35
@@ -41,10 +44,8 @@ function etaAFineStagione(carriera: Carriera, dataNascita: string): number {
 /** A fine stagione i giocatori NORMALI anziani si ritirano: certi a 38+,
     possibili dai 35 (probabilità che cresce con l'età; uno svincolato di
     35+ smette sempre, nessuno lo vuole più). Deterministico col seme.
-    Registra il `picco`: NON la media al ritiro (già erosa dal declino),
-    ma l'APICE della carriera — la media di fabbrica del DB più il massimo
-    di crescita mai toccato. Sarà il potenziale del rigenerato: Modrić si
-    ritira a 78, ma rinasce col potenziale dell'88 che valeva all'apice.
+    Registra il `picco` (la media al momento del ritiro) a titolo
+    informativo: il potenziale del rigenerato è quello del DB.
     Da chiamare DOPO carriera.anno++. */
 export function ritiriFineStagione(db: Database, carriera: Carriera): void {
   if (!carriera.ritirati || !carriera.rinati) return // salvataggio non ancora migrato
@@ -64,9 +65,7 @@ export function ritiriFineStagione(db: Database, carriera: Carriera): void {
     )
     // applicaCrescita: per i rinati sovrascrive anche l'età (un rigenerato
     // è un ragazzo, non deve ri-ritirarsi con la data di nascita del DB)
-    const conOverlay = applicaCrescita(carriera, grezze)
-    for (let j = 0; j < conOverlay.length; j++) {
-      const g = conOverlay[j]
+    for (const g of applicaCrescita(carriera, grezze)) {
       if (g.categoria !== 'normale') continue // le leggende hanno il loro ritiro
       const eta = etaAFineStagione(carriera, g.data_nascita)
       if (eta < ETA_RITIRO_POSSIBILE) continue
@@ -75,10 +74,7 @@ export function ritiriFineStagione(db: Database, carriera: Carriera): void {
         svincolatiSet.has(g.id) || // svincolato e anziano: fine corsa
         rng.evento(0.25 * (eta - (ETA_RITIRO_POSSIBILE - 1))) // 35: 25%, 36: 50%, 37: 75%
       if (!smette) continue
-      // il picco è l'APICE: media di fabbrica (riga grezza, senza il delta
-      // in declino di oggi) + il massimo di crescita mai raggiunto
-      const picco = mediaComplessiva(grezze[j]) + Math.max(0, carriera.crescitaMassima?.[g.id] ?? 0)
-      ritirati.push({ id: g.id, nome: `${g.nome} ${g.cognome}`.trim(), picco })
+      ritirati.push({ id: g.id, nome: `${g.nome} ${g.cognome}`.trim(), picco: mediaComplessiva(g) })
     }
   }
   if (ritirati.length === 0) return
@@ -124,17 +120,17 @@ export function ritiriFineStagione(db: Database, carriera: Carriera): void {
 }
 
 /** La RINASCITA: dopo una stagione di pausa, il ritirato normale torna nel
-    mercato come free agent sedicenne. L'identità nuova (anno di nascita e
-    potenziale = picco) vive in `carriera.rinati` e viene applicata in
-    lettura da applicaCrescita; le abilità vengono riportate a livello da
-    ragazzo con un delta in `carriera.crescita`. Da chiamare a fine
-    stagione, DOPO carriera.anno++ e dopo ritiriFineStagione. */
+    mercato come free agent sedicenne. L'identità nuova (solo l'anno di
+    nascita) vive in `carriera.rinati` e viene applicata in lettura da
+    applicaCrescita; il POTENZIALE resta quello del DB, e le abilità
+    vengono riportate a livello da ragazzo (potenziale − 22) con un delta
+    in `carriera.crescita`. Da chiamare a fine stagione, DOPO
+    carriera.anno++ e dopo ritiriFineStagione. */
 export function rinasciteFineStagione(db: Database, carriera: Carriera): void {
   if (!carriera.ritirati || !carriera.rinati) return
   const pronti = carriera.ritirati.filter(
     (r) =>
       r.categoria === 'normale' && // le leggende non rinascono
-      r.picco !== undefined &&
       r.rinato !== true &&
       carriera.anno >= r.anno + 1, // una stagione intera di pausa
   )
@@ -149,15 +145,15 @@ export function rinasciteFineStagione(db: Database, carriera: Carriera): void {
     )
     if (!riga) continue
     const mediaBase = mediaComplessiva(riga)
-    const target = Math.max(MEDIA_MINIMA_RINATO, r.picco! - DIVARIO_SEDICENNE)
+    // le abilità del sedicenne partono sotto il POTENZIALE del DB — che per
+    // i campioni anziani resta alto (Modrić: 83), quindi il rigenerato può
+    // crescere fino a diventare il campione che il DB "promette"
+    const target = Math.max(MEDIA_MINIMA_RINATO, riga.potenziale - DIVARIO_SEDICENNE)
 
-    // identità nuova: sedicenne col potenziale del picco raggiunto in carriera
-    carriera.rinati[r.giocatoreId] = {
-      annoNascita: carriera.anno - ETA_RINASCITA,
-      potenziale: r.picco!,
-    }
-    // abilità da sedicenne: il delta porta la media al target (può essere
-    // ben sotto il vecchio DECLINO_MASSIMO: la crescita lo sa e lo rispetta)
+    // identità nuova: sedicenne (il potenziale resta quello del DB)
+    carriera.rinati[r.giocatoreId] = { annoNascita: carriera.anno - ETA_RINASCITA }
+    // il delta porta la media al target (può essere ben sotto il vecchio
+    // DECLINO_MASSIMO: la crescita lo sa e lo rispetta)
     carriera.crescita[r.giocatoreId] = target - mediaBase
     // free agent: torna tra gli svincolati (lo stipendio atteso sarà quello
     // basso di un ragazzo, lo calcola stipendioAttesoSvincolato da età+media)

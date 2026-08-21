@@ -120,9 +120,8 @@ function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: nu
     caricato.versioneSchema = 12
   }
   if (caricato.versioneSchema === 12) {
-    // v12 → v13: il registro dei massimi di crescita (per il picco vero
-    // al ritiro: l'apice della carriera, non la media già in declino)
-    salvataggio.crescitaMassima = {}
+    // v12 → v13: semplificazione dei rigenerati — il potenziale del
+    // rigenerato è quello del DB, niente più campi extra da aggiungere
     caricato.versioneSchema = 13
   }
   return salvataggio

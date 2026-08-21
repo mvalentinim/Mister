@@ -209,7 +209,6 @@ export function creaCarriera(
     id: `carriera-${Date.now()}`,
     versioneSchema: 13,
     rinati: {}, // i rigenerati post-ritiro (sessione 24)
-    crescitaMassima: {}, // i massimi di crescita, per il picco al ritiro
     dbImpronta: improntaDbCorrente(), // il DB con cui nasce la carriera
     leggendeMercato: leggendeDaAnno === undefined
       ? null

@@ -45,8 +45,8 @@ export function applicaDelta(
 }
 
 /** Come applicaDelta, ma leggendo il registro dalla carriera — e applicando
-    anche l'identità dei RIGENERATI (post-ritiro): anno di nascita nuovo e
-    potenziale pari al picco della carriera precedente. */
+    anche l'identità dei RIGENERATI (post-ritiro): l'anno di nascita nuovo.
+    Il potenziale resta quello del DB: è il tetto verso cui può risalire. */
 export function applicaCrescita(carriera: Carriera, righe: GiocatoreRiga[]): GiocatoreRiga[] {
   const conDelta = applicaDelta(carriera.crescita, righe)
   const rinati = carriera.rinati
@@ -54,11 +54,7 @@ export function applicaCrescita(carriera: Carriera, righe: GiocatoreRiga[]): Gio
   return conDelta.map((g) => {
     const rinascita = rinati[g.id]
     if (!rinascita) return g
-    return {
-      ...g,
-      data_nascita: `${rinascita.annoNascita}-07-01`,
-      potenziale: rinascita.potenziale,
-    }
+    return { ...g, data_nascita: `${rinascita.annoNascita}-07-01` }
   })
 }
 
@@ -85,7 +81,6 @@ export interface NotaCrescita {
     da mostrare nel riepilogo di fine stagione. */
 export function crescitaFineStagione(db: Database, carriera: Carriera): NotaCrescita[] {
   if (!carriera.crescita) carriera.crescita = {}
-  if (!carriera.crescitaMassima) carriera.crescitaMassima = {}
   const rng = creaRng(semeDaStringa(`crescita-${carriera.seme}-${carriera.anno}`))
   const note: NotaCrescita[] = []
 
@@ -144,11 +139,6 @@ export function crescitaFineStagione(db: Database, carriera: Carriera): NotaCres
       const nuovo = Math.max(fondo, attuale + delta)
       if (nuovo === attuale) continue
       carriera.crescita[g.id] = nuovo
-      // il registro dei MASSIMI: memorizza l'apice della crescita (solo se
-      // positivo) — al ritiro ricostruisce il picco della carriera
-      if (nuovo > 0 && nuovo > (carriera.crescitaMassima[g.id] ?? 0)) {
-        carriera.crescitaMassima[g.id] = nuovo
-      }
 
       if (gruppo.mio) {
         note.push({

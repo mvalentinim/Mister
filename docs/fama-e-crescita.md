@@ -123,31 +123,31 @@ A fine stagione i giocatori **normali** anziani appendono le scarpe:
 - **38+**: ritiro certo; **35-37**: probabilità crescente (25% / 50% / 75%);
   uno **svincolato di 35+** smette sempre (nessuno lo vuole più).
 - Il ritirato sparisce da rose, svincolati, contratti, prestiti e promesse;
-  finisce nel registro `carriera.ritirati` col suo **picco** — l'APICE
-  della carriera, non la media al ritiro già erosa dal declino: la media
-  di fabbrica del DB più il massimo di crescita mai toccato (registro
-  `carriera.crescitaMassima`). Esempio: Modrić valeva 88 all'apice, si
-  ritira a 78 → il picco è 88.
+  finisce nel registro `carriera.ritirati` con la media al momento del
+  ritiro (informativa).
 
 Dopo **una stagione di pausa** arriva la **rinascita**: il ritirato torna
-nel mercato come **free agent SEDICENNE** — stesso giocatore del DB, ma con
-identità nuova (anno di nascita e **potenziale = picco della carriera
-precedente**, sovrascritti in lettura via `carriera.rinati`) e abilità
-riportate a livello da ragazzo (media ≈ picco − 22, minimo 35, con un delta
-in `carriera.crescita`). Ambizioni, stipendio e valore si adeguano da soli:
-dipendono tutti da età e media, ora quelle di un sedicenne. Da lì la
-normale crescita di M8 lo fa risalire, un passo alla volta, verso il
-campione che era. Si rinasce **una volta sola**; le **leggende** ritirate
-non rinascono (hanno il loro ritiro dopo 5 stagioni, vedi mercato.md).
+nel mercato come **free agent SEDICENNE** — stesso giocatore del DB, con
+il solo anno di nascita sovrascritto in lettura (`carriera.rinati`). Il
+**potenziale resta quello del DB**, che per i campioni anziani è alto
+(Modrić: potenziale 83, valore attuale 76; Salah 91, Lewandowski 88): un
+over 30 non cresce più verso il potenziale — al massimo declina piano —
+quindi non lo raggiungerà mai nella carriera "vecchia", ma il rigenerato
+riparte con abilità da ragazzo (media = potenziale − 22, minimo 35, con un
+delta in `carriera.crescita`) e può crescere fino a diventare il campione
+che il DB promette. Ambizioni, stipendio e valore si adeguano da soli:
+dipendono tutti da età e media, ora quelle di un sedicenne. Il potenziale
+è editabile nell'editor del DB: alzarlo cambia anche il futuro del
+rigenerato. Si rinasce **una volta sola**; le **leggende** ritirate non
+rinascono (hanno il loro ritiro dopo 5 stagioni, vedi mercato.md).
 
 ## Salvataggio
 
 VersioneSchema **12** (v7: fiducia, crescita, coppa, registro fama, trofei,
 esoneri, offerte; v8: Coppa Europa e contratto dell'allenatore; v9: la
 nazionale; v10: impronta del DB; v11: leggende free agent e registro
-ritirati; v12: ritiri per età e rigenerati; v13: il registro dei massimi
-di crescita per il picco al ritiro). I salvataggi vecchi migrano da soli
-(coppa dalla stagione successiva).
+ritirati; v12-13: ritiri per età e rigenerati). I salvataggi vecchi
+migrano da soli (coppa dalla stagione successiva).
 
 ## La panchina della nazionale (M8 parte 3, FRD §4.3)
 

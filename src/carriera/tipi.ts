@@ -251,14 +251,12 @@ export interface OfferteSpeciali {
 export interface Carriera {
   id: string
   versioneSchema: 13 // per le migrazioni dei salvataggi (FRD §11)
-  /** i giocatori RIGENERATI (post-ritiro): id → identità nuova di 16enne.
-      L'anno di nascita e il potenziale sovrascrivono quelli del DB in
-      lettura (come la crescita): il resto del gioco li vede giovanissimi. */
-  rinati: Record<number, { annoNascita: number; potenziale: number }>
-  /** il delta di crescita PIÙ ALTO mai toccato da ogni giocatore (solo se
-      positivo): serve a ricostruire il PICCO della carriera al ritiro —
-      l'apice, non la media già erosa dal declino. */
-  crescitaMassima: Record<number, number>
+  /** i giocatori RIGENERATI (post-ritiro): id → l'anno di nascita nuovo,
+      che sovrascrive quello del DB in lettura (come la crescita): il resto
+      del gioco li vede sedicenni. Il POTENZIALE resta quello del DB — il
+      rigenerato può ridiventare il campione "sulla carta", anche se nella
+      carriera precedente (iniziata da anziano) non l'ha mai raggiunto. */
+  rinati: Record<number, { annoNascita: number }>
   /** le LEGGENDE nel mercato come free agent (M9, opzione di carriera):
       null = opzione spenta. daAnno = la stagione in cui entrano;
       annoIngresso/ids si riempiono all'ingresso; dopo 5 stagioni si ritirano. */
@@ -269,8 +267,8 @@ export interface Carriera {
     ids: number[]
   } | null
   /** i giocatori ritirati in questa carriera. `picco` = la media al momento
-      del ritiro (diventa il potenziale del rigenerato); `rinato` marca chi
-      è già tornato (si rinasce una volta sola). */
+      del ritiro (informativa: il potenziale del rigenerato è quello del DB);
+      `rinato` marca chi è già tornato (si rinasce una volta sola). */
   ritirati: Array<{
     giocatoreId: number
     nome: string
