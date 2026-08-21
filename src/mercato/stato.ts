@@ -257,7 +257,9 @@ export function fineStagioneMercato(db: Database, carriera: Carriera): void {
       const contratto = carriera.contratti[g.id]
       if (!contratto || contratto.scadenza > carriera.anno) continue // non in scadenza
       const importante = ordinata.indexOf(g) < 14
-      if (club.id !== carriera.clubId && importante) {
+      // le LEGGENDE non firmano rinnovi coi club IA (M9): a scadenza
+      // tornano free agent, ingaggiabili senza cartellino
+      if (club.id !== carriera.clubId && importante && g.categoria === 'normale') {
         contratto.scadenza = carriera.anno + 2 + (g.id % 2) // rinnovo IA 2-3 anni
         contratto.stipendio = Math.round(contratto.stipendio * 1.1)
       } else {

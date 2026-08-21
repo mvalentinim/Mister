@@ -90,8 +90,16 @@ estivo come svincolati**. Regole:
   dall'ingresso si ritirano**, ovunque si trovino (anche dalla tua rosa),
   a prescindere dall'età. I ritirati finiscono nel registro
   `carriera.ritirati` (la base per la gestione del post-ritiro).
-- L'IA non le ingaggia (per ora, semplificazione dichiarata): le leggende
-  aspettano il TUO progetto.
+- **Anche l'IA le ingaggia** (il "colpo da leggenda"): ogni giorno di
+  mercato, 0-2 grandi club europei (forza ≥ 74 — serve un progetto, come per
+  te) possono convincere una leggenda free agent, in tutta Europa. La firma
+  crea un contratto normale (stipendio da leggenda, 2-4 anni).
+- **Sotto contratto valgono un cartellino da leggenda**: il valore segue il
+  NOME (curva pura della media, senza sconti d'età) — per strapparle a un
+  club si tratta il cartellino come per chiunque. **A scadenza** i club IA
+  non le rinnovano: tornano free agent, ingaggiabili senza cartellino.
+- **Niente nazionali**: le leggende non entrano nelle convocazioni (le
+  convocazioni vengono dalla tabella dedicata, dove non ci sono — verificato).
 
 ## Torneo fantasy e Legend nel campionato
 

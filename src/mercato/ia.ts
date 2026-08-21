@@ -91,7 +91,9 @@ function trasferimentoIA(
   if (venditoreId === carriera.clubId) carriera.budget.mercato += prezzo
   const vecchio = carriera.contratti[g.id]
   spostaGiocatore(carriera, g.id, compratoreId, {
-    stipendio: Math.round((vecchio?.stipendio ?? 300_000) * 1.15),
+    // senza contratto precedente (es. una leggenda free agent) vale
+    // lo stipendio atteso da svincolato, non il minimo sindacale
+    stipendio: Math.round((vecchio?.stipendio ?? stipendioAttesoSvincolato(carriera, g)) * 1.15),
     scadenza: carriera.anno + 2 + (g.id % 3), // 2-4 anni
   })
   aggiungiNotizia(
@@ -106,6 +108,25 @@ function trasferimentoIA(
  * rinforzi tra gli esuberi altrui e gli svincolati; qualcuno bussa alla
  * porta dell'utente. Genera notizie ufficiali e rumor.
  */
+/** Il "colpo da leggenda" (M9): ogni giorno di mercato, qualche grande
+    club europeo può convincere una leggenda free agent. Vale la stessa
+    regola dell'utente: serve un PROGETTO (club forte), non i soldi. */
+function colpiDaLeggenda(db: Database, carriera: Carriera, rng: ReturnType<typeof creaRng>): void {
+  const leggendeLibere = giocatoriPerId(db, carriera.svincolati, carriera)
+    .filter((g) => g.categoria !== 'normale')
+  if (leggendeLibere.length === 0) return
+  // i club col progetto giusto: forti, di qualunque campionato (utente escluso)
+  const grandi = carriera.club.filter((c) => c.id !== carriera.clubId && c.forza >= 74)
+  const colpi = rng.intero(3) // 0-2 al giorno
+  for (let i = 0; i < colpi && leggendeLibere.length > 0; i++) {
+    if (!rng.evento(0.6)) continue // non tutti i giorni son da prima pagina
+    const club = grandi[rng.intero(grandi.length)]
+    if (!club) break
+    const leggenda = leggendeLibere.splice(rng.intero(leggendeLibere.length), 1)[0]
+    trasferimentoIA(carriera, leggenda, club.id, 0, 'colpo da leggenda: il progetto l’ha convinta')
+  }
+}
+
 export function giornoDiMercato(db: Database, carriera: Carriera): void {
   const m = carriera.mercato
   if (!m.aperto || m.giorniRimasti <= 0) return
@@ -132,7 +153,8 @@ export function giornoDiMercato(db: Database, carriera: Carriera): void {
     for (const altro of venditori) {
       candidati.push(...analizzaRosa(db, carriera, altro.id).esuberi.filter((g) => REPARTO[g.ruolo] === reparto))
     }
-    // le LEGGENDE aspettano un progetto: l'IA non le ingaggia (per ora, M9)
+    // le leggende hanno un canale dedicato (il "colpo da leggenda", sotto):
+    // qui il giro normale degli svincolati resta sui giocatori comuni
     const svincolatiReparto = giocatoriPerId(db, carriera.svincolati, carriera)
       .filter((g) => REPARTO[g.ruolo] === reparto && g.categoria === 'normale')
     candidati.push(...svincolatiReparto)
@@ -197,6 +219,9 @@ export function giornoDiMercato(db: Database, carriera: Carriera): void {
       }
     }
   }
+
+  // il canale dedicato delle leggende free agent (M9)
+  colpiDaLeggenda(db, carriera, rng)
 
   m.giorniRimasti--
   if (m.giorniRimasti <= 0) {

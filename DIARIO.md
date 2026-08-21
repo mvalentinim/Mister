@@ -463,3 +463,16 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Il progetto decide** (`punteggioInteresse`, ramo dedicato alle leggende): forza del club, palcoscenico (la B vale −10), reputazione dell'allenatore, promessa di progetto a peso doppio; il denaro è solo "rispetto del nome" (±poco). L'IA non le ingaggia (dichiarato): aspettano il TUO progetto.
 - **Ritiro dopo 5 stagioni** dall'ingresso, ovunque siano (anche dalla tua rosa), a prescindere dall'età: rimossi da rose/svincolati/contratti/prestiti/promesse, notizia, e registro `carriera.ritirati` (id, nome, anno) — la base per la gestione del post-ritiro in arrivo. Salvataggi a **versioneSchema 11**.
 - **Collaudo end-to-end**: opzione "dopo la 1ª stagione" → alla creazione zero svincolati ✓; nell'estate della stagione 2 entrano le 166 leggende (⭐ in lista) ✓; dialogo con Homare Sawa: fattori del progetto in chiaro, interesse 47 dalla Serie B → la firma arriva SOLO con la promessa di progetto (62) ✓; ritiro forzato a +5 stagioni: tutte via (una dalla mia rosa), 166 nel registro ritirati, notizia col conteggio ✓. Build, lint, tsc e calibrazione verdi.
+
+---
+
+## Sessione 23-bis — 2026-08-21 — Le leggende nel mercato IA (richiesta esplicita)
+
+**Obiettivo dichiarato:** anche i club IA (di tutti i campionati europei) ingaggiano le leggende free agent; sotto contratto valgono un cartellino da trattare col club; a scadenza tornano free agent; niente convocazioni in nazionale.
+
+**Fatto:**
+- **Il "colpo da leggenda"** (`giornoDiMercato`): ogni giorno di finestra, 0-2 grandi club europei (forza ≥ 74: serve un progetto, come per l'utente) possono ingaggiare una leggenda free agent, con notizia dedicata. Il contratto è vero: stipendio da leggenda (atteso da svincolato ×1.15), scadenza 2-4 anni.
+- **Cartellino da leggenda**: `valoreMercato` ha un ramo per le leggende — il valore segue il NOME (curva pura della media, senza premio giovani né sconto veterani: l'età anagrafica è storica). Strappare una leggenda a un club passa dalla normale trattativa a 5 leve sul cartellino, poi dal dialogo col giocatore (fattori del progetto).
+- **A scadenza tornano free agent**: `fineStagioneMercato` non rinnova mai le leggende dei club IA (i giocatori normali importanti sì) — il ciclo free agent → contratto → free agent continua fino al ritiro dei 5 anni.
+- **Nazionali**: verificato sul DB — zero leggende nelle convocazioni (vale per costruzione, ora dichiarato nei documenti).
+- **Collaudo end-to-end**: finestra estiva → colpi IA ("Bobby Moore da svincolato alla Juventus a parametro zero", contratto 1,7M fino al 2028) ✓; Moore cercato nel mercato: cartellino 43M ✅ e trattativa col club apribile ✓; contratto portato a scadenza → di nuovo tra gli svincolati (nessun rinnovo IA) ✓. Build, lint, tsc verdi.

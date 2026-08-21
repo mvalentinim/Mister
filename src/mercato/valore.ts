@@ -24,8 +24,11 @@ export function valoreMercato(
   // curva base esponenziale: ~300k a media 50, ~12M a 70, ~120M a 85
   let valore = Math.exp(12.6 + 0.171 * (media - 50))
 
-  // età: picco 22-27; i giovani con potenziale valgono un premio
-  if (eta <= 21) valore *= 1.25 + Math.max(0, g.potenziale - media) * 0.02
+  if (g.categoria !== 'normale') {
+    // le LEGGENDE (M9): il cartellino segue il NOME, non l'età anagrafica
+    // (che è storica). Niente premio giovani, niente sconto veterani:
+    // vale la curva pura della media — un cartellino "certamente alto".
+  } else if (eta <= 21) valore *= 1.25 + Math.max(0, g.potenziale - media) * 0.02
   else if (eta <= 27) valore *= 1.15 + Math.max(0, g.potenziale - media) * 0.01
   else if (eta <= 30) valore *= 0.9
   else if (eta <= 33) valore *= 0.55
