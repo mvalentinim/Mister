@@ -61,8 +61,25 @@ si modificano e si eliminano; la persistenza è quella del DB personalizzato.
 qualunque squadra — Legend contro Legend, o contro i club di oggi. Partita
 col motore vero, cronaca e pagelle; il risultato non tocca le carriere.
 
-## Cosa arriva nelle prossime sessioni di M9
+## Creazione da zero e import/export
 
-- Creazione di nuovi giocatori e club da zero.
-- Import/export del database in JSON (backup e condivisione).
-- Torneo fantasy e inserimento delle Legend nel campionato.
+- **➕ Nuovo giocatore**: nasce con attributi neutri (60) e si compila nella
+  scheda. **➕ Nuovo club in…**: nasce nel campionato scelto; dalla scheda
+  club si può anche SPOSTARE un club tra i campionati. Il calendario
+  gestisce i numeri dispari (turno di riposo), ma meglio tenere pari le leghe.
+- **JSON** (FRD §5.4): "Esporta JSON" scarica club, giocatori e squadre
+  Legend in un file leggibile; "Importa JSON" li riapplica per id (upsert) e
+  ricostruisce le squadre Legend elencate. È il formato di condivisione;
+  il .sqlite resta il backup totale.
+
+## Torneo fantasy e Legend nel campionato
+
+- **Torneo fantasy** (schermata Amichevole): 4 o 8 squadre a scelta (Legend
+  e/o club), eliminazione diretta secca, tabellone giocato in un colpo.
+- **Legend nel campionato** (opzione alla creazione carriera): la squadra
+  Legend scelta entra nella SECONDA divisione al posto del club più debole
+  (mai il tuo), con contratti pesanti e forza calcolata dalla rosa; il club
+  sostituito resta solo nel mondo del mercato. Le leggende sono **fuori dal
+  tempo**: niente crescita né declino (con date di nascita storiche il
+  declino le azzererebbe); il loro valore di mercato risente dell'età
+  anagrafica — stranezza nota e accettata.

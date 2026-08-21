@@ -159,6 +159,11 @@ function Editor({ db }: Props) {
     const set: string[] = []
     const parametri: (string | number)[] = []
     for (const [nome, valore] of Object.entries(clubCampi)) {
+      if (nome === 'campionato') {
+        const compId = interrogaUna<{ id: number }>(db, 'SELECT id FROM competizione WHERE nome = ?', [valore])?.id
+        if (compId) { set.push('competizione_id = ?'); parametri.push(compId) }
+        continue
+      }
       set.push(`${nome} = ?`)
       parametri.push(nome === 'nome' ? valore : Number(valore))
     }
@@ -247,6 +252,51 @@ function Editor({ db }: Props) {
     setVersione((v) => v + 1)
   }
 
+  /** Crea un giocatore nuovo di zecca e apre la sua scheda. */
+  async function nuovoGiocatore() {
+    const id = Number(db.exec('SELECT MAX(id) + 1 FROM giocatore')[0].values[0][0])
+    db.run(
+      `INSERT INTO giocatore (id, club_id, club_esterno, nome, cognome, data_nascita,
+         nazionalita, ue, ruolo, ruoli_secondari, piede, categoria,
+         velocita, resistenza, tecnica, passaggio, tiro, dribbling, colpo_testa,
+         marcatura, contrasto, posizionamento, visione, calci_piazzati,
+         riflessi, presa, uscite, rinvio,
+         ambizione, attaccamento_denaro, fedelta, bisogno_giocare, professionalita,
+         leadership, legame_territoriale, forma, morale, condizione, potenziale)
+       VALUES (?, NULL, NULL, 'Nuovo', 'Giocatore', '2000-01-01',
+         'Italy', 1, 'CC', '', 'destro', 'normale',
+         60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60,
+         NULL, NULL, NULL, NULL,
+         50, 50, 50, 50, 50, 50, 50, 50, 50, 100, 70)`,
+      [id],
+    )
+    assegnaImprontaSeMancante(db)
+    await salvaDatabaseUtente(db)
+    setVersione((v) => v + 1)
+    setApertoId(id)
+    setModifiche({})
+    setAvviso(`✅ Giocatore creato (id ${id}): compila la scheda e salva.`)
+  }
+
+  /** Crea un club nuovo nel campionato scelto e apre la sua scheda. */
+  async function nuovoClub(campionato: string) {
+    const compId = interrogaUna<{ id: number }>(db, 'SELECT id FROM competizione WHERE nome = ?', [campionato])?.id
+    if (!compId) return
+    const id = Number(db.exec('SELECT MAX(id) + 1 FROM club')[0].values[0][0])
+    db.run(
+      `INSERT INTO club (id, competizione_id, nome, citta, fama, budget_mercato, budget_stipendi, legend)
+       VALUES (?, ?, 'Nuovo Club', '', 60, 5000000, 8000000, 0)`,
+      [id, compId],
+    )
+    assegnaImprontaSeMancante(db)
+    await salvaDatabaseUtente(db)
+    setVersione((v) => v + 1)
+    setClubAperto(id)
+    setClubCampi({})
+    setAvviso(`✅ Club creato in ${campionato}: rinominalo e sistemane i budget. ` +
+      'Entrerà nelle NUOVE carriere di quella nazione (il calendario gestisce anche i numeri dispari).')
+  }
+
   async function ripristina() {
     const ok = confirm(
       'Tornare al database ORIGINALE?\n\nLe modifiche dell\'editor si perdono (esportale prima, se ci tieni). ' +
@@ -256,6 +306,63 @@ function Editor({ db }: Props) {
     if (!ok) return
     await eliminaDatabaseUtente()
     location.reload() // l'app riparte col database originale
+  }
+
+  /** Esporta club, giocatori e squadre Legend in JSON leggibile (FRD §5.4). */
+  function esportaJson() {
+    const dump = {
+      formato: 'mister-db-json',
+      versione: 1,
+      club: interroga<Record<string, unknown>>(db, 'SELECT * FROM club'),
+      giocatori: interroga<Record<string, unknown>>(db, 'SELECT * FROM giocatore'),
+      squadreLegend: squadre.map((s) => ({
+        nome: s.nome, descrizione: s.descrizione, giocatori: rosaLegendIds(db, s.id),
+      })),
+    }
+    const blob = new Blob([JSON.stringify(dump, null, 1)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'mister-database.json'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  /** Importa un JSON esportato: aggiorna club e giocatori per id (upsert)
+      e ricostruisce le squadre Legend elencate. */
+  async function importaJson(file: File) {
+    try {
+      const dump = JSON.parse(await file.text()) as {
+        formato?: string
+        club?: Array<Record<string, unknown>>
+        giocatori?: Array<Record<string, unknown>>
+        squadreLegend?: Array<{ nome: string; giocatori: number[] }>
+      }
+      if (dump.formato !== 'mister-db-json') {
+        setAvviso('❌ Il file non è un export JSON di MISTER.')
+        return
+      }
+      const upsert = (tabella: string, righe: Array<Record<string, unknown>>) => {
+        for (const riga of righe) {
+          const colonne = Object.keys(riga)
+          db.run(
+            `INSERT OR REPLACE INTO ${tabella} (${colonne.join(',')}) VALUES (${colonne.map(() => '?').join(',')})`,
+            colonne.map((c) => riga[c] as string | number | null),
+          )
+        }
+      }
+      if (dump.club) upsert('club', dump.club)
+      if (dump.giocatori) upsert('giocatore', dump.giocatori)
+      for (const squadra of dump.squadreLegend ?? []) {
+        const esistente = squadre.find((s) => s.nome === squadra.nome)
+        salvaSquadraLegend(db, squadra.nome, squadra.giocatori, esistente?.id)
+      }
+      assegnaImprontaSeMancante(db)
+      await salvaDatabaseUtente(db)
+      location.reload()
+    } catch {
+      setAvviso('❌ JSON non leggibile o non compatibile.')
+    }
   }
 
   /** Scarica il database in uso come file .sqlite (backup/condivisione).
@@ -312,6 +419,14 @@ function Editor({ db }: Props) {
           <input type="file" accept=".sqlite" hidden
             onChange={(e) => { const f = e.target.files?.[0]; if (f) void importa(f) }} />
         </label>
+        <button className="bottone-secondario" onClick={esportaJson}>
+          ⬇️ Esporta JSON
+        </button>
+        <label className="bottone-secondario" style={{ cursor: 'pointer' }}>
+          ⬆️ Importa JSON
+          <input type="file" accept=".json" hidden
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) void importaJson(f) }} />
+        </label>
         {personalizzato && (
           <button className="bottone-secondario" onClick={() => void ripristina()}>
             ♻️ Ripristina il database originale
@@ -322,6 +437,9 @@ function Editor({ db }: Props) {
 
       {/* ── ricerca ── */}
       <h3>🔎 Cerca giocatori</h3>
+      <div className="riga-bottoni">
+        <button className="bottone-secondario" onClick={() => void nuovoGiocatore()}>➕ Nuovo giocatore</button>
+      </div>
       <div className="riga-bottoni filtri-mercato">
         <input placeholder="Nome (min 2 lettere)…" value={ricerca}
           onChange={(e) => setRicerca(e.target.value)} className="campo-ricerca" />
@@ -560,10 +678,10 @@ function Editor({ db }: Props) {
       )}
 
       {/* ── i club ── */}
-      <h3>🏟 Modifica un club</h3>
+      <h3>🏟 Club</h3>
       <div className="riga-bottoni filtri-mercato">
         <select value={clubAperto} onChange={(e) => { setClubAperto(e.target.value === '' ? '' : Number(e.target.value)); setClubCampi({}) }}>
-          <option value="">Scegli un club…</option>
+          <option value="">Scegli un club da modificare…</option>
           {campionati.map((k) => (
             <optgroup key={k} label={k}>
               {club.filter((c) => c.campionato === k).map((c) => (
@@ -571,6 +689,10 @@ function Editor({ db }: Props) {
               ))}
             </optgroup>
           ))}
+        </select>
+        <select value="" onChange={(e) => { if (e.target.value) void nuovoClub(e.target.value) }}>
+          <option value="">➕ Nuovo club in…</option>
+          {campionati.map((k) => <option key={k} value={k}>{k}</option>)}
         </select>
       </div>
       {clubRiga && (
@@ -580,7 +702,18 @@ function Editor({ db }: Props) {
             <label>Fama (forza) <input type="number" min={30} max={99} value={campoClub('fama', clubRiga.fama)} onChange={(e) => setClubCampi({ ...clubCampi, fama: e.target.value })} /></label>
             <label>Budget mercato <input type="number" step={500_000} value={campoClub('budget_mercato', clubRiga.budget_mercato)} onChange={(e) => setClubCampi({ ...clubCampi, budget_mercato: e.target.value })} /></label>
             <label>Budget stipendi <input type="number" step={500_000} value={campoClub('budget_stipendi', clubRiga.budget_stipendi)} onChange={(e) => setClubCampi({ ...clubCampi, budget_stipendi: e.target.value })} /></label>
+            <label>Campionato{' '}
+              <select value={campoClub('campionato', club.find((c) => c.id === clubAperto)?.campionato ?? '')}
+                onChange={(e) => setClubCampi({ ...clubCampi, campionato: e.target.value })}>
+                {campionati.map((k) => <option key={k} value={k}>{k}</option>)}
+              </select>
+            </label>
           </div>
+          <p className="nota">
+            Spostare un club di campionato (o crearne uno nuovo) vale per le NUOVE
+            carriere; meglio tenere pari il numero di squadre per lega (con un
+            numero dispari il calendario prevede un turno di riposo).
+          </p>
           <button className="bottone-primario" onClick={() => void salvaClub()}>💾 Salva club</button>
         </div>
       )}

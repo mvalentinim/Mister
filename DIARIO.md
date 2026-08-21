@@ -435,3 +435,18 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 **DoD di M9** (crea da solo una squadra Legend e affrontala in amichevole): il flusso è collaudato end-to-end; la prova "senza aiuto" dello sviluppatore resta in sospeso col solito debito da Mac.
 
 **Resta di M9:** creazione giocatori/club da zero, import/export JSON, torneo fantasy / Legend nel campionato.
+
+---
+
+## Sessione 22 — 2026-08-21 — M9 COMPLETATA: creazione da zero, JSON, torneo fantasy, Legend nel campionato
+
+**Obiettivo dichiarato:** chiudere M9 coi quattro pezzi rimasti.
+
+**Fatto:**
+- **Nuovo giocatore da zero** (nasce neutro a 60 e si compila nella scheda) e **nuovo club** nel campionato scelto; dalla scheda club ora si può anche spostare un club tra i campionati. Il calendario gestiva già i numeri dispari col turno di riposo — collaudato davvero: Serie B a 21 squadre, 42 giornate.
+- **Export/Import JSON** (FRD §5.4): club, giocatori e squadre Legend in un file leggibile; l'import riapplica per id (upsert) e ricostruisce le squadre Legend. Round-trip collaudato: 6.018 giocatori, 199 club, 4 squadre.
+- **Torneo fantasy** nella schermata Amichevole: 4 o 8 squadre (Legend e/o club), eliminazione diretta, tabellone in un colpo.
+- **Legend nel campionato** (FRD §5.3, opzione alla creazione carriera): entra in seconda divisione al posto del club più debole (mai il tuo); il sostituito resta nel mondo del mercato (nazioneId sentinella). Le leggende sono **fuori dal tempo**: escluse da crescita/declino (date di nascita storiche).
+- **Collaudo end-to-end**: "Nuovo Fenomeno" creato e cercabile ✓; "Real Collaudo" creato in Serie B ✓; JSON esportato → ripristino originale (Fenomeno sparito) → import → Fenomeno tornato ✓; torneo fantasy a 4 vinto dalle Leggende d'Italia ✓; carriera con le Leggende d'Italia in Serie B (forza 77, 15 giocatori; il sostituito, ironia, era proprio il debole Real Collaudo) → prima giornata: le Leggende in vetta con un 5-0 ✓. Build, lint, tsc, calibrazione e test tattiche verdi.
+
+**M9 CHIUSA.** Il DoD (creare una squadra Legend senza aiuto e affrontarla in amichevole) resta da esercitare di persona col solito debito da Mac. Prossima milestone: **M10 — salvataggi portabili e ciclo di vita** (file .mister, game over/restart/slot, upload).

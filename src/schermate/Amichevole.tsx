@@ -30,10 +30,19 @@ function testoEvento(e: EventoPartita): string {
   }
 }
 
+/** Un turno del torneo fantasy, già giocato. */
+interface TurnoTorneo {
+  nome: string
+  partite: Array<{ a: string; b: string; golA: number; golB: number; vincitrice: string; rigori: boolean }>
+}
+
 function Amichevole({ db }: Props) {
   const [sceltaA, setSceltaA] = useState<Scelta>('')
   const [sceltaB, setSceltaB] = useState<Scelta>('')
   const [risultato, setRisultato] = useState<{ esito: RisultatoPartita; nomeA: string; nomeB: string } | null>(null)
+  // torneo fantasy
+  const [partecipanti, setPartecipanti] = useState<Scelta[]>([])
+  const [torneo, setTorneo] = useState<{ turni: TurnoTorneo[]; campione: string } | null>(null)
 
   const legend = useMemo(() => squadreLegend(db), [db])
   const club = useMemo(
@@ -70,6 +79,35 @@ function Amichevole({ db }: Props) {
     setRisultato({ esito, nomeA: nomeDi(sceltaA), nomeB: nomeDi(sceltaB) })
   }
 
+  /** Il torneo fantasy: 4 o 8 squadre, eliminazione diretta secca. */
+  function giocaTorneo() {
+    let inCorsa = [...partecipanti].sort(() => Math.random() - 0.5)
+    const nomiTurni = inCorsa.length === 8 ? ['Quarti di finale', 'Semifinali', 'Finale'] : ['Semifinali', 'Finale']
+    const turni: TurnoTorneo[] = []
+    for (const nomeTurno of nomiTurni) {
+      const turno: TurnoTorneo = { nome: nomeTurno, partite: [] }
+      const vincitrici: Scelta[] = []
+      for (let i = 0; i < inCorsa.length; i += 2) {
+        const esito = simulaPartitaMotore(
+          squadra(inCorsa[i]), squadra(inCorsa[i + 1]),
+          `torneo-fantasy-${Date.now()}-${nomeTurno}-${i}`,
+        )
+        const pari = esito.golCasa === esito.golTrasferta
+        const vincitrice = esito.golCasa > esito.golTrasferta || (pari && Math.random() < 0.5)
+          ? inCorsa[i] : inCorsa[i + 1]
+        turno.partite.push({
+          a: nomeDi(inCorsa[i]), b: nomeDi(inCorsa[i + 1]),
+          golA: esito.golCasa, golB: esito.golTrasferta,
+          vincitrice: nomeDi(vincitrice), rigori: pari,
+        })
+        vincitrici.push(vincitrice)
+      }
+      turni.push(turno)
+      inCorsa = vincitrici
+    }
+    setTorneo({ turni, campione: nomeDi(inCorsa[0]) })
+  }
+
   const opzioni = (valore: Scelta, cambia: (v: Scelta) => void) => (
     <select value={valore} onChange={(e) => cambia(e.target.value)}>
       <option value="">Scegli una squadra…</option>
@@ -104,6 +142,40 @@ function Amichevole({ db }: Props) {
           ⚽ Gioca l'amichevole
         </button>
       </div>
+
+      {/* ── il torneo fantasy (FRD §5.3) ── */}
+      <h3>🏆 Torneo fantasy</h3>
+      <p className="nota">Scegli 4 oppure 8 squadre: eliminazione diretta secca, il tabellone si gioca in un colpo.</p>
+      <div className="riga-bottoni filtri-mercato">
+        {opzioni('', (v) => { if (v && !partecipanti.includes(v) && partecipanti.length < 8) setPartecipanti([...partecipanti, v]) })}
+        <span className="nota">
+          {partecipanti.length === 0 ? 'nessuna squadra scelta' : partecipanti.map(nomeDi).join(' · ')}
+        </span>
+        {partecipanti.length > 0 && (
+          <button className="bottone-secondario" onClick={() => { setPartecipanti([]); setTorneo(null) }}>Svuota</button>
+        )}
+        <button className="bottone-primario"
+          disabled={partecipanti.length !== 4 && partecipanti.length !== 8}
+          onClick={giocaTorneo}>
+          🏆 Gioca il torneo ({partecipanti.length}/4 o 8)
+        </button>
+      </div>
+      {torneo && (
+        <div className="cronaca">
+          <h3>🏆 {torneo.campione} vince il torneo!</h3>
+          {torneo.turni.map((t) => (
+            <div key={t.nome}>
+              <h4>{t.nome}</h4>
+              {t.partite.map((p, i) => (
+                <p key={i} className="nota">
+                  {p.a} <strong>{p.golA} - {p.golB}</strong> {p.b}
+                  {p.rigori ? ` (rigori: passa ${p.vincitrice})` : ''}
+                </p>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
 
       {risultato && (
         <div className="cronaca">

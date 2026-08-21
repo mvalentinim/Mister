@@ -21,6 +21,9 @@ import { creaCoppa, creaCoppaEuropa, giocaTurnoCoppaSeDovuto } from './coppa.ts'
 import { aggiornaFiducia, controllaEsonero, famaFineStagione, obiettivoDelClub, offerteFineStagione, variaFama } from './fama.ts'
 import { crescitaFineStagione, type NotaCrescita } from './crescita.ts'
 import { avanzaNazionale, offertaNazionale } from './nazionale.ts'
+import { rosaLegendIds, squadreLegend } from '../db/legends.ts'
+import { giocatoriPerId } from '../mercato/stato.ts'
+import { mediaComplessiva } from '../db/tipi.ts'
 import { GIORNI_FINESTRA_INVERNALE } from '../mercato/stato.ts'
 import { aggiornaComportamento, verificaPromesseFineStagione } from '../comportamento/comportamento.ts'
 import { simulaPartitaMotore } from '../motore/partita.ts'
@@ -148,12 +151,15 @@ export function generaOfferte(db: Database, nazioneId: number): Offerta[] {
   })
 }
 
-/** Crea la carriera dopo l'accettazione di un'offerta. */
+/** Crea la carriera dopo l'accettazione di un'offerta.
+    `legendSquadraId` (opzionale, FRD §5.3): una squadra Legend entra nella
+    seconda divisione al posto del club più debole. */
 export function creaCarriera(
   db: Database,
   allenatore: ProfiloAllenatore,
   nazione: { id: number; nome: string },
   offerta: Offerta,
+  legendSquadraId?: number,
 ): Carriera {
   const nomi = interroga<{ livello: 1 | 2; nome: string }>(
     db,
@@ -161,6 +167,37 @@ export function creaCarriera(
     [nazione.id],
   )
   const club = fotografaClub(db, nazione.id)
+
+  // ── la Legend nel campionato (M9, FRD §5.3) ──
+  // Sostituisce il club più DEBOLE della seconda divisione (mai quello
+  // dell'utente): il sostituito "fa spazio" e resta solo nel mondo del
+  // mercato. La rosa leggendaria viene fotografata più sotto.
+  let legend: { clubCarriera: ClubCarriera; rosaIds: number[]; sostituitoId: number } | null = null
+  if (legendSquadraId !== undefined) {
+    const squadra = squadreLegend(db).find((s) => s.id === legendSquadraId)
+    const rosaIds = rosaLegendIds(db, legendSquadraId)
+    if (squadra && rosaIds.length >= 11) {
+      const deboli = club
+        .filter((c) => c.livello === 2 && c.id !== offerta.clubId)
+        .sort((a, b) => a.forza - b.forza)
+      const sostituito = deboli[0]
+      const righe = giocatoriPerId(db, rosaIds)
+      const medie = righe.map((g) => mediaComplessiva(g)).sort((a, b) => b - a)
+      const forza = Math.round(medie.slice(0, 14).reduce((s, v) => s + v, 0) / Math.min(14, medie.length))
+      const clubCarriera: ClubCarriera = {
+        id: 500_000 + squadra.id, // id sintetico: non collide coi club del DB
+        nome: squadra.nome,
+        forza,
+        livello: 2,
+        nazioneId: nazione.id,
+        campionato: nomi.find((n) => n.livello === 2)?.nome ?? 'Seconda divisione',
+        budgetMercato: 10_000_000,
+        budgetMercatoIniziale: 10_000_000,
+      }
+      club[club.findIndex((c) => c.id === sostituito.id)] = clubCarriera
+      legend = { clubCarriera, rosaIds, sostituitoId: sostituito.id }
+    }
+  }
   const mieiCompagniDiLega = club.filter((c) => c.livello === 2).map((c) => c.id)
   const rosaMia = interroga<import('../db/tipi.ts').GiocatoreRiga>(
     db, 'SELECT * FROM giocatore WHERE club_id = ?', [offerta.clubId],
@@ -222,6 +259,17 @@ export function creaCarriera(
   // poi estende il mercato a tutti i campionati del DB
   inizializzaMercato(db, carriera)
   estendiMercatoAlMondo(db, carriera)
+  if (legend) {
+    // la rosa leggendaria entra nella carriera con contratti pesanti
+    carriera.rose[legend.clubCarriera.id] = legend.rosaIds
+    for (const id of legend.rosaIds) {
+      carriera.contratti[id] = { stipendio: 1_500_000, scadenza: carriera.anno + 3 }
+    }
+    // il club sostituito resta nel mondo del mercato ma fuori dal campionato
+    const sostituito = carriera.club.find((c) => c.id === legend!.sostituitoId)
+    if (sostituito) sostituito.nazioneId = -1
+    aggiungiNotizia(carriera, `⭐ ${legend.clubCarriera.nome} è stata ammessa al campionato al posto del ${sostituito?.nome ?? 'club più debole'}!`, 'avviso')
+  }
   carriera.budget.mercato = offerta.budgetMercato
   carriera.budget.stipendi = Math.max(carriera.budget.stipendi, offerta.budgetStipendi)
   carriera.coppa = creaCoppa(carriera) // la coppa nazionale (M8)

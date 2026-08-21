@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import type { Database } from 'sql.js'
+import { squadreLegend } from '../db/legends.ts'
 import {
   creaCarriera, generaOfferte, nazioniDisponibili, ANNO_INIZIO_CARRIERA,
 } from '../carriera/motore.ts'
@@ -14,6 +15,9 @@ interface Props {
 }
 
 function NuovaCarriera({ db, onCarrieraCreata }: Props) {
+  // la squadra Legend da inserire nel campionato (M9, opzionale)
+  const [legendScelta, setLegendScelta] = useState<number | ''>('')
+  const legends = squadreLegend(db)
   const nazioni = nazioniDisponibili(db)
 
   // Stato del wizard: la nazione scelta, il profilo, le offerte generate
@@ -84,6 +88,17 @@ function NuovaCarriera({ db, onCarrieraCreata }: Props) {
         {offerte.length} club di seconda divisione hanno bussato alla tua porta.
         Stagione {etichettaStagione(ANNO_INIZIO_CARRIERA)}.
       </p>
+      {/* la Legend nel campionato (M9, FRD §5.3): opzionale */}
+      {legends.length > 0 && (
+        <p className="nota">
+          ⭐ Vuoi una squadra Legend nel tuo campionato?{' '}
+          <select value={legendScelta} onChange={(e) => setLegendScelta(e.target.value === '' ? '' : Number(e.target.value))}>
+            <option value="">No, campionato normale</option>
+            {legends.map((l) => <option key={l.id} value={l.id}>{l.nome}</option>)}
+          </select>{' '}
+          Entrerà al posto del club più debole della seconda divisione.
+        </p>
+      )}
       <div className="menu">
         {offerte.map((o) => (
           <button
@@ -91,7 +106,8 @@ function NuovaCarriera({ db, onCarrieraCreata }: Props) {
             className="voce-menu"
             onClick={() =>
               onCarrieraCreata(
-                creaCarriera(db, { nome: nome.trim(), nazionalita, eta }, nazione, o),
+                creaCarriera(db, { nome: nome.trim(), nazionalita, eta }, nazione, o,
+                  legendScelta === '' ? undefined : legendScelta),
               )
             }
           >

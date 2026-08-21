@@ -96,6 +96,9 @@ export function crescitaFineStagione(db: Database, carriera: Carriera): NotaCres
     }
     const righe = applicaCrescita(carriera, grezze)
     for (const g of righe) {
+      // le LEGGENDE sono fuori dal tempo: niente crescita né declino
+      // (con date di nascita storiche il declino le azzererebbe subito)
+      if (g.categoria !== 'normale') continue
       const eta = etaNellaStagione(carriera, g)
       const media = mediaComplessiva(g) // già col delta attuale
       const margine = g.potenziale - media // quanto può ancora crescere
