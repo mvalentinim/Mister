@@ -405,3 +405,16 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - Decisioni in `docs/editor.md`.
 
 **Prossima sessione:** M9 sessione 2 — wizard "Crea squadra Legend", creazione giocatori/club da zero, prime squadre Legends.
+
+---
+
+## Sessione 20-bis — 2026-08-21 — Coerenza carriera ↔ DB personalizzato + export/import
+
+**Obiettivo dichiarato (richiesta esplicita):** garantire che una carriera creata su un DB personalizzato resti coerente coi salvataggi, e aggiungere l'export del DB personalizzato.
+
+**Fatto:**
+- **Impronta del database** scritta dentro il file (`PRAGMA user_version`): 0 = originale, numero casuale assegnato dall'editor al primo salvataggio; viaggia con export/import. Il modulo db espone `improntaDbCorrente()`.
+- **Le carriere memorizzano l'impronta di nascita** (`dbImpronta`, versioneSchema 10, migrazione automatica con -1 = sconosciuta). Al caricamento, se il DB attuale è diverso, la schermata carriera mostra un avviso chiaro e actionable (ripristina l'originale / reimporta il file giusto). Coerente = nessun avviso.
+- **⬇️ Esporta database (.sqlite)** dall'editor (nome file con l'impronta) e **⬆️ Importa da file** (diventa il DB personalizzato, reload automatico): backup e trasferimento su altri dispositivi. File non SQLite rifiutati con messaggio; DB corrotto in IndexedDB → l'app ripiega sull'originale senza rompersi (sonda in apertura).
+- "Ripristina il database originale" ora chiede conferma ricordando l'export e l'effetto sulle carriere.
+- **Collaudo end-to-end del giro completo**: modifica → DB personalizzato con impronta 511077876 → carriera nata con quell'impronta (nessun avviso) → export `mister-database-511077876.sqlite` (firma SQLite verificata) → ripristino originale → la carriera AVVISA ✓ → import del file → avviso sparito e tiro modificato ancora lì ✓ → file finto rifiutato ✓. Build, lint e tsc verdi.

@@ -103,6 +103,11 @@ function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: nu
     salvataggio.offertaNazionale = null
     caricato.versioneSchema = 9
   }
+  if (caricato.versioneSchema === 9) {
+    // v9 → v10: l'impronta del database di nascita (sconosciuta nei vecchi)
+    salvataggio.dbImpronta = -1
+    caricato.versioneSchema = 10
+  }
   return salvataggio
 }
 

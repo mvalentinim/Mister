@@ -12,6 +12,25 @@ Regola del FRD §5.4: l'editor modifica il DB statico, **mai le carriere in
 corso** — le carriere fotografano il database alla creazione. Le modifiche
 valgono quindi per le carriere NUOVE.
 
+## Coerenza carriera ↔ database (l'impronta)
+
+Le rose sono fotografate nella carriera, ma nomi e attributi si leggono dal
+database vivo: se il DB cambia sotto una carriera, i dati non corrispondono
+più. Per questo ogni database ha un'**impronta** scritta DENTRO il file
+(`PRAGMA user_version`): 0 = originale; l'editor assegna un numero casuale
+al primo salvataggio. L'impronta **viaggia con l'export/import**.
+
+- Ogni carriera memorizza l'impronta del DB con cui è nata (`dbImpronta`).
+- Se al caricamento il DB attuale è diverso, la schermata carriera mostra un
+  **avviso chiaro** (si gioca comunque) con la via d'uscita: ripristinare
+  l'originale o reimportare il file giusto.
+- **⬇️ Esporta database (.sqlite)**: scarica il DB in uso (il nome del file
+  contiene l'impronta). **⬆️ Importa database da file**: lo ricarica —
+  anche su un altro browser/dispositivo — e le carriere nate su di lui
+  tornano coerenti. I file non validi vengono rifiutati; un DB corrotto in
+  IndexedDB fa ripiegare l'app sull'originale senza rompersi.
+- "Ripristina" ora chiede conferma ricordando di esportare prima.
+
 ## Cosa si può fare (sessione 1)
 
 - **Ricerca giocatori** per nome, club (raggruppati per campionato), ruolo e

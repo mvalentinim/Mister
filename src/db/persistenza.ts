@@ -38,6 +38,17 @@ export async function salvaDatabaseUtente(db: Database): Promise<void> {
   })
 }
 
+/** Salva dei bytes SQLite grezzi come database personalizzato (import da file). */
+export async function salvaBytesDatabase(dati: Uint8Array): Promise<void> {
+  const idb = await apriIndexedDb()
+  return new Promise((risolvi, rifiuta) => {
+    const tx = idb.transaction(NOME_STORE, 'readwrite')
+    tx.objectStore(NOME_STORE).put({ dati, salvatoIl: new Date().toISOString() }, CHIAVE)
+    tx.oncomplete = () => { idb.close(); risolvi() }
+    tx.onerror = () => rifiuta(new Error('Import del database fallito'))
+  })
+}
+
 /** Il database personalizzato, se esiste (altrimenti null). */
 export async function caricaDatabaseUtente(): Promise<Uint8Array | null> {
   const idb = await apriIndexedDb()

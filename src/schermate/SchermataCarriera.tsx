@@ -9,6 +9,7 @@ import {
 } from '../carriera/motore.ts'
 import { tatticaDefault } from '../motore/preparazione.ts'
 import { interroga } from '../db/query.ts'
+import { improntaDbCorrente } from '../db/database.ts'
 import type { GiocatoreRiga } from '../db/tipi.ts'
 import { salvaCarriera } from '../carriera/salvataggio.ts'
 import {
@@ -459,6 +460,22 @@ function SchermataCarriera({ db, carriera }: Props) {
         giornata {Math.min(carriera.giornata + 1, carriera.calendario.length)} di {carriera.calendario.length}
         {' '}· salvataggio automatico attivo
       </p>
+
+      {/* coerenza carriera ↔ database (FRD §11): se il DB attuale non è
+          quello con cui la carriera è nata, meglio dirlo chiaramente */}
+      {carriera.dbImpronta !== undefined && carriera.dbImpronta >= 0 &&
+        carriera.dbImpronta !== improntaDbCorrente() && (
+        <p className="avviso">
+          ⚠️ Questa carriera è nata con un {carriera.dbImpronta === 0
+            ? 'database ORIGINALE, ma ora è attivo un database personalizzato'
+            : `database PERSONALIZZATO (impronta ${carriera.dbImpronta}) diverso da quello attuale`}.
+          Si può giocare, ma nomi e attributi dei giocatori potrebbero non
+          corrispondere. Per tornare coerente: nell'Editor,{' '}
+          {carriera.dbImpronta === 0
+            ? 'ripristina il database originale'
+            : 'importa il file .sqlite esportato da quel database'}.
+        </p>
+      )}
 
       {/* Linguette di navigazione interna */}
       <nav className="linguette">

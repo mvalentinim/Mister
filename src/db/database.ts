@@ -19,6 +19,32 @@ import seedSql from '../../data/seed-esempio.sql?raw'
 // chiamata lo costruisce, le successive riusano la stessa istanza.
 let istanza: Database | null = null
 
+// ── L'IMPRONTA del database (coerenza carriere ↔ DB, FRD §11) ─────────────
+// Ogni database ha un'identità scritta DENTRO il file (PRAGMA user_version):
+// 0 = database originale; l'editor assegna un numero casuale al primo
+// salvataggio, che viaggia con l'export/import. Le carriere memorizzano
+// l'impronta del DB con cui sono nate: se non combacia, l'app avvisa.
+let impronta = 0
+
+/** L'impronta del database attualmente in uso (0 = originale). */
+export function improntaDbCorrente(): number {
+  return impronta
+}
+
+/** Prima di salvare un DB personalizzato: se è ancora "originale" (0),
+    gli viene assegnata un'identità casuale, scritta nel file stesso. */
+export function assegnaImprontaSeMancante(db: Database): void {
+  if (leggiImpronta(db) !== 0) return
+  const nuova = 1 + Math.floor(Math.random() * 2_000_000_000)
+  db.run(`PRAGMA user_version = ${nuova}`)
+  impronta = nuova
+}
+
+function leggiImpronta(db: Database): number {
+  const risultato = db.exec('PRAGMA user_version')
+  return Number(risultato[0]?.values[0]?.[0] ?? 0)
+}
+
 /** Apre (o riusa) il database del gioco.
  *  Prima scelta: public/mister.sqlite, il database REALE costruito dalla
  *  pipeline di importazione (npm run importa-dati).
@@ -33,8 +59,17 @@ export async function apriDatabase(): Promise<Database> {
   // 0. il DATABASE PERSONALIZZATO dell'editor (M9), se esiste, vince su tutto
   const personalizzato = await caricaDatabaseUtente()
   if (personalizzato) {
-    istanza = new SQL.Database(personalizzato)
-    return istanza
+    try {
+      const db = new SQL.Database(personalizzato)
+      db.exec('SELECT COUNT(*) FROM giocatore') // sonda: il file è davvero un DB MISTER?
+      impronta = leggiImpronta(db)
+      istanza = db
+      return istanza
+    } catch {
+      // file corrotto o estraneo (es. import sbagliato): si ripiega
+      // sull'originale invece di lasciare l'app rotta
+      console.warn('Database personalizzato non valido: uso quello originale.')
+    }
   }
 
   // BASE_URL = radice del sito (di solito "/"): lì Vite serve i file di public/
@@ -42,6 +77,7 @@ export async function apriDatabase(): Promise<Database> {
   if (risposta.ok) {
     const contenuto = new Uint8Array(await risposta.arrayBuffer())
     istanza = new SQL.Database(contenuto)
+    impronta = leggiImpronta(istanza)
     return istanza
   }
 

@@ -9,7 +9,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import type { Database } from 'sql.js'
-import { interroga, interrogaUna } from '../db/database.ts'
+import { assegnaImprontaSeMancante, improntaDbCorrente, interroga, interrogaUna } from '../db/database.ts'
 import { calcolaEta, mediaComplessiva, type GiocatoreRiga } from '../db/tipi.ts'
 import { eliminaDatabaseUtente, esisteDatabaseUtente, salvaDatabaseUtente } from '../db/persistenza.ts'
 
@@ -122,6 +122,7 @@ function Editor({ db }: Props) {
     }
     if (set.length === 0) { setAvviso('Nessuna modifica da salvare.'); return }
     db.run(`UPDATE giocatore SET ${set.join(', ')} WHERE id = ${aperto.id}`, parametri)
+    assegnaImprontaSeMancante(db) // il DB personalizzato riceve la sua identità
     await salvaDatabaseUtente(db)
     setModifiche({})
     setVersione((v) => v + 1)
@@ -140,6 +141,7 @@ function Editor({ db }: Props) {
        WHERE id IN (${ids.join(',')}) AND ${massaAttributo} IS NOT NULL`,
       [delta],
     )
+    assegnaImprontaSeMancante(db)
     await salvaDatabaseUtente(db)
     setVersione((v) => v + 1)
     setAvviso(`✅ ${massaAttributo} ${delta > 0 ? '+' : ''}${delta} applicato a ${ids.length} giocatori filtrati.`)
@@ -155,6 +157,7 @@ function Editor({ db }: Props) {
     }
     if (set.length === 0) return
     db.run(`UPDATE club SET ${set.join(', ')} WHERE id = ${clubAperto}`, parametri)
+    assegnaImprontaSeMancante(db)
     await salvaDatabaseUtente(db)
     setClubCampi({})
     setVersione((v) => v + 1)
@@ -162,8 +165,42 @@ function Editor({ db }: Props) {
   }
 
   async function ripristina() {
+    const ok = confirm(
+      'Tornare al database ORIGINALE?\n\nLe modifiche dell\'editor si perdono (esportale prima, se ci tieni). ' +
+      'Le carriere create sul database personalizzato restano giocabili ma mostreranno un avviso: ' +
+      'nomi e attributi potrebbero non corrispondere più.',
+    )
+    if (!ok) return
     await eliminaDatabaseUtente()
     location.reload() // l'app riparte col database originale
+  }
+
+  /** Scarica il database in uso come file .sqlite (backup/condivisione).
+      L'impronta viaggia dentro il file: reimportandolo, le carriere nate
+      su di lui tornano coerenti. */
+  function esporta() {
+    const bytes = db.export()
+    const blob = new Blob([bytes as unknown as BlobPart], { type: 'application/octet-stream' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `mister-database-${improntaDbCorrente() || 'originale'}.sqlite`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  /** Importa un database da file: diventa il database personalizzato. */
+  async function importa(file: File) {
+    const bytes = new Uint8Array(await file.arrayBuffer())
+    // controllo di sanità: i file SQLite iniziano con questa firma
+    const firma = new TextDecoder().decode(bytes.slice(0, 15))
+    if (firma !== 'SQLite format 3') {
+      setAvviso('❌ Il file scelto non è un database SQLite di MISTER.')
+      return
+    }
+    const { salvaBytesDatabase } = await import('../db/persistenza.ts')
+    await salvaBytesDatabase(bytes)
+    location.reload() // l'app riparte col database importato
   }
 
   const clubRiga = clubAperto === ''
@@ -183,11 +220,21 @@ function Editor({ db }: Props) {
           ? <strong>Stai usando un database personalizzato.</strong>
           : 'Il database è quello originale.'}
       </p>
-      {personalizzato && (
-        <button className="bottone-secondario" onClick={() => void ripristina()}>
-          ♻️ Ripristina il database originale (le modifiche si perdono)
+      <div className="riga-bottoni">
+        <button className="bottone-secondario" onClick={esporta}>
+          ⬇️ Esporta database (.sqlite)
         </button>
-      )}
+        <label className="bottone-secondario" style={{ cursor: 'pointer' }}>
+          ⬆️ Importa database da file
+          <input type="file" accept=".sqlite" hidden
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) void importa(f) }} />
+        </label>
+        {personalizzato && (
+          <button className="bottone-secondario" onClick={() => void ripristina()}>
+            ♻️ Ripristina il database originale
+          </button>
+        )}
+      </div>
       {avviso && <p className="avviso">{avviso}</p>}
 
       {/* ── ricerca ── */}

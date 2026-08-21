@@ -250,7 +250,11 @@ export interface OfferteSpeciali {
 /** Lo stato completo di una carriera. */
 export interface Carriera {
   id: string
-  versioneSchema: 9 // per le migrazioni dei salvataggi (FRD §11)
+  versioneSchema: 10 // per le migrazioni dei salvataggi (FRD §11)
+  /** l'impronta del database con cui è nata la carriera (0 = originale,
+      -1 = sconosciuta nei salvataggi vecchi). Se il DB attuale è diverso,
+      l'app avvisa: nomi e attributi potrebbero non corrispondere. */
+  dbImpronta: number
   // ── M8 parte 3: la nazionale ──
   /** l'incarico di CT in corso (null = si allena un club) */
   nazionale: IncaricoNazionale | null

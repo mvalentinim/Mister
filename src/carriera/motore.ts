@@ -14,6 +14,7 @@
 
 import type { Database } from 'sql.js'
 import { interroga } from '../db/query.ts'
+import { improntaDbCorrente } from '../db/database.ts'
 import { preparaSquadra, tatticaDefault } from '../motore/preparazione.ts'
 import { estendiMercatoAlMondo, fineStagioneMercato, inizializzaMercato, aggiungiNotizia } from '../mercato/stato.ts'
 import { creaCoppa, creaCoppaEuropa, giocaTurnoCoppaSeDovuto } from './coppa.ts'
@@ -166,7 +167,8 @@ export function creaCarriera(
   )
   const carriera: Carriera = {
     id: `carriera-${Date.now()}`,
-    versioneSchema: 9,
+    versioneSchema: 10,
+    dbImpronta: improntaDbCorrente(), // il DB con cui nasce la carriera
     // ── M8: fama completa, fiducia, coppa, crescita ──
     fiducia: 60,
     crescita: {},
