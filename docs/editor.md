@@ -43,11 +43,26 @@ al primo salvataggio. L'impronta **viaggia con l'export/import**.
   filtrati, con limiti 1-99 rispettati.
 - **Modifica club**: nome, fama (forza), budget mercato e stipendi.
 
+## Le squadre Legend (FRD §5.3)
+
+Vivono in tabelle DEDICATE (`squadra_legend` + `rosa_legend`), fuori dalla
+tabella club: non toccano carriere, mercato e coppe. Quattro squadre sono
+seminate nel database (`npm run legends`): Leggende d'Italia, d'Inghilterra,
+del Brasile e Stelle d'Europa — rose con reparti coperti; dove una scuola
+non ha leggende in un ruolo (es. nessun portiere italiano tra le Icon), il
+buco è colmato dal bacino globale, e con il wizard si può sempre rifinire.
+
+**Il wizard** (sezione "⭐ Squadre Legend" dell'editor): nome, poi la rosa
+pescando da Icon e Heroes con ricerca e filtro ruolo; contatori di reparto
+sempre visibili; per salvare servono ≥16 giocatori e un portiere. Le squadre
+si modificano e si eliminano; la persistenza è quella del DB personalizzato.
+
+**Amichevole** (voce nel menu principale): qualunque squadra contro
+qualunque squadra — Legend contro Legend, o contro i club di oggi. Partita
+col motore vero, cronaca e pagelle; il risultato non tocca le carriere.
+
 ## Cosa arriva nelle prossime sessioni di M9
 
-- Wizard "Crea squadra Legend" (club → rosa dalle leggende → attributi) e le
-  prime 3-5 squadre Legends.
 - Creazione di nuovi giocatori e club da zero.
 - Import/export del database in JSON (backup e condivisione).
-- Modalità d'uso delle Legends: amichevoli, torneo fantasy, inserimento nel
-  campionato.
+- Torneo fantasy e inserimento delle Legend nel campionato.

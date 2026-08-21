@@ -418,3 +418,20 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **⬇️ Esporta database (.sqlite)** dall'editor (nome file con l'impronta) e **⬆️ Importa da file** (diventa il DB personalizzato, reload automatico): backup e trasferimento su altri dispositivi. File non SQLite rifiutati con messaggio; DB corrotto in IndexedDB → l'app ripiega sull'originale senza rompersi (sonda in apertura).
 - "Ripristina il database originale" ora chiede conferma ricordando l'export e l'effetto sulle carriere.
 - **Collaudo end-to-end del giro completo**: modifica → DB personalizzato con impronta 511077876 → carriera nata con quell'impronta (nessun avviso) → export `mister-database-511077876.sqlite` (firma SQLite verificata) → ripristino originale → la carriera AVVISA ✓ → import del file → avviso sparito e tiro modificato ancora lì ✓ → file finto rifiutato ✓. Build, lint e tsc verdi.
+
+---
+
+## Sessione 21 — 2026-08-21 — M9 sessione 2: squadre Legend, wizard e amichevoli
+
+**Obiettivo dichiarato:** il cuore di M9 — le prime squadre Legend, il wizard per crearle e le amichevoli per giocarle (DoD della milestone).
+
+**Fatto:**
+- **Tabelle dedicate** (`squadra_legend` + `rosa_legend`) fuori dalla tabella club: le Legend non toccano carriere, mercato e coppe. Create al volo se mancano (compatibile coi DB personalizzati esistenti).
+- **4 squadre seminate** nel database (`npm run legends`, aggiunto anche alla pipeline `importa-dati`): Leggende d'Italia, d'Inghilterra, del Brasile e Stelle d'Europa — selezione con vincoli di reparto (1 POR, ≥5 DIF, ≥5 CEN, ≥3 ATT); dove una scuola non ha leggende in un ruolo (nessun POR italiano/inglese/brasiliano tra le Icon!) il buco è colmato dal bacino globale: l'Italia gioca con Yashin in porta — rifinibile col wizard.
+- **Wizard "Crea squadra Legend"** nell'editor: nome, rosa pescata da Icon/Heroes con ricerca e filtro ruolo, contatori di reparto, validazione (≥16 giocatori e un portiere), modifica/eliminazione; persistenza col DB personalizzato (impronta inclusa).
+- **Amichevole** (nuova voce di menu): qualunque squadra contro qualunque squadra — Legend contro Legend o contro i club di oggi; motore vero, cronaca e pagelle; il risultato non tocca le carriere.
+- **Collaudo end-to-end**: le 4 seminate nel menu ✓; Brasile-Italia 1-2 con gol di Del Piero e Jairzinho, Baggio espulso, Del Piero 7.9 ✓; col wizard creata "I Miei Eroi" (17 giocatori, 2 POR) ✓; ancora lì dopo il reload ✓; "I Miei Eroi" 1-1 con l'Inter ✓. Build, lint, tsc e calibrazione verdi.
+
+**DoD di M9** (crea da solo una squadra Legend e affrontala in amichevole): il flusso è collaudato end-to-end; la prova "senza aiuto" dello sviluppatore resta in sospeso col solito debito da Mac.
+
+**Resta di M9:** creazione giocatori/club da zero, import/export JSON, torneo fantasy / Legend nel campionato.

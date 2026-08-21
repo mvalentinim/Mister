@@ -12,6 +12,7 @@ import type { Database } from 'sql.js'
 import { assegnaImprontaSeMancante, improntaDbCorrente, interroga, interrogaUna } from '../db/database.ts'
 import { calcolaEta, mediaComplessiva, type GiocatoreRiga } from '../db/tipi.ts'
 import { eliminaDatabaseUtente, esisteDatabaseUtente, salvaDatabaseUtente } from '../db/persistenza.ts'
+import { eliminaSquadraLegend, rosaLegendIds, salvaSquadraLegend, squadreLegend } from '../db/legends.ts'
 
 interface Props {
   db: Database
@@ -53,6 +54,12 @@ function Editor({ db }: Props) {
   // modifica club
   const [clubAperto, setClubAperto] = useState<number | ''>('')
   const [clubCampi, setClubCampi] = useState<Record<string, string>>({})
+  // wizard squadre Legend (undefined = chiuso, null = nuova, numero = modifica)
+  const [legendAperta, setLegendAperta] = useState<number | null | undefined>(undefined)
+  const [legendNome, setLegendNome] = useState('')
+  const [legendRosa, setLegendRosa] = useState<number[]>([])
+  const [legendCerca, setLegendCerca] = useState('')
+  const [legendRuolo, setLegendRuolo] = useState('')
 
   useEffect(() => { void esisteDatabaseUtente().then(setPersonalizzato) }, [versione])
 
@@ -162,6 +169,82 @@ function Editor({ db }: Props) {
     setClubCampi({})
     setVersione((v) => v + 1)
     setAvviso('✅ Club salvato.')
+  }
+
+  // ── il wizard delle squadre Legend (FRD §5.3) ──
+  const squadre = useMemo(() => squadreLegend(db),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [db, versione])
+
+  function apriLegend(id: number | null) {
+    setLegendAperta(id)
+    setLegendCerca('')
+    if (id === null) { setLegendNome(''); setLegendRosa([]) }
+    else {
+      setLegendNome(squadre.find((s) => s.id === id)?.nome ?? '')
+      setLegendRosa(rosaLegendIds(db, id))
+    }
+  }
+
+  const righeLegend = useMemo(
+    () => legendRosa.length === 0 ? [] : interroga<GiocatoreRiga>(
+      db,
+      `SELECT * FROM giocatore WHERE id IN (${legendRosa.map(() => '?').join(',')})`,
+      legendRosa,
+    ).sort((a, b) => mediaComplessiva(b) - mediaComplessiva(a)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [db, legendRosa],
+  )
+
+  // i candidati: leggende (icon/hero) non ancora in rosa
+  const candidatiLegend = useMemo(() => {
+    if (legendAperta === undefined) return []
+    if (legendCerca.length < 2 && legendRuolo === '') return []
+    const condizioni = ["g.categoria != 'normale'"]
+    const parametri: (string | number)[] = []
+    if (legendCerca.length >= 2) {
+      condizioni.push("(g.nome || ' ' || g.cognome) LIKE ?")
+      parametri.push(`%${legendCerca}%`)
+    }
+    if (legendRuolo) { condizioni.push('g.ruolo = ?'); parametri.push(legendRuolo) }
+    return interroga<GiocatoreRiga>(
+      db, `SELECT g.* FROM giocatore g WHERE ${condizioni.join(' AND ')} LIMIT 20`, parametri,
+    ).filter((g) => !legendRosa.includes(g.id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [db, legendAperta, legendCerca, legendRuolo, legendRosa])
+
+  function contaReparto(ids: number[]): Record<string, number> {
+    const conta: Record<string, number> = {}
+    for (const g of righeLegend) {
+      if (!ids.includes(g.id)) continue
+      const reparto = g.ruolo === 'POR' ? 'POR'
+        : ['DC', 'TD', 'TS'].includes(g.ruolo) ? 'DIF'
+        : g.ruolo === 'PC' ? 'ATT' : 'CEN'
+      conta[reparto] = (conta[reparto] ?? 0) + 1
+    }
+    return conta
+  }
+
+  const legendValida =
+    legendNome.trim().length >= 2 && legendRosa.length >= 16 &&
+    (contaReparto(legendRosa)['POR'] ?? 0) >= 1
+
+  async function salvaLegend() {
+    const id = salvaSquadraLegend(db, legendNome.trim(), legendRosa, legendAperta ?? undefined)
+    assegnaImprontaSeMancante(db)
+    await salvaDatabaseUtente(db)
+    setLegendAperta(id)
+    setVersione((v) => v + 1)
+    setAvviso(`✅ Squadra Legend "${legendNome.trim()}" salvata: sfidala da "Amichevole" nel menu.`)
+  }
+
+  async function cancellaLegend(id: number) {
+    if (!confirm('Eliminare questa squadra Legend?')) return
+    eliminaSquadraLegend(db, id)
+    assegnaImprontaSeMancante(db)
+    await salvaDatabaseUtente(db)
+    if (legendAperta === id) setLegendAperta(undefined)
+    setVersione((v) => v + 1)
   }
 
   async function ripristina() {
@@ -380,6 +463,99 @@ function Editor({ db }: Props) {
             <button className="bottone-primario" onClick={() => void salvaGiocatore()}>💾 Salva giocatore</button>
             <button className="bottone-secondario" onClick={() => { setApertoId(null); setModifiche({}) }}>Chiudi</button>
           </div>
+        </div>
+      )}
+
+      {/* ── le squadre Legend (wizard, FRD §5.3) ── */}
+      <h3>⭐ Squadre Legend</h3>
+      <p className="nota">
+        Rose leggendarie pescate da Icon e Heroes: si sfidano in amichevole
+        (voce "Amichevole" nel menu principale).
+      </p>
+      {squadre.length > 0 && (
+        <table className="tabella">
+          <tbody>
+            {squadre.map((s) => (
+              <tr key={s.id} className={s.id === legendAperta ? 'riga-mia' : ''}>
+                <td className="grassetto">{s.nome}</td>
+                <td className="nota">{s.descrizione}</td>
+                <td className="num">{s.giocatori} giocatori</td>
+                <td>
+                  <button className="bottone-secondario" onClick={() => apriLegend(s.id)}>Modifica</button>{' '}
+                  <button className="bottone-secondario" onClick={() => void cancellaLegend(s.id)}>Elimina</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <button className="bottone-primario" onClick={() => apriLegend(null)}>➕ Nuova squadra Legend</button>
+
+      {legendAperta !== undefined && (
+        <div className="scheda-editor">
+          <h3>{legendAperta === null ? 'Nuova squadra Legend' : 'Modifica squadra Legend'}</h3>
+          <div className="riga-bottoni">
+            <input className="campo-ricerca" placeholder="Nome della squadra (es. Invincibili '99)…"
+              value={legendNome} onChange={(e) => setLegendNome(e.target.value)} />
+          </div>
+
+          {/* la rosa in costruzione */}
+          <p className="nota">
+            Rosa: <strong>{legendRosa.length}</strong> giocatori (servono almeno 16, con un portiere) ·{' '}
+            {['POR', 'DIF', 'CEN', 'ATT'].map((r) => `${r} ${contaReparto(legendRosa)[r] ?? 0}`).join(' · ')}
+          </p>
+          {legendRosa.length > 0 && (
+            <table className="tabella">
+              <tbody>
+                {righeLegend.map((g) => (
+                  <tr key={g.id}>
+                    <td className="grassetto">{g.nome} {g.cognome}</td>
+                    <td>{g.ruolo}</td>
+                    <td className="nota">{g.nazionalita}</td>
+                    <td className="num evidenza">{mediaComplessiva(g)}</td>
+                    <td><button className="bottone-secondario"
+                      onClick={() => setLegendRosa(legendRosa.filter((id) => id !== g.id))}>Togli</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {/* pesca dal bacino delle leggende */}
+          <div className="riga-bottoni filtri-mercato">
+            <input className="campo-ricerca" placeholder="Cerca una leggenda da aggiungere…"
+              value={legendCerca} onChange={(e) => setLegendCerca(e.target.value)} />
+            <select value={legendRuolo} onChange={(e) => setLegendRuolo(e.target.value)}>
+              <option value="">Tutti i ruoli</option>
+              {RUOLI.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+          {candidatiLegend.length > 0 && (
+            <table className="tabella">
+              <tbody>
+                {candidatiLegend.map((g) => (
+                  <tr key={g.id}>
+                    <td className="grassetto">{g.nome} {g.cognome}</td>
+                    <td>{g.ruolo}</td>
+                    <td className="nota">{g.nazionalita} · {g.categoria}</td>
+                    <td className="num evidenza">{mediaComplessiva(g)}</td>
+                    <td><button className="bottone-secondario"
+                      onClick={() => setLegendRosa([...legendRosa, g.id])}>Aggiungi</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          <div className="riga-bottoni">
+            <button className="bottone-primario" disabled={!legendValida} onClick={() => void salvaLegend()}>
+              💾 Salva squadra Legend
+            </button>
+            <button className="bottone-secondario" onClick={() => setLegendAperta(undefined)}>Chiudi</button>
+          </div>
+          {!legendValida && (
+            <p className="nota">Per salvare: un nome, almeno 16 giocatori e un portiere.</p>
+          )}
         </div>
       )}
 
