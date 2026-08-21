@@ -15,7 +15,7 @@ import { interroga } from '../db/query.ts'
 import type { GiocatoreRiga } from '../db/tipi.ts'
 import { creaRng, semeDaStringa } from '../motore/rng.ts'
 import { tatticaDefault } from '../motore/preparazione.ts'
-import { aggiungiNotizia, rosaClub } from '../mercato/stato.ts'
+import { GIORNI_FINESTRA_ESTIVA, aggiungiNotizia, rosaClub } from '../mercato/stato.ts'
 import { generaCalendario } from './calendario.ts'
 import { creaCoppa } from './coppa.ts'
 import type { Carriera, ClubCarriera, Obiettivo, Offerta, RigaClassifica } from './tipi.ts'
@@ -195,6 +195,7 @@ function clubDellaNazione(carriera: Carriera): ClubCarriera[] {
 export function accettaOffertaPanchina(db: Database, carriera: Carriera, offerta: Offerta): void {
   const quando = carriera.offerteSpeciali?.contesto ?? 'fine-stagione'
   const vecchioClub = carriera.club.find((c) => c.id === carriera.clubId)
+  const eraCt = carriera.nazionale !== null
 
   // ── rompere un contratto in essere costa fama (M8 parte 2) ──
   // Dopo un esonero no: è il club ad averti cacciato. A fine stagione sì,
@@ -215,6 +216,15 @@ export function accettaOffertaPanchina(db: Database, carriera: Carriera, offerta
   }
   // il posto in Coppa Europa era del vecchio club: cambiando, si perde
   if (quando === 'fine-stagione') carriera.coppaEuropa = null
+  // si torna ai club: l'avventura da CT (se c'era) è chiusa (M8 parte 3),
+  // e il mercato estivo riapre per accogliere il nuovo allenatore
+  carriera.nazionale = null
+  carriera.offertaNazionale = null
+  if (eraCt) {
+    carriera.mercato.aperto = true
+    carriera.mercato.finestra = 'estiva'
+    carriera.mercato.giorniRimasti = GIORNI_FINESTRA_ESTIVA
+  }
 
   // budget del nuovo club
   const club = carriera.club.find((c) => c.id === offerta.clubId)!

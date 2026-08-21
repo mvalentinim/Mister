@@ -198,6 +198,34 @@ export interface ContrattoAllenatore {
   stipendio: number
 }
 
+// ── M8 parte 3: la panchina della NAZIONALE (FRD §4.3) ────────────────────
+
+export interface PartitaNazionale {
+  casaId: number // id della tabella `nazionale` (namespace separato dai club!)
+  trasfertaId: number
+  golCasa: number | null
+  golTrasferta: number | null
+}
+
+/** L'incarico di CT (esclusivo: si lasciano i club, FRD §4.3 default).
+    Il ciclo è compresso in UNA stagione: girone di qualificazione a 6
+    (10 date), poi — per le prime 2 — torneo internazionale a 16. */
+export interface IncaricoNazionale {
+  nazionaleId: number
+  nome: string
+  fase: 'qualificazioni' | 'torneo' | 'conclusa'
+  esito: 'in-corso' | 'campione' | 'finalista' | 'eliminato' | 'fallito'
+  /** il girone di qualificazione: io + 5 avversarie (id nazionali) */
+  squadre: number[]
+  /** id nazionale → nome, fotografati (i render non interrogano il DB) */
+  nomi: Record<number, string>
+  calendario: PartitaNazionale[][] // 10 date da 3 partite
+  data: number // prossima data da giocare (0-based)
+  /** il torneo a eliminazione diretta (riusa la struttura delle coppe) */
+  torneo: TurnoCoppa[] | null
+  turnoTorneo: number
+}
+
 /** Una voce del registro spiegabile della fama (FRD §12: si vede il perché). */
 export interface EventoFama {
   anno: number
@@ -222,7 +250,12 @@ export interface OfferteSpeciali {
 /** Lo stato completo di una carriera. */
 export interface Carriera {
   id: string
-  versioneSchema: 8 // per le migrazioni dei salvataggi (FRD §11)
+  versioneSchema: 9 // per le migrazioni dei salvataggi (FRD §11)
+  // ── M8 parte 3: la nazionale ──
+  /** l'incarico di CT in corso (null = si allena un club) */
+  nazionale: IncaricoNazionale | null
+  /** offerta di una federazione in attesa di risposta (fama alta) */
+  offertaNazionale: { id: number; nome: string } | null
   // ── M8: fama completa, fiducia, coppa, crescita ──
   /** fiducia della dirigenza (0-100): sotto la soglia scatta l'esonero */
   fiducia: number

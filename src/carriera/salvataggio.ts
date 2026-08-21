@@ -97,6 +97,12 @@ function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: nu
     if (salvataggio.coppa && !salvataggio.coppa.nome) salvataggio.coppa.nome = 'Coppa nazionale'
     caricato.versioneSchema = 8
   }
+  if (caricato.versioneSchema === 8) {
+    // v8 → v9 (M8 parte 3): la panchina della nazionale.
+    salvataggio.nazionale = null
+    salvataggio.offertaNazionale = null
+    caricato.versioneSchema = 9
+  }
   return salvataggio
 }
 

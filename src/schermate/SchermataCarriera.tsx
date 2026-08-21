@@ -16,6 +16,7 @@ import {
   type Offerta, type Partita,
 } from '../carriera/tipi.ts'
 import { accettaOffertaPanchina } from '../carriera/fama.ts'
+import { accettaPanchinaNazionale, classificaGirone, nuovoCicloStessaNazionale } from '../carriera/nazionale.ts'
 import { euro } from '../mercato/valore.ts'
 import type { EventoPartita } from '../motore/tipi.ts'
 import { estendiMercatoAlMondo, inizializzaMercato } from '../mercato/stato.ts'
@@ -212,6 +213,142 @@ function SchermataCarriera({ db, carriera }: Props) {
     )
   }
 
+  // ── CT DELLA NAZIONALE (M8 parte 3): vista dedicata, esclusiva ──
+  if (carriera.nazionale) {
+    const incarico = carriera.nazionale
+    const nomeNaz = (id: number) => incarico.nomi[id] ?? '?'
+    const graduatoria = classificaGirone(incarico)
+    const conclusa = incarico.fase === 'conclusa'
+    const ultimaData = incarico.data > 0 ? incarico.calendario[incarico.data - 1] : null
+
+    const passo = async () => {
+      avanzaGiornata(db, carriera)
+      await salvaCarriera(carriera)
+      setVersione((v) => v + 1)
+    }
+    const tuttoIlCiclo = async () => {
+      let guardia = 0
+      while (carriera.nazionale && carriera.nazionale.fase !== 'conclusa' && guardia++ < 20) {
+        avanzaGiornata(db, carriera)
+      }
+      await salvaCarriera(carriera)
+      setVersione((v) => v + 1)
+    }
+    const restaCt = async () => {
+      nuovoCicloStessaNazionale(db, carriera)
+      await salvaCarriera(carriera)
+      setVersione((v) => v + 1)
+    }
+
+    return (
+      <section className="schermata">
+        <h2>🌍 {incarico.nome} — Commissario Tecnico</h2>
+        <p className="nota">
+          Allenatore: {carriera.allenatore.nome} (fama {carriera.famaAllenatore})
+          {carriera.trofei.length > 0 && <> · 🏆 {carriera.trofei.length}</>} ·
+          {incarico.fase === 'qualificazioni'
+            ? ` qualificazioni — data ${Math.min(incarico.data + 1, 10)} di 10`
+            : incarico.fase === 'torneo' ? ' TORNEO INTERNAZIONALE' : ' ciclo concluso'}
+        </p>
+
+        {!conclusa && (
+          <div className="riga-bottoni">
+            <button className="bottone-primario" onClick={() => void passo()}>
+              ▶ {incarico.fase === 'qualificazioni' ? `Gioca la data ${incarico.data + 1}` : `Gioca: ${incarico.torneo?.[incarico.turnoTorneo]?.nome}`}
+            </button>
+            <button className="bottone-secondario" onClick={() => void tuttoIlCiclo()}>
+              ⏩ Simula tutto il ciclo
+            </button>
+          </div>
+        )}
+
+        {/* ── il verdetto e le strade per il futuro ── */}
+        {conclusa && (
+          <div className="riquadro-esito">
+            {incarico.esito === 'campione' && <p>🏆 <strong>CAMPIONI DEL TORNEO INTERNAZIONALE!</strong> La notte più bella della carriera.</p>}
+            {incarico.esito === 'finalista' && <p>🥈 <strong>Finale persa.</strong> Brucia, ma il mondo ha visto la tua {incarico.nome}.</p>}
+            {incarico.esito === 'eliminato' && <p>Il cammino si ferma nel torneo. Esperienza preziosa.</p>}
+            {incarico.esito === 'fallito' && <p>❌ <strong>Qualificazione fallita.</strong> La federazione ti ringrazia e ti saluta.</p>}
+            <p className="nota">Fama attuale: {carriera.famaAllenatore}. Decidi il futuro:</p>
+            {incarico.esito !== 'fallito' && (
+              <button className="bottone-primario" onClick={() => void restaCt()}>
+                🌍 Resta CT: nuovo ciclo con {incarico.nome}
+              </button>
+            )}
+            {carriera.offerteSpeciali && carriera.offerteSpeciali.offerte.length > 0 && (
+              <div className="menu">
+                {carriera.offerteSpeciali.offerte.map((o) => (
+                  <button key={o.clubId} className="voce-menu" onClick={() => void accettaOfferta(o)}>
+                    <span className="voce-etichetta">{o.clubNome}</span>
+                    <span className="nota">{campionatoDi(o.clubId)} · obiettivo {DESCRIZIONE_OBIETTIVO[o.obiettivo]} · budget mercato {euro(o.budgetMercato)}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── il girone di qualificazione ── */}
+        <h3>Girone di qualificazione</h3>
+        <table className="tabella">
+          <thead>
+            <tr><th className="num">#</th><th>Nazionale</th><th className="num">G</th><th className="num">Pt</th><th className="num">DR</th></tr>
+          </thead>
+          <tbody>
+            {graduatoria.map((r, i) => (
+              <tr key={r.id} className={r.id === incarico.nazionaleId ? 'riga-mia' : ''}>
+                <td className="num">{i + 1}</td>
+                <td className="grassetto">{r.nome}</td>
+                <td className="num">{r.giocate}</td>
+                <td className="num grassetto">{r.punti}</td>
+                <td className="num">{r.dr > 0 ? `+${r.dr}` : r.dr}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="nota">Le prime 2 si qualificano al torneo internazionale a 16.</p>
+
+        {/* ── il tabellone del torneo ── */}
+        {incarico.torneo && (
+          <>
+            <h3>Torneo internazionale</h3>
+            {incarico.torneo.filter((t) => t.partite.length > 0).map((t) => (
+              <div key={t.nome} className="riquadro-coppa">
+                <h3>{t.nome}</h3>
+                {t.partite.map((p, i) => (
+                  <p key={i} className={p.casaId === incarico.nazionaleId || p.trasfertaId === incarico.nazionaleId ? 'grassetto' : 'nota'}>
+                    {nomeNaz(p.casaId)} {p.golCasa ?? ''}{p.golCasa !== null ? ' - ' : ' vs '}{p.golTrasferta ?? ''} {nomeNaz(p.trasfertaId)}
+                    {p.golCasa !== null && p.golCasa === p.golTrasferta ? ` (rigori: passa ${nomeNaz(p.vincitriceId!)})` : ''}
+                  </p>
+                ))}
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* la cronaca dell'ultima partita della mia nazionale */}
+        {carriera.cronaca && <PannelloCronaca cronaca={carriera.cronaca} />}
+
+        {ultimaData && incarico.fase === 'qualificazioni' && (
+          <>
+            <h3>Risultati — data {incarico.data}</h3>
+            <table className="tabella">
+              <tbody>
+                {ultimaData.map((p, i) => (
+                  <tr key={i} className={p.casaId === incarico.nazionaleId || p.trasfertaId === incarico.nazionaleId ? 'riga-mia' : ''}>
+                    <td>{nomeNaz(p.casaId)}</td>
+                    <td className="num grassetto">{p.golCasa} - {p.golTrasferta}</td>
+                    <td>{nomeNaz(p.trasfertaId)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+      </section>
+    )
+  }
+
   // ── Riepilogo di fine stagione (dopo chiudiStagione) ──
   if (esitoStagione) {
     const offerte = carriera.offerteSpeciali?.contesto === 'fine-stagione'
@@ -282,6 +419,21 @@ function SchermataCarriera({ db, carriera }: Props) {
           </div>
         )}
 
+        {/* la chiamata della federazione (M8 parte 3, fama alta) */}
+        {carriera.offertaNazionale && (
+          <div className="riquadro-esito">
+            <h3>🌍 Chiama la federazione</h3>
+            <p>
+              La <strong>{carriera.offertaNazionale.nome}</strong> ti vuole come Commissario Tecnico.
+              È un incarico esclusivo: lasceresti il club per il ciclo qualificazioni + torneo.
+            </p>
+            <button className="bottone-primario"
+              onClick={() => { void (async () => { accettaPanchinaNazionale(db, carriera); await salvaCarriera(carriera); setEsitoStagione(null); setVersione((v) => v + 1) })() }}>
+              Accetta: CT della {carriera.offertaNazionale.nome}
+            </button>
+          </div>
+        )}
+
         <button className="bottone-primario" onClick={() => void restaEIniziaStagione()}>
           {offerte.length > 0 ? `Resta al ${nomeClub} — ` : ''}Inizia la stagione {etichettaStagione(carriera.anno)} →
         </button>
@@ -349,6 +501,21 @@ function SchermataCarriera({ db, carriera }: Props) {
             <div className="riga-bottoni">
               <button className="bottone-primario" onClick={concludiStagione}>
                 🏁 Concludi la stagione (verdetti e nuova stagione)
+              </button>
+            </div>
+          )}
+
+          {/* offerta della federazione ancora sul tavolo (dopo un ricaricamento) */}
+          {carriera.offertaNazionale && (
+            <div className="riquadro-esito">
+              <h3>🌍 La {carriera.offertaNazionale.nome} ti vuole CT</h3>
+              <button className="bottone-primario"
+                onClick={() => { void (async () => { accettaPanchinaNazionale(db, carriera); await salvaCarriera(carriera); setVersione((v) => v + 1) })() }}>
+                Accetta l'incarico
+              </button>{' '}
+              <button className="bottone-secondario"
+                onClick={() => { void (async () => { carriera.offertaNazionale = null; await salvaCarriera(carriera); setVersione((v) => v + 1) })() }}>
+                Rifiuta
               </button>
             </div>
           )}

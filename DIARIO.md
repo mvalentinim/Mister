@@ -368,3 +368,21 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Collaudo end-to-end**: fama 60 → a fine stagione 4 offerte (Torino e Inter italiane garantite, Mallorca e Real Sociedad estere) ✓; accettato il Mallorca a contratto vivo → "Contratto rotto col Monza" −3 fama, nuovo contratto ✓; La Liga vinta → trofeo Campionato, +8 fama, qualificazione Europa +2 ✓; stagione dopo con ENTRAMBE le coppe nei riquadri: sedicesimi di coppa di Spagna passati e sedicesimi europei giocati dopo la giornata 7 (Milan-Mallorca 3-1) ✓; rinnovo automatico del contratto fino al 2029 visibile in intestazione ✓. Build, lint, tsc e calibrazione verdi.
 
 **Resta per chiudere M8** (parte 3): le panchine delle NAZIONALI oltre soglia di fama alta, col ciclo qualificazioni/torneo — è una modalità di gioco a sé e merita la sua sessione.
+
+---
+
+## Sessione 19 — 2026-08-20 — M8 parte 3: la panchina della NAZIONALE — M8 CHIUSA 🎮
+
+**Obiettivo dichiarato:** l'ultimo pezzo di M8 — le federazioni chiamano oltre soglia di fama alta, ciclo qualificazioni + torneo (FRD §4.3, default esclusiva).
+
+**Fatto:**
+- **La chiamata della federazione**: a fine stagione, con fama ≥ 75, arriva l'offerta di una nazionale (le top — Spagna, Francia, Brasile… — solo da fama 88). Riquadro dedicato nell'esito di stagione; rompere il contratto col club costa i soliti 3 punti.
+- **Il ciclo del CT** (compresso in una stagione, `src/carriera/nazionale.ts`): girone di qualificazione a 6 con **sorteggio a teste di serie** (al massimo un'altra big — la prima stesura pescava 4 top nello stesso girone: corretta), 10 date andata/ritorno; le prime 2 al **torneo internazionale a 16** a eliminazione diretta coi rigori seminati. Le squadre nazionali giocano coi convocati veri del DB e la crescita di carriera applicata.
+- **Vista dedicata del CT** in SchermataCarriera: classifica girone, tabellone del torneo, cronaca completa delle partite della nazionale (pannello riusato: parate di Pickford e doppiette di Saka comprese), verdetto finale con le due strade — "Resta CT" (nuovo ciclo) o tornare ai club (offerte per fama, mercato estivo riaperto).
+- **Verdetti**: campione +12 fama e trofeo in bacheca; finalista +4; eliminato +1; qualificazione fallita −6 e la federazione ti scarica. Mentre sei CT il mondo dei club avanza (crescita giocatori, scadenze, svincoli).
+- Salvataggi a **versioneSchema 9**. Semplificazioni dichiarate in `docs/fama-e-crescita.md` (convocazioni fisse, tattica automatica, partite simulate).
+- **Collaudo**: 8 cicli completi in Node con l'Argentina → 2 titoli, 2 finali, 3 eliminazioni, 1 fallimento (distribuzione credibile); nel browser il giro intero: chiamata della federazione ✓ → CT della Spagna, girone vinto davanti all'Italia ✓ → torneo (eliminati in semifinale dall'Inghilterra) ✓ → "Resta CT", secondo ciclo da finalista ✓ → rientro alla Juventus col mercato estivo aperto e prima giornata giocata ✓. Anche il ramo del fallimento verificato (−6, niente "Resta CT"). Build, lint, tsc e calibrazione verdi.
+
+**M8 CHIUSA** — per il piano è il traguardo 🎮 **GIOCO COMPLETO (v1)**: carriera lunga con fama, fiducia, esoneri, coppe, Europa, crescita giocatori, panchine estere e nazionali. Collaudo di persona dello sviluppatore in sospeso come sempre.
+
+**Prossima milestone:** M9 — Editor e squadre Legends (FRD §5.4).

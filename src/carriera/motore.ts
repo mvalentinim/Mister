@@ -19,6 +19,7 @@ import { estendiMercatoAlMondo, fineStagioneMercato, inizializzaMercato, aggiung
 import { creaCoppa, creaCoppaEuropa, giocaTurnoCoppaSeDovuto } from './coppa.ts'
 import { aggiornaFiducia, controllaEsonero, famaFineStagione, obiettivoDelClub, offerteFineStagione, variaFama } from './fama.ts'
 import { crescitaFineStagione, type NotaCrescita } from './crescita.ts'
+import { avanzaNazionale, offertaNazionale } from './nazionale.ts'
 import { GIORNI_FINESTRA_INVERNALE } from '../mercato/stato.ts'
 import { aggiornaComportamento, verificaPromesseFineStagione } from '../comportamento/comportamento.ts'
 import { simulaPartitaMotore } from '../motore/partita.ts'
@@ -165,7 +166,7 @@ export function creaCarriera(
   )
   const carriera: Carriera = {
     id: `carriera-${Date.now()}`,
-    versioneSchema: 8,
+    versioneSchema: 9,
     // ── M8: fama completa, fiducia, coppa, crescita ──
     fiducia: 60,
     crescita: {},
@@ -174,6 +175,8 @@ export function creaCarriera(
     trofei: [],
     coppaEuropa: null, // la Coppa Europa si conquista sul campo
     qualificatoEuropa: false,
+    nazionale: null,
+    offertaNazionale: null,
     contrattoAllenatore: { scadenza: ANNO_INIZIO_CARRIERA + offerta.durataAnni, stipendio: offerta.stipendioAllenatore },
     esoneri: 0,
     offerteSpeciali: null,
@@ -248,6 +251,11 @@ export function avanzaGiornata(
   carriera: Carriera,
   risultatoUtente?: import('../motore/tipi.ts').RisultatoPartita,
 ): void {
+  // da CT (M8 parte 3) il "gioca" avanza il ciclo della nazionale
+  if (carriera.nazionale) {
+    avanzaNazionale(db, carriera)
+    return
+  }
   if (carriera.giornata >= carriera.calendario.length) return
   for (const partita of carriera.calendario[carriera.giornata]) {
     const partitaMia = partita.casaId === carriera.clubId || partita.trasfertaId === carriera.clubId
@@ -467,6 +475,9 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
   const offerte = offerteFineStagione(carriera)
   if (offerte.length > 0) carriera.offerteSpeciali = { contesto: 'fine-stagione', offerte }
 
+  // con la fama alta può bussare una federazione (M8 parte 3)
+  carriera.offertaNazionale = offertaNazionale(db, carriera)
+
   // gli eventi di fama della stagione appena chiusa, per il riepilogo
   const eventiFama = carriera.eventiFama.filter((e) => e.anno === carriera.anno - 1)
 
@@ -476,5 +487,6 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
     crescita: crescita as NotaCrescita[],
     coppaVinta: carriera.trofei.some((t) => t.anno === carriera.anno - 1),
     qualificatoEuropa: carriera.qualificatoEuropa,
+    offertaNazionale: carriera.offertaNazionale,
   }
 }

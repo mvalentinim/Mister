@@ -125,3 +125,25 @@ VersioneSchema **7**: `fiducia`, `crescita`, `coppa`, `eventiFama`,
 
 Competizioni continentali semplificate e panchine delle nazionali oltre la
 soglia di fama alta (ciclo qualificazioni/torneo).
+
+## La panchina della nazionale (M8 parte 3, FRD §4.3)
+
+Oltre **fama 75** le federazioni chiamano (a fine stagione, sempre); le
+**nazionali top** (fama DB ≥ 80: Spagna, Francia, Brasile…) rispondono solo
+da **fama 88**. L'incarico è **esclusivo** (default del FRD): si lasciano i
+club — rompere il contratto costa i soliti 3 punti di fama.
+
+Il ciclo del CT è compresso in una stagione:
+1. **Qualificazioni**: girone a 6 (andata e ritorno, 10 date) con sorteggio
+   a teste di serie (al massimo un'altra big nel girone). Le prime 2 passano.
+2. **Torneo internazionale a 16**: le qualificate + le migliori per fama,
+   eliminazione diretta, rigori seminati.
+
+Verdetti: campione **+12 fama e trofeo**; finalista +4; eliminato nel
+torneo +1; qualificazione fallita **−6** (e la federazione ti saluta).
+A fine ciclo si sceglie: **restare CT** (nuovo ciclo) o tornare ai club
+(le offerte arrivano per fama, col mercato estivo aperto ad accoglierti).
+
+Semplificazioni dichiarate: convocazioni fisse dal DB, tattica automatica,
+partite simulate (niente Match Day in nazionale), il mondo dei club avanza
+di una stagione (crescita giocatori e mercato) mentre sei CT.
