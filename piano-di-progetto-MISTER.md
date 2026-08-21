@@ -192,6 +192,7 @@ Attività:
 - **Riprogettazione visiva di tutte le schermate**: design system coerente (tipografia, colori, spaziature, componenti), layout da videogame (schermate immersive, non tabelle), transizioni e micro-animazioni, feedback visivi, icone/stemmi, cura di Match Day, mercato, trattativa e Spogliatoio come momenti "di scena".
 - Verifica finale multi-nazione (l'espansione delle leghe è di fatto arrivata con M6-M8: mercato mondiale e panchine estere): regole nazionali rifinite dove serve, ricalibrazione del motore sulle 10 leghe.
 - Rifiniture di coerenza (es. nomi delle nazionalità in italiano), collaudo complessivo del gioco.
+- **Curve di crescita personali** *(richiesta del 2026-08-21)*: oggi le fasce d'età della crescita/declino sono uno stampo unico per tutti; l'idea è legarle alla **personalità del giocatore** già presente nel DB — ad esempio la professionalità (il professionista serio declina più tardi, lo sregolato prima) e l'ambizione (il talento precoce che sboccia subito contro quello tardivo). Vale anche per i rigenerati.
 
 **DoD:** lo sviluppatore attraversa tutte le schermate e le giudica all'altezza di un videogame moderno; una carriera completa gira in qualunque nazione senza stonature.
 

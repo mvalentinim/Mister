@@ -514,3 +514,5 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - Media di partenza del sedicenne = **potenziale DB − 22** (minimo 35). Modrić: fabbrica 76, potenziale 83, si ritira a 74 → rinasce con media 61 e può salire fino a 83, oltre il 76 della carriera precedente. `picco` nel registro ritirati resta come dato informativo (media al ritiro).
 - versioneSchema resta 13 (migrazione v12→13 ora è un semplice avanzamento).
 - **Nuovo test CLI** (`tsx` sui moduli veri e sul DB vero): Modrić ritirato e rinato — età 16 ✓, potenziale visto dal gioco 83 ✓, delta −15 esatto ✓, media 61 = target ✓, free agent ✓. Collaudo E2E Playwright rifatto: 208 ritirati, 208 rinati, identità = solo anno di nascita ✓, crescita graduale +2 senza risucchi ✓. Build, lint, tsc e calibrazione verdi.
+
+**In lista (2026-08-21):** curve di crescita/declino personalizzate dalla personalità del giocatore (professionalità, ambizione) — annotata tra le attività di M11 nel piano.
