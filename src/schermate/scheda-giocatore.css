@@ -1,0 +1,65 @@
+/* scheda-giocatore.css — la pagina d'almanacco intorno alla Figurina
+   (schermata eroe, DESIGN-MISTER.md §7 punto 2). Sfondo carta con retino,
+   riquadri a filetto, ombre dure: qui si giudica lo stile. */
+
+.scheda-almanacco {
+  background: var(--paper);
+  min-height: calc(100vh - 60px);
+  padding: 2rem 1rem 3rem;
+}
+
+.scheda-colonne {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* la figurina "attaccata storta", come su un album vero */
+.scheda-colonne .figurina {
+  transform: rotate(-1.2deg);
+  flex: none;
+}
+
+.pagina-almanacco {
+  flex: 1;
+  min-width: 300px;
+  max-width: 460px;
+  background: var(--paper);
+  border: var(--bordo-vivo);
+  box-shadow: var(--ombra-dura);
+  padding: 1.1rem 1.3rem 1.3rem;
+}
+
+.titolo-almanacco {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  border-bottom: 3px solid var(--ink);
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.9rem;
+}
+
+.voce-almanacco {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--paper-3);
+  font-family: var(--font-body);
+}
+
+.voce-almanacco .etichetta-almanacco {
+  font-size: 0.72rem;
+  color: var(--ink-2);
+}
+
+.nota-almanacco {
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-2);
+}

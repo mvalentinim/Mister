@@ -1,0 +1,121 @@
+/* tokens.css — I DESIGN TOKEN DI MISTER (DESIGN-MISTER.md, §7 punto 1).
+   Stile "ALMANACCO": retrò anni '90 su fondo chiaro — carta, inchiostro,
+   colori pieni da stampa, bordi netti e ombre dure. Questo file è l'UNICA
+   fonte dei valori visivi: cambiare un token cambia tutto il gioco.
+   (Il progetto non usa Tailwind: le CSS variables qui sotto sono la
+   mappatura completa richiesta dal documento di design.) */
+
+:root {
+  /* ── §2.1 BASE CARTA ────────────────────────────────────────────── */
+  --paper: #f4efe3;    /* sfondo principale: carta crema, mai bianco puro */
+  --paper-2: #eae3d2;  /* pannelli, righe alternate delle tabelle */
+  --paper-3: #ddd4be;  /* bordi soft, separatori */
+  --ink: #1a1a1a;      /* testo principale e bordi: quasi-nero inchiostro */
+  --ink-2: #5a5648;    /* testo secondario */
+
+  /* ── §2.2 ACCENTI (saturi, da stampa) ───────────────────────────── */
+  --green-pitch: #2e7d32; /* identità del gioco: campo, conferme, CTA */
+  --red-card: #c62828;    /* errori, sconfitte, cartellini, negativi */
+  --gold: #c9a227;        /* trofei, fama, eventi speciali, stelle */
+  --blue-euro: #1854a6;   /* azioni secondarie, coppe europee */
+  --orange-hot: #e65100;  /* notifiche mercato, urgenze */
+
+  /* ── §2.3 COLORI DINAMICI DEL CLUB ──────────────────────────────
+     Tinti a runtime dal club dell'utente (barra, cornici, badge).
+     Il default è la veste neutra del gioco. */
+  --club-primary: var(--green-pitch);
+  --club-secondary: var(--ink);
+
+  /* ── §3 TIPOGRAFIA ──────────────────────────────────────────────── */
+  --font-display: 'Archivo Black', 'Arial Black', sans-serif; /* titoli, numeroni */
+  --font-heading: 'Oswald Variable', 'Arial Narrow', sans-serif; /* etichette MAIUSCOLE condensate */
+  --font-body: 'Inter Variable', system-ui, sans-serif; /* testo corrente */
+  --font-pixel: 'Press Start 2P', monospace; /* SOLO accenti retrò */
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace; /* dati tabellari */
+
+  /* ── §4.1 LINGUAGGIO VISIVO GLOBALE ─────────────────────────────── */
+  --bordo-vivo: 2px solid var(--ink);      /* il bordo standard */
+  --raggio-max: 4px;                        /* angoli: mai più tondi di così */
+  --ombra-dura: 4px 4px 0 var(--ink);      /* piena, spostata, SENZA blur */
+  --ombra-dura-premuta: 2px 2px 0 var(--ink); /* al hover ci si "preme" */
+}
+
+/* ── §2.4 CODIFICA VALORI: scala fissa a 5 fasce ──────────────────
+   1-45 rosso · 46-60 arancio · 61-74 inchiostro · 75-87 verde · 88-99 oro.
+   Le classi si applicano a numeri e barre, ovunque nel gioco. */
+.fascia-1 { color: var(--red-card); }
+.fascia-2 { color: var(--orange-hot); }
+.fascia-3 { color: var(--ink); }
+.fascia-4 { color: var(--green-pitch); }
+.fascia-5 { color: var(--gold); }
+.fascia-riempimento-1 { background: var(--red-card); }
+.fascia-riempimento-2 { background: var(--orange-hot); }
+.fascia-riempimento-3 { background: var(--ink-2); }
+.fascia-riempimento-4 { background: var(--green-pitch); }
+.fascia-riempimento-5 { background: var(--gold); }
+
+/* ── §4.1 PATTERN DI STAMPA (righe diagonali, retino a punti) ─────
+   Per riempire aree vuote, al 5-8% di inchiostro. */
+.retino-righe {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgb(26 26 26 / 7%) 0 2px,
+    transparent 2px 8px
+  );
+}
+
+.retino-punti {
+  background-image: radial-gradient(rgb(26 26 26 / 8%) 1.2px, transparent 1.2px);
+  background-size: 8px 8px;
+}
+
+/* ── COMPONENTI DI BASE DELL'ALMANACCO ───────────────────────────── */
+
+/* il riquadro con filetto e ombra dura: il mattone di tutto */
+.riquadro-almanacco {
+  background: var(--paper);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
+  box-shadow: var(--ombra-dura);
+}
+
+/* etichetta MAIUSCOLA condensata (intestazioni, didascalie) */
+.etichetta-almanacco {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* il "numerone": voti, medie, prezzi — metà dell'estetica */
+.numerone {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* bottone da stampa: pieno, bordo netto, ombra dura che si preme */
+.bottone-almanacco {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--green-pitch);
+  color: var(--paper);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
+  box-shadow: var(--ombra-dura);
+  padding: 0.5rem 1.1rem;
+  cursor: pointer;
+  transition: box-shadow 0.08s steps(2), transform 0.08s steps(2);
+}
+
+.bottone-almanacco:hover {
+  box-shadow: var(--ombra-dura-premuta);
+  transform: translate(2px, 2px);
+}
+
+.bottone-almanacco.secondario {
+  background: var(--paper);
+  color: var(--ink);
+}

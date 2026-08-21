@@ -4,9 +4,15 @@
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-// i font del design system (M11), impacchettati nell'app: niente rete
+// i font dello stile "Almanacco" (DESIGN-MISTER.md §3), impacchettati
+// nell'app: niente rete, funzionano anche nell'app nativa
+import '@fontsource/archivo-black'
+import '@fontsource-variable/oswald'
 import '@fontsource-variable/inter'
-import '@fontsource-variable/outfit'
+import '@fontsource/press-start-2p'
+import '@fontsource/ibm-plex-mono'
+import '@fontsource-variable/outfit' // in uscita: resta finché le vecchie schermate non migrano
+import './design/tokens.css'
 import './index.css'
 import App from './App.tsx'
 

@@ -562,3 +562,20 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Collaudo visivo**: screenshot Playwright di titolo, carriera, mercato, tattica, lista salvataggi e Match Day — giudicati e corretti (il difetto della lista slot è emerso proprio così). Build, lint e tsc verdi.
 
 **Resta di M11:** la cura "di scena" di Match Day/trattativa/spogliatoio (momenti da regia), la verifica multi-nazione con ricalibrazione, le nazionalità in italiano, e le curve di crescita personali annotate in lista.
+
+---
+
+## Sessione 28 — 2026-08-21 — M11: arriva la direzione artistica "Almanacco" (DESIGN-MISTER.md)
+
+**Obiettivo dichiarato:** lo sviluppatore ha bocciato lo stile della sessione 27 e ha fornito DESIGN-MISTER.md (stile "Almanacco": retrò anni '90 su carta, bordi netti, ombre dure, colori pieni da stampa). Applicare il processo del §7: token + Figurina come campione di stile, da approvare PRIMA di propagare.
+
+**Fatto:**
+- **`src/design/tokens.css`** (§7 punto 1): tutti i token del documento — carta/inchiostro (§2.1), accenti saturi (§2.2), colori dinamici del club (§2.3), scala a 5 fasce coi numeroni (§2.4), tipografia (§3: Archivo Black, Oswald, Inter, Press Start 2P, IBM Plex Mono — impacchettati, niente rete), bordo vivo/ombra dura/raggio max (§4.1), retini di stampa, bottone almanacco. Il progetto non usa Tailwind: le CSS variables sono la mappatura completa.
+- **La FIGURINA** (§4.2, componente eroe in `src/design/Figurina.tsx`): cornice spessa nei colori sociali (oro per le leggende), banda del nome su inchiostro, numero di maglia gigante, medaglione della media, badge ruolo pieno d'inchiostro, barre attributi squadrate che si riempiono A SCATTI (§5), marchio MISTER in font pixel.
+- **Ritratto pixel art procedurale** (`pixelart.tsx`): volto 12×14 generato dal seed del giocatore (carnagione, capigliatura, barba) con maglia nei colori e nel motivo del club (tinta unita/palato/fascia/metà). Stesso giocatore, stessa faccia, per sempre.
+- **Colori sociali procedurali** (`colori-club.ts`): il DB non ha ancora le colonne dei colori — ogni club pesca una maglia stabile da una palette di 12 maglie classiche (annotato: quando i colori veri entreranno nel DB, si leggeranno da lì). Numero di maglia tipico del ruolo, deterministico.
+- **Scheda Giocatore rifatta come schermata eroe**: figurina "attaccata storta" su pagina di carta col retino, pannello d'almanacco a fianco (squadra, nazionale, contratto).
+- **Giro di critica su screenshot** (§0.4): trovato e corretto il badge ruolo illeggibile coi colori sociali chiari (ora sempre inchiostro). Verificati portiere, leggenda (cornice oro, ★ HERO) e fasce colore.
+- Build, lint, tsc verdi. Lo stile della sessione 27 resta sulle altre schermate FINCHÉ la Figurina non è approvata: poi la propagazione lo sostituirà (metodo del campione, §0.3).
+
+**In attesa:** l'approvazione dello sviluppatore sulla Figurina (§7 punto 2). Poi: Match Day (§4.5), quindi propagazione schermata per schermata (§6). Annotato: nessuna skill di frontend design disponibile nella sessione — il documento stesso ha fatto da brief vincolante.

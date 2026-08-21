@@ -1,45 +1,17 @@
-// SchedaGiocatore.tsx — la scheda completa di un singolo giocatore:
-// anagrafica, attributi tecnici con barre, contratto.
+// SchedaGiocatore.tsx — la scheda giocatore, PRIMA SCHERMATA EROE dello
+// stile "Almanacco" (DESIGN-MISTER.md §0.3 e §4.2): la Figurina al centro,
+// e accanto la "pagina di almanacco" con contratto, nazionale e note.
+// Questo è il campione di stile: approvato qui, si propaga altrove.
 
 import type { Database } from 'sql.js'
 import { interrogaUna } from '../db/database.ts'
-import { calcolaEta, mediaComplessiva, type GiocatoreRiga } from '../db/tipi.ts'
+import type { GiocatoreRiga } from '../db/tipi.ts'
+import { Figurina } from '../design/Figurina.tsx'
+import './scheda-giocatore.css'
 
 interface Props {
   db: Database
   giocatoreId: number
-}
-
-// Attributi da mostrare, con etichetta leggibile, per ciascun set
-const ATTRIBUTI_MOVIMENTO: Array<[keyof GiocatoreRiga, string]> = [
-  ['velocita', 'Velocità'], ['resistenza', 'Resistenza'], ['tecnica', 'Tecnica'],
-  ['passaggio', 'Passaggio'], ['tiro', 'Tiro'], ['dribbling', 'Dribbling'],
-  ['colpo_testa', 'Colpo di testa'], ['marcatura', 'Marcatura'], ['contrasto', 'Contrasto'],
-  ['posizionamento', 'Posizionamento'], ['visione', 'Visione'], ['calci_piazzati', 'Calci piazzati'],
-]
-
-const ATTRIBUTI_PORTIERE: Array<[keyof GiocatoreRiga, string]> = [
-  ['riflessi', 'Riflessi'], ['presa', 'Presa'], ['uscite', 'Uscite'],
-  ['rinvio', 'Rinvio'], ['velocita', 'Velocità'], ['resistenza', 'Resistenza'],
-]
-
-/** Una barra colorata proporzionale al valore dell'attributo (1-99). */
-function BarraAttributo({ etichetta, valore }: { etichetta: string; valore: number | null }) {
-  if (valore === null) return null
-  return (
-    <div className="attributo">
-      <span className="attributo-nome">{etichetta}</span>
-      <div className="attributo-barra">
-        {/* larghezza = valore in percentuale; colore dal rosso (scarso) al
-            verde (ottimo) usando la tonalità HSL: 0 = rosso, ~120 = verde */}
-        <div
-          className="attributo-riempimento"
-          style={{ width: `${valore}%`, backgroundColor: `hsl(${valore * 1.2}, 70%, 45%)` }}
-        />
-      </div>
-      <span className="attributo-valore">{valore}</span>
-    </div>
-  )
 }
 
 function SchedaGiocatore({ db, giocatoreId }: Props) {
@@ -60,40 +32,44 @@ function SchedaGiocatore({ db, giocatoreId }: Props) {
     db, 'SELECT stipendio, scadenza FROM contratto WHERE giocatore_id = ?', [giocatoreId],
   )
 
-  const attributi = g.ruolo === 'POR' ? ATTRIBUTI_PORTIERE : ATTRIBUTI_MOVIMENTO
-
   return (
-    <section className="schermata">
-      <h2>{g.nome} {g.cognome}</h2>
-      <p className="riga-info">
-        <span className="etichetta-ruolo">{g.ruolo}</span>
-        {/* Badge per le leggende (tag categoria: icon/hero) */}
-        {g.categoria !== 'normale' && (
-          <>{' '}<span className="etichetta-leggenda">{g.categoria === 'icon' ? '★ ICON' : '⚡ HERO'}</span></>
-        )}
-        {' '}· {nomeClub ?? (g.categoria === 'normale' ? 'Svincolato' : 'Leggenda')} ·{' '}
-        {calcolaEta(g.data_nascita)} anni · {g.nazionalita} ·
-        piede {g.piede} · <strong>media {mediaComplessiva(g)}</strong> · potenziale {g.potenziale}
-        {nazionale && <> · 🏆 nazionale: {nazionale.nome}</>}
-      </p>
+    <section className="scheda-almanacco retino-righe">
+      <div className="scheda-colonne">
+        {/* la figurina: il cuore della pagina */}
+        <Figurina giocatore={g} nomeClub={nomeClub ?? null} clubId={g.club_id} />
 
-      <h3>Attributi</h3>
-      <div className="griglia-attributi">
-        {attributi.map(([chiave, etichetta]) => (
-          <BarraAttributo key={chiave} etichetta={etichetta} valore={g[chiave] as number | null} />
-        ))}
-      </div>
+        {/* la pagina d'almanacco a fianco */}
+        <div className="pagina-almanacco">
+          <h2 className="titolo-almanacco">Scheda giocatore</h2>
 
-      {contratto && (
-        <>
-          <h3>Contratto</h3>
-          <p>
-            {/* toLocaleString: formatta 250000 come "250.000" all'italiana */}
-            Stipendio: € {contratto.stipendio.toLocaleString('it-IT')}/anno ·
-            scadenza {new Date(contratto.scadenza).toLocaleDateString('it-IT')}
+          <div className="voce-almanacco">
+            <span className="etichetta-almanacco">Squadra</span>
+            <strong>{nomeClub ?? (g.categoria === 'normale' ? 'Svincolato' : 'Leggenda del calcio')}</strong>
+          </div>
+
+          {nazionale && (
+            <div className="voce-almanacco">
+              <span className="etichetta-almanacco">Nazionale</span>
+              <strong>{nazionale.nome}</strong>
+            </div>
+          )}
+
+          {contratto && (
+            <div className="voce-almanacco">
+              <span className="etichetta-almanacco">Contratto</span>
+              <strong>
+                € {contratto.stipendio.toLocaleString('it-IT')}/anno
+                {' — '}scadenza {new Date(contratto.scadenza).toLocaleDateString('it-IT')}
+              </strong>
+            </div>
+          )}
+
+          <p className="nota-almanacco">
+            Dall'album MISTER: numeri di maglia e ritratti sono quelli
+            dell'almanacco — il campo dirà il resto.
           </p>
-        </>
-      )}
+        </div>
+      </div>
     </section>
   )
 }

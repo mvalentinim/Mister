@@ -1,0 +1,203 @@
+/* figurina.css — lo stile della FIGURINA (DESIGN-MISTER.md §4.2).
+   Tutto viene dai token: carta, inchiostro, bordi netti, ombra dura.
+   La cornice esterna è nei COLORI DEL CLUB (via --club-primary/secondary,
+   impostati dal componente). */
+
+.figurina {
+  width: 300px;
+  background: var(--paper);
+  /* la cornice spessa della figurina: colore sociale fuori, filetto
+     inchiostro dentro — come le figurine stampate */
+  border: 8px solid var(--club-primary);
+  outline: 2px solid var(--ink);
+  box-shadow: var(--ombra-dura);
+  border-radius: 2px;
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+
+/* le leggende hanno la cornice d'oro, da carta speciale */
+.figurina-oro {
+  border-color: var(--gold);
+}
+
+/* ── il ritratto ── */
+
+.fig-ritratto {
+  position: relative;
+  background: var(--paper-2);
+  border-bottom: 2px solid var(--ink);
+  display: flex;
+  justify-content: center;
+  padding: 14px 0 6px;
+}
+
+/* il numero di maglia gigante, dietro la testa come sulle carte */
+.fig-numero-maglia {
+  position: absolute;
+  top: 2px;
+  right: 10px;
+  font-family: var(--font-display);
+  font-size: 64px;
+  line-height: 1;
+  color: var(--club-primary);
+  -webkit-text-stroke: 2px var(--ink);
+  opacity: 0.9;
+}
+
+/* il medaglione della media: il numerone che comanda la carta */
+.fig-media {
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 0.9;
+  background: var(--paper);
+  border: var(--bordo-vivo);
+  box-shadow: var(--ombra-dura-premuta);
+  padding: 6px 8px 4px;
+}
+
+.fig-media small {
+  font-family: var(--font-heading);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--ink-2);
+  margin-top: 3px;
+}
+
+/* la fascia oro (88-99) merita il bordo speciale (§2.4) */
+.fig-media.fascia-5 {
+  border-color: var(--gold);
+  outline: 2px solid var(--gold);
+  outline-offset: -5px;
+}
+
+/* il badge del ruolo: SEMPRE pieno d'inchiostro (i colori sociali possono
+   essere chiari: l'inchiostro garantisce la leggibilità, §2.3) */
+.fig-ruolo {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--club-primary);
+  padding: 2px 8px;
+}
+
+/* la stella delle leggende */
+.fig-stella {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  background: var(--gold);
+  color: var(--ink);
+  border: var(--bordo-vivo);
+  padding: 2px 7px;
+}
+
+/* ── la banda del nome ── */
+
+.fig-nome {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+  padding: 6px 8px 7px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fig-anagrafica {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: var(--ink-2);
+  border-bottom: 2px solid var(--ink);
+  padding: 5px 6px;
+  margin: 0;
+}
+
+/* ── gli attributi: barre squadrate, numeroni ── */
+
+.fig-attributi {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px 14px;
+  padding: 10px 12px;
+}
+
+.fig-attributo {
+  display: grid;
+  grid-template-columns: 30px 1fr 24px;
+  align-items: center;
+  gap: 6px;
+}
+
+.fig-attributo-sigla {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+
+.fig-attributo-barra {
+  height: 9px;
+  background: var(--paper-3);
+  border: 1px solid var(--ink);
+}
+
+/* la barra si riempie A SCATTI (§5: effetto 16-bit, non easing morbido) */
+.fig-attributo-pieno {
+  height: 100%;
+  animation: riempi-a-scatti 0.5s steps(8) both;
+}
+
+@keyframes riempi-a-scatti {
+  from { width: 0; }
+}
+
+.fig-attributo-numero {
+  font-family: var(--font-display);
+  font-size: 13px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── il piè di figurina ── */
+
+.fig-piede {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 2px solid var(--ink);
+  background: var(--paper-2);
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+/* il marchio in font pixel: l'accento retrò ammesso (§3) */
+.fig-marchio {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--green-pitch);
+}
