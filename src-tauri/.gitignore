@@ -1,0 +1,3 @@
+# artefatti di compilazione Rust/Tauri: mai su git
+/target
+/gen

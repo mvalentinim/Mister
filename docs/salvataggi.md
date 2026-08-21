@@ -72,7 +72,9 @@ Ogni carriera ricorda l'**impronta** del DB con cui è nata
   giocare lo stesso, ma la schermata carriera mostra il solito avviso di
   incoerenza: nomi e attributi potrebbero non corrispondere.
 
-## Cosa resta di M10
+## App nativa e cloud
 
-- Packaging **Tauri** (app macOS nativa, salvataggi su file system).
-- Guida alla sincronizzazione via cartella cloud.
+Il packaging **Tauri** (app macOS nativa) e la sincronizzazione tra
+computer via cartella cloud sono descritti passo passo in
+[tauri-e-cloud.md](tauri-e-cloud.md). Nell'app nativa l'export usa la
+vera finestra "Salva con nome" del sistema (vedi `src/scarica.ts`).

@@ -1,0 +1,19 @@
+# Cargo.toml — il "package.json" della parte nativa (Rust/Tauri).
+# Non serve capire Rust: questo file elenca solo le dipendenze
+# dell'involucro nativo; il gioco vero resta quello web in /src.
+
+[package]
+name = "mister"
+version = "0.2.0"
+description = "MISTER — manageriale calcistico"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+# i due plugin che servono al salvataggio su file:
+# dialog = la finestra "Salva con nome", fs = la scrittura del file
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"

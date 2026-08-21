@@ -14,6 +14,7 @@ import {
   duplicaCarriera, leggiFileMister, nomeFileMister, serializzaCarriera,
 } from './carriera/portabile.ts'
 import { etichettaStagione, type Carriera } from './carriera/tipi.ts'
+import { scaricaFile } from './scarica.ts'
 import Amichevole from './schermate/Amichevole.tsx'
 import Editor from './schermate/Editor.tsx'
 import ElencoSquadre from './schermate/ElencoSquadre.tsx'
@@ -72,13 +73,7 @@ function App() {
   async function esportaSuFile(c: Carriera) {
     const serveDb = c.dbImpronta !== 0 && improntaDbCorrente() === c.dbImpronta
     const dbUtente = serveDb ? await caricaDatabaseUtente() : null
-    const blob = new Blob([serializzaCarriera(c, dbUtente)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = nomeFileMister(c)
-    a.click()
-    URL.revokeObjectURL(url)
+    await scaricaFile(nomeFileMister(c), serializzaCarriera(c, dbUtente), 'application/json')
   }
 
   /** Importa un file .mister: migra la carriera, evita di sovrascrivere

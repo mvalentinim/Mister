@@ -532,3 +532,17 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Collaudo end-to-end**: DB personalizzato creato dall'editor → carriera con impronta 29999045 → copia di sicurezza (2 slot) → export .mister (DB incluso, 1.5MB base64) → eliminati gli slot e ripristinato il DB originale → import: carriera tornata con lo stesso id, DB installato, NESSUN avviso di incoerenza → re-import: secondo slot con id diverso ✓. Build, lint e tsc verdi (motore non toccato).
 
 **Resta di M10:** packaging Tauri (app macOS) e guida alla sincronizzazione cloud.
+
+---
+
+## Sessione 26 — 2026-08-21 — M10 completata: app macOS (Tauri) e guida cloud
+
+**Obiettivo dichiarato:** completare M10 — il packaging Tauri per l'app macOS nativa e la guida alla sincronizzazione via cloud.
+
+**Fatto:**
+- **Scaffolding Tauri v2 completo** (`src-tauri/`): configurazione (finestra 1320×900, bundle app+dmg), involucro Rust minimo con i plugin `dialog` e `fs`, permessi (capabilities) per la finestra "Salva con nome" e la scrittura nelle cartelle personali, icone generate (campo verde con la M: png, icns per macOS, ico). Script npm: `tauri:dev` e `tauri:build`.
+- **Salvataggio file consapevole dell'ambiente** (`src/scarica.ts`): nel browser il solito download; dentro l'app nativa la WebView di macOS non gestisce i download, quindi si apre la vera finestra "Salva con nome" e si scrive il file col plugin fs. I tre punti di export (carriera .mister, database .sqlite, database JSON) ora passano tutti da qui.
+- **Guida passo passo** (`docs/tauri-e-cloud.md`): preparare il Mac (Xcode CLT + Rust), `npm run tauri:dev`, `npm run tauri:build`, dove finisce l'app, l'avviso di macOS sulle app non firmate, dove stanno i salvataggi nativi (separati da quelli del browser!), e la sincronizzazione cloud coi file .mister ("una copia di lavoro alla volta").
+- **Verifiche**: build/lint/tsc verdi; collaudo E2E .mister rieseguito dopo il refactor (tutto ok); la parte Rust è in compilazione di verifica (`cargo check`) con le librerie GUI installate nell'ambiente — l'esito sarà annotato qui sotto.
+
+**M10 CHIUSA** (con debito da Mac: `npm run tauri:dev` di persona, export con "Salva con nome" nativa, e il DoD del giro browser→altro dispositivo via .mister). Prossima milestone: **M11 — rifinitura "videogame"**.

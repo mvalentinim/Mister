@@ -13,6 +13,7 @@ import { assegnaImprontaSeMancante, improntaDbCorrente, interroga, interrogaUna 
 import { calcolaEta, mediaComplessiva, type GiocatoreRiga } from '../db/tipi.ts'
 import { eliminaDatabaseUtente, esisteDatabaseUtente, salvaDatabaseUtente } from '../db/persistenza.ts'
 import { eliminaSquadraLegend, rosaLegendIds, salvaSquadraLegend, squadreLegend } from '../db/legends.ts'
+import { scaricaFile } from '../scarica.ts'
 
 interface Props {
   db: Database
@@ -319,13 +320,7 @@ function Editor({ db }: Props) {
         nome: s.nome, descrizione: s.descrizione, giocatori: rosaLegendIds(db, s.id),
       })),
     }
-    const blob = new Blob([JSON.stringify(dump, null, 1)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'mister-database.json'
-    a.click()
-    URL.revokeObjectURL(url)
+    void scaricaFile('mister-database.json', JSON.stringify(dump, null, 1), 'application/json')
   }
 
   /** Importa un JSON esportato: aggiorna club e giocatori per id (upsert)
@@ -369,14 +364,11 @@ function Editor({ db }: Props) {
       L'impronta viaggia dentro il file: reimportandolo, le carriere nate
       su di lui tornano coerenti. */
   function esporta() {
-    const bytes = db.export()
-    const blob = new Blob([bytes as unknown as BlobPart], { type: 'application/octet-stream' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `mister-database-${improntaDbCorrente() || 'originale'}.sqlite`
-    a.click()
-    URL.revokeObjectURL(url)
+    void scaricaFile(
+      `mister-database-${improntaDbCorrente() || 'originale'}.sqlite`,
+      db.export(),
+      'application/octet-stream',
+    )
   }
 
   /** Importa un database da file: diventa il database personalizzato. */
