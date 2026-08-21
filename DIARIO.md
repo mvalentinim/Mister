@@ -594,3 +594,16 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Giro di critica su screenshot** (§0.4): corretti i nomi accavallati e la scala voti; verificate partita intera (2-2 al 90' con ticker del triplice fischio), pausa e finale. Build, lint, tsc verdi.
 
 **Prossimo passo del §7:** approvazione dello sviluppatore sul Match Day (punto 3), poi propagazione alle altre schermate nell'ordine del §6, una per sessione.
+
+---
+
+## Sessione 29-bis — 2026-08-21 — I ritratti diventano "Monkey Island" (correzione richiesta)
+
+**Obiettivo dichiarato:** lo sviluppatore ha approvato la plancia del Match Day ma bocciato i volti cartoon: il riferimento è lo stile disegnato LucasArts di Curse of Monkey Island.
+
+**Fatto:**
+- **Ritratti riscritti da capo** (`src/design/ritratto.tsx`): visi allungati e spigolosi con zigomi e mento a punta (o squadrato), ombreggiatura calda a due toni sul lato del viso e lungo il naso, occhi a mandorla con la palpebra marcata, sopracciglia piene (arcuate o dritte), nasi lunghi disegnati con una curva sola (dritto alla Guybrush / aquilino / all'insù), sorrisetti storti col labbro accennato, sei chiome a ciocche piene con le punte (frangia, fluente, riccio, ciuffo spavaldo, rasato raro), barba e baffi sagomati, orecchino da pirata a sorte (12%). Contorni sottili color SEPPIA, mai neri e uniformi. Sempre deterministici dal seed, maglia coi colori e il motivo del club.
+- **Banco di prova dei volti**: pagina-griglia con 16 seed renderizzata coi moduli veri (tsx + react-dom/server) e fotografata — due giri di critica (calvizie troppo frequente, orecchio in ombra a macchia, barba bionda stonata, punte della frangia timide) e correzioni.
+- Verificato il risultato dentro la Figurina. Build, lint, tsc verdi. Match Day invariato (già approvato).
+
+**Prossimo passo:** propagazione dello stile alle altre schermate nell'ordine del §6, una per sessione.
