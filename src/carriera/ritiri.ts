@@ -41,8 +41,11 @@ function etaAFineStagione(carriera: Carriera, dataNascita: string): number {
 /** A fine stagione i giocatori NORMALI anziani si ritirano: certi a 38+,
     possibili dai 35 (probabilità che cresce con l'età; uno svincolato di
     35+ smette sempre, nessuno lo vuole più). Deterministico col seme.
-    Registra il `picco` (la media attuale, crescita inclusa): sarà il
-    potenziale del rigenerato. Da chiamare DOPO carriera.anno++. */
+    Registra il `picco`: NON la media al ritiro (già erosa dal declino),
+    ma l'APICE della carriera — la media di fabbrica del DB più il massimo
+    di crescita mai toccato. Sarà il potenziale del rigenerato: Modrić si
+    ritira a 78, ma rinasce col potenziale dell'88 che valeva all'apice.
+    Da chiamare DOPO carriera.anno++. */
 export function ritiriFineStagione(db: Database, carriera: Carriera): void {
   if (!carriera.ritirati || !carriera.rinati) return // salvataggio non ancora migrato
   const rng = creaRng(semeDaStringa(`ritiri-${carriera.seme}-${carriera.anno}`))
@@ -61,7 +64,9 @@ export function ritiriFineStagione(db: Database, carriera: Carriera): void {
     )
     // applicaCrescita: per i rinati sovrascrive anche l'età (un rigenerato
     // è un ragazzo, non deve ri-ritirarsi con la data di nascita del DB)
-    for (const g of applicaCrescita(carriera, grezze)) {
+    const conOverlay = applicaCrescita(carriera, grezze)
+    for (let j = 0; j < conOverlay.length; j++) {
+      const g = conOverlay[j]
       if (g.categoria !== 'normale') continue // le leggende hanno il loro ritiro
       const eta = etaAFineStagione(carriera, g.data_nascita)
       if (eta < ETA_RITIRO_POSSIBILE) continue
@@ -70,7 +75,10 @@ export function ritiriFineStagione(db: Database, carriera: Carriera): void {
         svincolatiSet.has(g.id) || // svincolato e anziano: fine corsa
         rng.evento(0.25 * (eta - (ETA_RITIRO_POSSIBILE - 1))) // 35: 25%, 36: 50%, 37: 75%
       if (!smette) continue
-      ritirati.push({ id: g.id, nome: `${g.nome} ${g.cognome}`.trim(), picco: mediaComplessiva(g) })
+      // il picco è l'APICE: media di fabbrica (riga grezza, senza il delta
+      // in declino di oggi) + il massimo di crescita mai raggiunto
+      const picco = mediaComplessiva(grezze[j]) + Math.max(0, carriera.crescitaMassima?.[g.id] ?? 0)
+      ritirati.push({ id: g.id, nome: `${g.nome} ${g.cognome}`.trim(), picco })
     }
   }
   if (ritirati.length === 0) return

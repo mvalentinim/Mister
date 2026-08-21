@@ -491,3 +491,14 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Collaudo end-to-end** (2 script Playwright, profilo persistente): stagione 1 chiusa → 206 ritirati normali col picco, notizia, rimossi ovunque, zero rinascite immediate ✓; stagione 2 chiusa → tutti e 206 rinati: Modrić 16enne, potenziale 74 (= picco), free agent, delta −24, notizia "RIGENERATI", flag anti-doppia-rinascita ✓; stagione 3 → il delta sale di +2 (niente salto a −12) e il 17enne resta in circolazione (niente ri-ritiro dalla data del DB) ✓. Build, lint, tsc e calibrazione verdi.
 
 **Debito personale (senza Mac):** vedere un rigenerato in gioco e provare a ingaggiarlo di persona.
+
+---
+
+## Sessione 24-bis — 2026-08-21 — Il picco è l'APICE della carriera (correzione richiesta)
+
+**Obiettivo dichiarato:** il potenziale del rigenerato non è la media al momento del ritiro (già erosa dal declino), ma la media più alta MAI raggiunta in carriera — Modrić all'apice valeva 88, al ritiro 78: il rigenerato deve avere potenziale 88.
+
+**Fatto:**
+- Nuovo registro `carriera.crescitaMassima` (giocatore → il delta di crescita più alto mai toccato, solo se positivo), aggiornato dalla crescita di fine stagione. Al ritiro il **picco = media di fabbrica del DB + massimo storico**: l'apice, comunque sia andato il declino. Per chi parte già anziano nel DB (Modrić 39enne) il picco è la sua media di partenza, non quella declinata dal gioco.
+- Salvataggi a **versioneSchema 13** (migrazione v12→13).
+- **Collaudo end-to-end rifatto**: Modrić cala di −2 in stagione ma il picco registrato è 76 (l'apice), non 74; rinasce 16enne con potenziale 76 e delta di rinascita ESATTAMENTE −22 (= media di fabbrica − 22, la formula verificata al punto); il registro dei massimi si popola con 1.987 voci positive (i giovani cresciuti) ✓; terza stagione: risalita graduale +3, niente salto a −12, niente ri-ritiro ✓. Build, lint, tsc e calibrazione verdi.

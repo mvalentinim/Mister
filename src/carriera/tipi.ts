@@ -250,11 +250,15 @@ export interface OfferteSpeciali {
 /** Lo stato completo di una carriera. */
 export interface Carriera {
   id: string
-  versioneSchema: 12 // per le migrazioni dei salvataggi (FRD §11)
+  versioneSchema: 13 // per le migrazioni dei salvataggi (FRD §11)
   /** i giocatori RIGENERATI (post-ritiro): id → identità nuova di 16enne.
       L'anno di nascita e il potenziale sovrascrivono quelli del DB in
       lettura (come la crescita): il resto del gioco li vede giovanissimi. */
   rinati: Record<number, { annoNascita: number; potenziale: number }>
+  /** il delta di crescita PIÙ ALTO mai toccato da ogni giocatore (solo se
+      positivo): serve a ricostruire il PICCO della carriera al ritiro —
+      l'apice, non la media già erosa dal declino. */
+  crescitaMassima: Record<number, number>
   /** le LEGGENDE nel mercato come free agent (M9, opzione di carriera):
       null = opzione spenta. daAnno = la stagione in cui entrano;
       annoIngresso/ids si riempiono all'ingresso; dopo 5 stagioni si ritirano. */

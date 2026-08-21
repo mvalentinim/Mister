@@ -123,8 +123,11 @@ A fine stagione i giocatori **normali** anziani appendono le scarpe:
 - **38+**: ritiro certo; **35-37**: probabilità crescente (25% / 50% / 75%);
   uno **svincolato di 35+** smette sempre (nessuno lo vuole più).
 - Il ritirato sparisce da rose, svincolati, contratti, prestiti e promesse;
-  finisce nel registro `carriera.ritirati` col suo **picco** (la media al
-  momento del ritiro, crescita inclusa).
+  finisce nel registro `carriera.ritirati` col suo **picco** — l'APICE
+  della carriera, non la media al ritiro già erosa dal declino: la media
+  di fabbrica del DB più il massimo di crescita mai toccato (registro
+  `carriera.crescitaMassima`). Esempio: Modrić valeva 88 all'apice, si
+  ritira a 78 → il picco è 88.
 
 Dopo **una stagione di pausa** arriva la **rinascita**: il ritirato torna
 nel mercato come **free agent SEDICENNE** — stesso giocatore del DB, ma con
@@ -142,8 +145,9 @@ non rinascono (hanno il loro ritiro dopo 5 stagioni, vedi mercato.md).
 VersioneSchema **12** (v7: fiducia, crescita, coppa, registro fama, trofei,
 esoneri, offerte; v8: Coppa Europa e contratto dell'allenatore; v9: la
 nazionale; v10: impronta del DB; v11: leggende free agent e registro
-ritirati; v12: ritiri per età e rigenerati). I salvataggi vecchi migrano
-da soli (coppa dalla stagione successiva).
+ritirati; v12: ritiri per età e rigenerati; v13: il registro dei massimi
+di crescita per il picco al ritiro). I salvataggi vecchi migrano da soli
+(coppa dalla stagione successiva).
 
 ## La panchina della nazionale (M8 parte 3, FRD §4.3)
 

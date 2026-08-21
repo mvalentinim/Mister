@@ -85,6 +85,7 @@ export interface NotaCrescita {
     da mostrare nel riepilogo di fine stagione. */
 export function crescitaFineStagione(db: Database, carriera: Carriera): NotaCrescita[] {
   if (!carriera.crescita) carriera.crescita = {}
+  if (!carriera.crescitaMassima) carriera.crescitaMassima = {}
   const rng = creaRng(semeDaStringa(`crescita-${carriera.seme}-${carriera.anno}`))
   const note: NotaCrescita[] = []
 
@@ -143,6 +144,11 @@ export function crescitaFineStagione(db: Database, carriera: Carriera): NotaCres
       const nuovo = Math.max(fondo, attuale + delta)
       if (nuovo === attuale) continue
       carriera.crescita[g.id] = nuovo
+      // il registro dei MASSIMI: memorizza l'apice della crescita (solo se
+      // positivo) — al ritiro ricostruisce il picco della carriera
+      if (nuovo > 0 && nuovo > (carriera.crescitaMassima[g.id] ?? 0)) {
+        carriera.crescitaMassima[g.id] = nuovo
+      }
 
       if (gruppo.mio) {
         note.push({

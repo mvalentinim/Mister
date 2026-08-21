@@ -119,6 +119,12 @@ function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSchema: nu
     salvataggio.rinati = {}
     caricato.versioneSchema = 12
   }
+  if (caricato.versioneSchema === 12) {
+    // v12 → v13: il registro dei massimi di crescita (per il picco vero
+    // al ritiro: l'apice della carriera, non la media già in declino)
+    salvataggio.crescitaMassima = {}
+    caricato.versioneSchema = 13
+  }
   return salvataggio
 }
 
