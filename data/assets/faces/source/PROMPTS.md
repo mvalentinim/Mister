@@ -24,12 +24,14 @@ certamente sbagliato: allegarlo SEMPRE.
 
 ## Regole comuni (già dentro i prompt)
 
-- Celle 48×48 in griglia rigida, sfondo TRASPARENTE, niente linee di griglia.
-- SOLO capelli (o barba): niente viso, testa, pelle, occhi, colletti.
+- Celle 48×48 in griglia rigida, niente linee di griglia né scritte.
+- **Colori-chiave** (v2): sfondo magenta puro `#FF00FF`, testa segnaposto
+  ciano puro `#00FFFF` senza contorno né tratti — l'estrazione li elimina
+  al pixel; la trasparenza NON va chiesta (i modelli la disegnano finta).
+- Capelli/barba SOPRA la testa ciano, identica in ogni cella.
 - Pixel art netta: nessun antialiasing, nessuna sfumatura morbida, nessuna ombra.
 - **Rampa neutra a 4 grigi** (`#2E2E2E · #4A4A4A · #6E6E6E · #929292`):
   serve al ricolore di runtime (§4) — MAI colori veri di capelli.
-- Una sola variante per cella, centrata come se indossata dalla testa base.
 
 ## Dopo la generazione
 
@@ -67,7 +69,7 @@ FORMAT:
   (total canvas exactly 288x192 pixels). No visible grid lines, no
   labels, no watermark.
 - Crisp 1:1 pixel art, hard pixel edges only: no anti-aliasing, no
-  gradients, no soft shadows, no outlines around the transparent area.
+  gradients, no soft shadows.
 - COLOR: use ONLY this neutral 4-tone gray ramp, flat fills:
   #2E2E2E (darkest / line accents), #4A4A4A (dark), #6E6E6E (mid),
   #929292 (light highlight). No other colors. The game recolors these
