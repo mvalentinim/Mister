@@ -690,3 +690,18 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - Annotato: il DB non ha la colonna genere — i capelli F sono pronti ma inutilizzati finché non ci sarà (es. leggende donne); la cella cornrows maschile resta da rigenerare alla fonte.
 
 **Prossimi passi:** il porting del compositore nel gioco (TypeScript, con test di parità coi volti del prototipo), l'integrazione nella Figurina al posto dell'avatar attuale, il formato mini, e il bottone "rigenera volto" nell'editor (face_seed, §7).
+
+---
+
+## Sessione 32 — 2026-08-22 — Volti semplificati e NEL GIOCO, con l'editor della figurina
+
+**Obiettivo dichiarato:** decisione dello sviluppatore — le barbe automatiche non convincono (cadevano male) e i volti femminili nemmeno: la generazione resta SOLO pelle+capigliatura maschile; barbe e ritocchi diventano personalizzazioni manuali per singolo giocatore da un editor della figurina, usando solo gli asset caricati.
+
+**Fatto:**
+- **Compositore semplificato**: niente barba sorteggiata (il prototipo Python e le rose di collaudo rigenerate: volti puliti), volti femminili accantonati (asset estratti ma inutilizzati). Maglietta "cotta" come asset condiviso (`parts/jersey/jersey_std.png`), stessa per prototipo e gioco.
+- **Il compositore NEL GIOCO** (`src/design/compositore-volti.ts`): porting TypeScript del prototipo — stesso generatore del motore (creaRng/semeDaStringa), stesso ordine di estrazioni → stessi volti; parti PNG e i due JSON caricati direttamente da `data/assets/faces/` via Vite (una sola fonte); ricolore su canvas; cache. Componente `VoltoPixel` (sempre pixelated) e **Figurina aggiornata** col volto composto. Rimossi i moduli superati (ritratti Monkey Island, DiceBear disinstallato, maglia geometrica).
+- **Personalizzazioni nel DB**: colonne `volto_seme/pelle/capelli/colore/barba` sulla tabella giocatore, aggiunte a runtime da `assicuraColonneVolto` (ALTER TABLE idempotente, per DB personalizzati vecchi e originale) — viaggiano con export/import del DB personalizzato.
+- **Editor della figurina** nella scheda giocatore dell'editor: anteprima dal vivo + scelte (pelle 8 toni, 23 capigliature, 9 colori, 11 barbe o nessuna) + bottone "🎲 Rigenera volto" (nuovo seme estetico, il face_seed del §7).
+- **Collaudo end-to-end**: de Vrij aperto nell'editor → full beard castano scuro scelta → anteprima aggiornata → salvata → riletta dopo il reload (colonna nel DB personalizzato) → la Figurina nella scheda giocatore mostra il volto con la barba, al posto giusto ✓. Build, lint, tsc verdi.
+
+**Debiti/annotazioni:** VOLTI-MISTER.md annotato con le decisioni; restano la cella cornrows da rigenerare e (fuori perimetro per ora) i volti femminili; il formato mini per tattica/elenchi arriverà con la propagazione M11.

@@ -36,6 +36,13 @@ export interface GiocatoreRiga {
   data_nascita: string
   nazionalita: string
   ruolo: string
+  /** personalizzazioni della FIGURINA (VOLTI-MISTER §7): null = automatico.
+      Colonne aggiunte a runtime da assicuraColonneVolto, quindi facoltative. */
+  volto_seme?: number | null
+  volto_pelle?: number | null
+  volto_capelli?: string | null
+  volto_colore?: string | null
+  volto_barba?: string | null
   piede: string
   categoria: 'normale' | 'icon' | 'hero'
   // tecnici (null per i portieri)

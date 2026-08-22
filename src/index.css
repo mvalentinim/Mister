@@ -1269,3 +1269,15 @@ h1, h2, h3, h4 {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* il pannello Figurina dell'editor (VOLTI): anteprima + scelte affiancate */
+.riga-figurina {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-start;
+  background: var(--sfondo-carta);
+  border: 1px solid var(--bordo);
+  border-radius: var(--raggio);
+  padding: 0.8rem;
+  margin-bottom: 0.8rem;
+}

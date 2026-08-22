@@ -87,30 +87,8 @@ CAPELLI_F = {v['id']: _carica(QUI / v['file']) for v in MANIFEST['parti'] if v['
 BARBE = {v['id']: _carica(QUI / v['file']) for v in MANIFEST['parti'] if v['category'] == 'beard'}
 BIAS = {v['id']: v.get('region_bias', []) for v in MANIFEST['parti']}
 
-# la maglietta bianca standard (§3.4): geometria, disegnata qui
-MAGLIETTA = np.zeros((CELLA, CELLA, 4), np.uint8)
-for y in range(38, CELLA):
-    mezza = 11 + round((y - 38) * 1.3)  # le spalle si allargano scendendo
-    for x in range(CELLA):
-        dentro = abs(x - 23.5) <= mezza
-        # il colletto girocollo: una conca ellittica attorno al collo
-        conca = ((x - 23.5) / 7.5) ** 2 + ((y - 37) / 4.5) ** 2 < 1
-        if dentro and not conca:
-            MAGLIETTA[y, x] = (242, 242, 242, 255)
-# l'ombra sotto il colletto e il bordo inchiostro tutto attorno
-for y in range(38, CELLA):
-    riga = np.where(MAGLIETTA[y, :, 3] > 0)[0]
-    if not len(riga):
-        continue
-    MAGLIETTA[y, riga.min()] = (26, 26, 26, 255)
-    MAGLIETTA[y, riga.max()] = (26, 26, 26, 255)
-for x in range(CELLA):
-    colonna = np.where(MAGLIETTA[:, x, 3] > 0)[0]
-    if len(colonna):
-        y0 = colonna.min()
-        MAGLIETTA[y0, x] = (26, 26, 26, 255)
-        if y0 + 1 < CELLA and MAGLIETTA[y0 + 1, x, 3] > 0:
-            MAGLIETTA[y0 + 1, x] = (201, 201, 201, 255)  # l'ombra del bordo
+# la maglietta bianca standard (§3.4): asset condiviso col runtime TS
+MAGLIETTA = _carica(QUI / 'parts/jersey/jersey_std.png')
 
 def _ricolora(parte: np.ndarray, rampa: list[str]) -> np.ndarray:
     """Sostituisce i 4 grigi neutri coi 4 toni della rampa (scuro→chiaro)."""
@@ -147,10 +125,10 @@ def componi(giocatore_id: int, nazionalita: str, eta: int = 25,
     pesi = [(3.0 if regione_nome in BIAS.get(i, []) else 1.0) * PESO.get(i, 1.0) for i in ids]
     capelli_id = rng.pesato(ids, pesi)
 
-    # 3. barba (solo M, con la probabilità regionale)
+    # 3. NIENTE barba automatica (decisione dello sviluppatore, sessione 32:
+    #    il posizionamento non convince — le barbe si mettono a mano
+    #    dall'editor della figurina, per singolo giocatore)
     barba_id = None
-    if genere == 'M' and rng.evento(regione['beard_prob']):
-        barba_id = list(BARBE.keys())[rng.intero(len(BARBE))]
 
     # 4. la brizzolatura dell'età (§5)
     if eta >= 33 and rng.evento((eta - 32) * 0.06):

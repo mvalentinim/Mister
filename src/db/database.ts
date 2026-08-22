@@ -45,6 +45,23 @@ function leggiImpronta(db: Database): number {
   return Number(risultato[0]?.values[0]?.[0] ?? 0)
 }
 
+/** Le colonne volto_* della FIGURINA (VOLTI-MISTER §7): si aggiungono a
+    runtime ai database che non le hanno (ALTER TABLE è idempotente qui
+    grazie al try/catch: se la colonna esiste già, SQLite protesta e si
+    passa oltre). Le personalizzazioni viaggiano col DB personalizzato. */
+export function assicuraColonneVolto(db: Database): void {
+  for (const colonna of [
+    'volto_seme INTEGER', 'volto_pelle INTEGER', 'volto_capelli TEXT',
+    'volto_colore TEXT', 'volto_barba TEXT',
+  ]) {
+    try {
+      db.run(`ALTER TABLE giocatore ADD COLUMN ${colonna}`)
+    } catch {
+      // la colonna c'è già: va bene così
+    }
+  }
+}
+
 /** Apre (o riusa) il database del gioco.
  *  Prima scelta: public/mister.sqlite, il database REALE costruito dalla
  *  pipeline di importazione (npm run importa-dati).
@@ -62,6 +79,7 @@ export async function apriDatabase(): Promise<Database> {
     try {
       const db = new SQL.Database(personalizzato)
       db.exec('SELECT COUNT(*) FROM giocatore') // sonda: il file è davvero un DB MISTER?
+      assicuraColonneVolto(db)
       impronta = leggiImpronta(db)
       istanza = db
       return istanza
@@ -77,6 +95,7 @@ export async function apriDatabase(): Promise<Database> {
   if (risposta.ok) {
     const contenuto = new Uint8Array(await risposta.arrayBuffer())
     istanza = new SQL.Database(contenuto)
+    assicuraColonneVolto(istanza)
     impronta = leggiImpronta(istanza)
     return istanza
   }

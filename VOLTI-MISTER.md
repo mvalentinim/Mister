@@ -20,6 +20,7 @@
 - Un ritratto **univoco, deterministico e riproducibile** per ogni giocatore: `seed = player.id` → sempre lo stesso volto, su ogni dispositivo.
 - Risoluzione nativa 48×48, upscaling solo con `image-rendering: pixelated` (mai antialiasing).
 - **Maglietta standard bianca per tutti** (decisione definitiva: nessun colore club sul ritratto).
+- *(Aggiornamento 2026-08-22, deciso dallo sviluppatore)*: la generazione automatica usa SOLO pelle e capigliatura maschile; le **barbe non vengono mai sorteggiate** e i **volti femminili sono accantonati** (asset estratti ma inutilizzati). Barbe, tono pelle, capigliatura e colore si personalizzano per singolo giocatore dall'**editor della figurina** (colonne `volto_*` della tabella giocatore: viaggiano col DB personalizzato), usando solo gli asset caricati.
 - Coerenza con genere (set maschile/femminile) e **nazionalità** tramite stereotipi morbidi: tabelle di probabilità regionali, non mappature rigide (§6).
 - Sfondo del ritratto: `--paper-2` di DESIGN.md (o trasparente, con lo sfondo dato dalla Figurina).
 

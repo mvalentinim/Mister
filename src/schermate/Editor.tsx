@@ -14,6 +14,8 @@ import { calcolaEta, mediaComplessiva, type GiocatoreRiga } from '../db/tipi.ts'
 import { eliminaDatabaseUtente, esisteDatabaseUtente, salvaDatabaseUtente } from '../db/persistenza.ts'
 import { eliminaSquadraLegend, rosaLegendIds, salvaSquadraLegend, squadreLegend } from '../db/legends.ts'
 import { scaricaFile } from '../scarica.ts'
+import { VoltoPixel } from '../design/VoltoPixel.tsx'
+import { BARBE, CAPIGLIATURE, COLORI_CAPELLI, PELLI_ETICHETTE } from '../design/compositore-volti.ts'
 
 interface Props {
   db: Database
@@ -119,6 +121,11 @@ function Editor({ db }: Props) {
       if (nome === 'club_id') {
         set.push('club_id = ?')
         parametri.push(valore === '' ? null : Number(valore))
+      } else if (nome.startsWith('volto_')) {
+        // la FIGURINA: testo o numero, vuoto = automatico (NULL)
+        set.push(`${nome} = ?`)
+        parametri.push(valore === '' ? null
+          : nome === 'volto_seme' || nome === 'volto_pelle' ? Number(valore) : valore)
       } else if (testuali.has(nome)) {
         set.push(`${nome} = ?`)
         parametri.push(valore)
@@ -539,6 +546,55 @@ function Editor({ db }: Props) {
                 ))}
               </select>
             </label>
+          </div>
+
+          <h4>Figurina (VOLTI: vuoto/auto = generata dal seed; le scelte viaggiano col DB)</h4>
+          <div className="riga-figurina">
+            <VoltoPixel
+              giocatore={aperto}
+              lato={96}
+              extra={{
+                seme: campo('volto_seme') === '' ? null : Number(campo('volto_seme')),
+                pelle: campo('volto_pelle') === '' ? null : Number(campo('volto_pelle')),
+                capelli: campo('volto_capelli') || null,
+                colore: campo('volto_colore') || null,
+                barba: campo('volto_barba') || null,
+              }}
+            />
+            <div className="griglia-editor" style={{ flex: 1 }}>
+              <label>Pelle{' '}
+                <select value={campo('volto_pelle')} onChange={(e) => setModifiche({ ...modifiche, volto_pelle: e.target.value })}>
+                  <option value="">automatica</option>
+                  {PELLI_ETICHETTE.map((nome, i) => <option key={nome} value={i + 1}>{i + 1} · {nome}</option>)}
+                </select>
+              </label>
+              <label>Capigliatura{' '}
+                <select value={campo('volto_capelli')} onChange={(e) => setModifiche({ ...modifiche, volto_capelli: e.target.value })}>
+                  <option value="">automatica</option>
+                  {CAPIGLIATURE.map(([id, nome]) => <option key={id} value={id}>{nome}</option>)}
+                </select>
+              </label>
+              <label>Colore capelli{' '}
+                <select value={campo('volto_colore')} onChange={(e) => setModifiche({ ...modifiche, volto_colore: e.target.value })}>
+                  <option value="">automatico</option>
+                  {COLORI_CAPELLI.map((c) => <option key={c} value={c}>{c.replace('_', ' ')}</option>)}
+                </select>
+              </label>
+              <label>Barba{' '}
+                <select value={campo('volto_barba')} onChange={(e) => setModifiche({ ...modifiche, volto_barba: e.target.value })}>
+                  <option value="">nessuna</option>
+                  {BARBE.map(([id, nome]) => <option key={id} value={id}>{nome}</option>)}
+                </select>
+              </label>
+              <label>&nbsp;
+                <button
+                  className="bottone-secondario"
+                  onClick={() => setModifiche({ ...modifiche, volto_seme: String(1 + Math.floor(Math.random() * 2_000_000_000)) })}
+                >
+                  🎲 Rigenera volto
+                </button>
+              </label>
+            </div>
           </div>
 
           <h4>Attributi tecnici (1-99; vuoto = non pertinente)</h4>
