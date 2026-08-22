@@ -22,6 +22,7 @@ import { creaRng, semeDaStringa, type Rng } from '../motore/rng.ts'
 import type { EventoPartita, RisultatoPartita, SquadraMotore } from '../motore/tipi.ts'
 import { coloriClub, numeroMaglia } from '../design/colori-club.ts'
 import { fasciaVoto } from '../design/fasce.ts'
+import { suona } from '../design/suoni.ts'
 import './matchday.css'
 
 interface Props {
@@ -196,7 +197,11 @@ function MatchDay({ db, carriera, onFine }: Props) {
         if (p.palla) setPalla(p.palla)
         if (p.protagonistaId !== undefined) setProtagonista(p.protagonistaId)
         if (p.testo) aggiungiRiga(partita.minuto, p.testo, p.evidenza ?? false)
-        if (p.golPer) setPunteggio(partita.punteggio())
+        if (p.golPer) {
+          setPunteggio(partita.punteggio())
+          // il boato (o il mormorio, se il gol è degli altri) — §5
+          suona(p.golPer === latoMio ? 'gol' : 'golSubito')
+        }
         timer = setTimeout(passo, 1400 / Math.min(velocitaRef.current, 2))
         return
       }
@@ -205,6 +210,7 @@ function MatchDay({ db, carriera, onFine }: Props) {
       // ── fine partita ──
       if (partita.minuto >= 90) {
         const esito = partita.punteggio()
+        suona('fischioFinale')
         aggiungiRiga(90, `🔔 Triplice fischio! ${casa.nome} ${esito.casa} - ${esito.trasferta} ${trasferta.nome}`, true)
         setVoti(partita.votiLive(latoMio))
         setFinita(true)
@@ -219,9 +225,13 @@ function MatchDay({ db, carriera, onFine }: Props) {
 
       // intervallo: pausa automatica per sistemare la squadra (FRD §9.3)
       if (partita.minuto === 45) {
+        suona('fischio')
         aggiungiRiga(45, '🔔 Fine primo tempo. Puoi fare cambi e regolazioni, poi riprendi.', true)
         setPausa(true)
       }
+
+      // il fischio dell'arbitro accompagna i cartellini
+      if (eventi.some((e) => e.tipo === 'ammonizione' || e.tipo === 'espulsione')) suona('fischio')
 
       if (eventi.length > 0) {
         // azioni importanti: tempo rallentato e cronaca fitta
@@ -244,6 +254,7 @@ function MatchDay({ db, carriera, onFine }: Props) {
       timer = setTimeout(passo, 700 / velocitaRef.current)
     }
 
+    suona('fischio') // il fischio d'inizio (§5)
     timer = setTimeout(passo, 500)
     return () => { attivo = false; clearTimeout(timer) }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -21,6 +21,7 @@ import { accettaOffertaPanchina } from '../carriera/fama.ts'
 import { accettaPanchinaNazionale, classificaGirone, nuovoCicloStessaNazionale } from '../carriera/nazionale.ts'
 import { euro } from '../mercato/valore.ts'
 import { coloriClub } from '../design/colori-club.ts'
+import { suona } from '../design/suoni.ts'
 import type { EventoPartita } from '../motore/tipi.ts'
 import { estendiMercatoAlMondo, inizializzaMercato } from '../mercato/stato.ts'
 import MatchDay from './MatchDay.tsx'
@@ -132,6 +133,20 @@ function SchermataCarriera({ db, carriera }: Props) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [carriera])
+
+  // ── i jingle degli esiti (§5): oro per i trionfi, ronzio per i guai ──
+  const esonerato = carriera.offerteSpeciali?.contesto === 'esonero'
+  const esitoCt = carriera.nazionale?.fase === 'conclusa' ? carriera.nazionale.esito : null
+  useEffect(() => { if (esonerato) suona('errore') }, [esonerato])
+  useEffect(() => {
+    if (esitoCt === 'campione') suona('trofeo')
+    else if (esitoCt === 'fallito') suona('errore')
+  }, [esitoCt])
+  useEffect(() => {
+    if (!esitoStagione) return
+    if (esitoStagione.promosso || esitoStagione.coppaVinta || esitoStagione.qualificatoEuropa) suona('trofeo')
+    else if (esitoStagione.retrocesso) suona('errore')
+  }, [esitoStagione])
 
   const nomeClub = carriera.club.find((c) => c.id === carriera.clubId)!.nome
   const nomeCompetizione = carriera.competizioni[livelloUtente(carriera)]

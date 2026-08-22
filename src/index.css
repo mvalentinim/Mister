@@ -227,6 +227,24 @@ h1, h2, h3, h4 {
   position: relative;
 }
 
+/* il regolatore del volume nel piè di pagina del titolo (§5):
+   un bottoncino discreto in monospazio che cicla i 4 livelli */
+.controllo-audio {
+  font: inherit;
+  border: 1px solid var(--ink-2);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--ink-2);
+  padding: 0.05rem 0.4rem;
+  cursor: pointer;
+}
+
+.controllo-audio:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+  background: var(--paper-2);
+}
+
 /* ---- Le schermate ---- */
 
 .schermata {

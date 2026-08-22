@@ -732,3 +732,19 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Collaudi**: tsc, oxlint, build e `npm run calibra` verdi. Collaudo visivo Playwright su TUTTE le schermate (titolo, squadre, rosa elenco+album, scheda giocatore, editor, wizard nuova carriera, offerte, carriera/partite, classifica, mercato aperto e chiuso col ticker, tattica, Match Day, carica carriera) con iterazione critica sugli screenshot. **Verifica multi-nazione**: carriera in Germania (2. Bundesliga) — mercato, 3 giornate, classifica coi filetti e album volti regionali ✓ (la calibrazione del motore è indipendente dalla nazione ed è verde).
 
 **Debiti/annotazioni:** il SUONO (§5, 6-8 effetti con volume regolabile) resta come rifinitura facoltativa a valle del giudizio visivo dello sviluppatore; curve di crescita personali dalla personalità in lista M11; cella cornrows da rigenerare alla fonte; il collaudo di persona (DoD M11: giudizio visivo delle schermate) spetta allo sviluppatore quando riavrà il Mac.
+
+---
+
+## Sessione 34 — 2026-08-22 — M11: il suono (§5)
+
+**Obiettivo dichiarato:** con lo stile Almanacco approvato, aggiungere il suono del §5 — click sui bottoni, fischi, boato sui gol, jingle su trofei e colpi di mercato, volume regolabile e mai invadente.
+
+**Fatto:**
+- **`src/design/suoni.ts`**: otto effetti in stile retrò SINTETIZZATI con la Web Audio API — niente file audio, niente librerie, zero rete e zero peso: funzionano offline e nell'app Tauri. Gli effetti: `click` (tic secco da tasto fisico), `fischio` (fischietto dell'arbitro con il trillo della pallina: nota acuta modulata a 38 Hz), `fischioFinale` (corto-corto-lungo), `gol` (boato: rumore bianco filtrato che gonfia + slancio ascendente), `golSubito` (mormorio cupo discendente), `trofeo` (arpeggio do-mi-sol-do a 8 bit), `mercato` (il "din-din" del telex), `errore` (ronzio a due gradini discendenti).
+- **Volume a 4 livelli** (spento/basso/medio/alto, default medio, master comunque ≤50%), salvato in `localStorage` (`mister-audio`); regolatore nel piè di pagina della schermata titolo che cicla i livelli. Il contesto audio si crea pigramente al primo click (i browser lo esigono dopo un gesto).
+- **Click su TUTTI i bottoni** con un solo ascoltatore delegato sul documento (`attivaClickGlobale` in App), che salta i bottoni disabilitati.
+- **Agganci di gioco**: Match Day — fischio d'inizio, fischio all'intervallo e sui cartellini, boato/mormorio sui gol (nostro/loro), triplice fischio alla fine; SchermataCarriera — jingle dorato su promozione/coppa/qualificazione Europa e su un ciclo CT da campioni, ronzio su retrocessione, esonero e qualificazione CT fallita; Mercato — din-din quando un ingaggio va in porto o si accetta un'offerta in entrata.
+- **Bug trovato e corretto dal collaudo**: al primo avvio il volume partiva "spento" (`Number(null)` = 0): ora il primo avvio è esplicitamente "medio".
+- **Collaudo** (Playwright, senza casse: spiando l'AudioContext): il regolatore cicla e persiste dopo il ricarico ✅; i click schedulano suoni ✅; una partita intera al Match Day scheda 45 sorgenti audio (fischi, cartellini, gol, triplice fischio) senza errori di pagina ✅. tsc, oxlint e build verdi.
+
+**Debiti/annotazioni:** il giudizio d'orecchio (timbri e volumi "giusti") spetta allo sviluppatore, come il giudizio visivo del DoD M11; in lista M11 restano le curve di crescita personali dalla personalità.

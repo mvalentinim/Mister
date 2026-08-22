@@ -14,6 +14,7 @@ import {
   duplicaCarriera, leggiFileMister, nomeFileMister, serializzaCarriera,
 } from './carriera/portabile.ts'
 import { etichettaStagione, type Carriera } from './carriera/tipi.ts'
+import { attivaClickGlobale, cicloVolume, livelloAudio, NOMI_LIVELLI } from './design/suoni.ts'
 import { scaricaFile } from './scarica.ts'
 import Amichevole from './schermate/Amichevole.tsx'
 import Editor from './schermate/Editor.tsx'
@@ -42,6 +43,11 @@ type Vista =
 function App() {
   const [vista, setVista] = useState<Vista>({ tipo: 'menu' })
   const [carriereSalvate, setCarriereSalvate] = useState<Carriera[] | null>(null)
+  // il volume dell'audio (DESIGN §5): 4 livelli, salvato nel browser
+  const [volume, setVolume] = useState(livelloAudio())
+
+  // il click secco su TUTTI i bottoni del gioco (un solo ascoltatore)
+  useEffect(() => { attivaClickGlobale() }, [])
 
   // Il database si carica in modo asincrono (deve scaricare il motore
   // WebAssembly): finché non è pronto mostriamo un'attesa.
@@ -139,7 +145,16 @@ function App() {
           </button>
         </nav>
 
-        <footer className="versione">versione 0.11 · M11 — l'almanacco</footer>
+        <footer className="versione">
+          versione 0.11 · M11 — l'almanacco ·{' '}
+          <button
+            className="controllo-audio"
+            title="Regola il volume degli effetti sonori"
+            onClick={() => setVolume(cicloVolume())}
+          >
+            audio: {NOMI_LIVELLI[volume]}
+          </button>
+        </footer>
       </main>
     )
   }

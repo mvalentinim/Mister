@@ -19,6 +19,7 @@ import {
 import { stipendioAttesoSvincolato } from '../mercato/ia.ts'
 import { euro } from '../mercato/valore.ts'
 import { registraPromessa } from '../comportamento/comportamento.ts'
+import { suona } from '../design/suoni.ts'
 import type { OffertaIngaggio } from '../trattativa/interesse.ts'
 import DialogoIngaggio from './DialogoIngaggio.tsx'
 
@@ -208,6 +209,7 @@ function Mercato({ db, carriera, onModificata }: Props) {
         if (leva !== 'fascia') registraPromessa(carriera, ingaggio.giocatore.id, leva)
       }
       carriera.morale[ingaggio.giocatore.id] = 65 // arriva carico
+      suona('mercato') // il din-din del colpo di mercato (§5)
     })
     setIngaggio(null)
     setTrattativa(null)
@@ -281,7 +283,10 @@ function Mercato({ db, carriera, onModificata }: Props) {
                         : `un prestito con diritto di riscatto a ${euro(o.prezzo)}`}
                     </td>
                     <td className="num">
-                      <button className="bottone-primario" onClick={() => void applica(() => accettaOfferta(db, carriera, o.id))}>
+                      <button
+                        className="bottone-primario"
+                        onClick={() => void applica(() => { accettaOfferta(db, carriera, o.id); suona('mercato') })}
+                      >
                         Accetta
                       </button>{' '}
                       <button
