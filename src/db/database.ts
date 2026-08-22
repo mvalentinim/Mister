@@ -20,30 +20,11 @@ import seedSql from '../../data/seed-esempio.sql?raw'
 let istanza: Database | null = null
 
 // ── L'IMPRONTA del database (coerenza carriere ↔ DB, FRD §11) ─────────────
-// Ogni database ha un'identità scritta DENTRO il file (PRAGMA user_version):
-// 0 = database originale; l'editor assegna un numero casuale al primo
-// salvataggio, che viaggia con l'export/import. Le carriere memorizzano
-// l'impronta del DB con cui sono nate: se non combacia, l'app avvisa.
-let impronta = 0
-
-/** L'impronta del database attualmente in uso (0 = originale). */
-export function improntaDbCorrente(): number {
-  return impronta
-}
-
-/** Prima di salvare un DB personalizzato: se è ancora "originale" (0),
-    gli viene assegnata un'identità casuale, scritta nel file stesso. */
-export function assegnaImprontaSeMancante(db: Database): void {
-  if (leggiImpronta(db) !== 0) return
-  const nuova = 1 + Math.floor(Math.random() * 2_000_000_000)
-  db.run(`PRAGMA user_version = ${nuova}`)
-  impronta = nuova
-}
-
-function leggiImpronta(db: Database): number {
-  const risultato = db.exec('PRAGMA user_version')
-  return Number(risultato[0]?.values[0]?.[0] ?? 0)
-}
+// La logica vive in impronta.ts (modulo senza import speciali di Vite,
+// usabile anche dai collaudi da riga di comando); da qui si RI-ESPORTA
+// perché le schermate la importano da questo modulo.
+import { aggiornaImprontaDa } from './impronta.ts'
+export { assegnaImprontaSeMancante, improntaDbCorrente } from './impronta.ts'
 
 /** Le colonne volto_* della FIGURINA (VOLTI-MISTER §7): si aggiungono a
     runtime ai database che non le hanno (ALTER TABLE è idempotente qui
@@ -83,7 +64,7 @@ export async function apriDatabase(): Promise<Database> {
       const db = new SQL.Database(personalizzato)
       db.exec('SELECT COUNT(*) FROM giocatore') // sonda: il file è davvero un DB MISTER?
       assicuraColonneVolto(db)
-      impronta = leggiImpronta(db)
+      aggiornaImprontaDa(db)
       istanza = db
       return istanza
     } catch {
@@ -99,7 +80,7 @@ export async function apriDatabase(): Promise<Database> {
     const contenuto = new Uint8Array(await risposta.arrayBuffer())
     istanza = new SQL.Database(contenuto)
     assicuraColonneVolto(istanza)
-    impronta = leggiImpronta(istanza)
+    aggiornaImprontaDa(istanza)
     return istanza
   }
 

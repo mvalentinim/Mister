@@ -765,3 +765,17 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Collaudi**: `npm run curve`, tsc, oxlint, build e calibra verdi. E2E Playwright: scheda di un mio 19enne (POT 75 visibile, modello + reale) ✅; Yamal dal mercato (POT ??, solo curva reale, niente filetto oro) ✅; dopo una stagione simulata intera (esoneri gestiti) la curva reale si allunga con lo scatto vero (57→65, la crescita proporzionale lavora) ✅; veterano di 34 anni con parabola completa e declino tratteggiato ✅.
 
 **Debiti/annotazioni:** i giocatori delle ALTRE squadre crescono col potenziale pieno ma senza bonus di utilizzo (come prima: solo dei miei esistono statistiche vere); il giudizio finale su forme e leggibilità del grafico spetta allo sviluppatore.
+
+---
+
+## Sessione 36 — 2026-08-22 — M11: verifica multi-nazione "carriera completa" e chiusura tecnica
+
+**Obiettivo dichiarato:** rispondere alla domanda "M11 è completata?" chiudendo l'ultima attività verificabile da remoto: la prova che una carriera completa gira in QUALUNQUE nazione (finora collaudate a fondo solo Italia e Germania).
+
+**Fatto:**
+- **`npm run nazioni`** (`verifica-nazioni-cli.ts`): per OGNUNA delle 5 nazioni disponibili (Francia, Germania, Inghilterra, Italia, Spagna) crea una carriera e gioca 2 stagioni complete a livello di motore — mercati estivi e invernali chiusi giorno per giorno, esoneri gestiti accettando la prima panchina — poi controlla: campionato pieno, storico stagioni, crescita applicata a ~4.600 giocatori, storico medie fotografato. TUTTE VERDI (compresa una carriera spagnola con esonero a metà).
+- **Refactor `db/impronta.ts`**: l'impronta del DB viveva in database.ts, che importa i file .sql con la sintassi speciale di Vite (?raw) e quindi non si può caricare da Node/tsx; estratta in un modulo pulito (database.ts la ri-esporta, nulla cambia per le schermate) — ora il motore della carriera è interamente collaudabile da riga di comando.
+- **Bug scovato dal collaudo**: la fotografia di fine stagione usava la STESSA età di quella di inizio stagione e la sovrascriveva (un punto per età) — dopo N stagioni lo storico aveva sempre e solo 2 punti, e l'ancora della curva "come da DB" derivava col tempo. Ora la fotografia di fine stagione vale per l'età successiva (il valore con cui il giocatore entra nel nuovo anno): il punto della creazione resta intatto e lo storico si allunga davvero di un punto a stagione.
+- Batteria completa verde: tsc, oxlint, build, `npm run curve`, `npm run calibra`, `npm run nazioni`, smoke E2E dell'app dopo il refactor.
+
+**Stato M11:** tutte le attività del piano sono FATTE (riprogettazione visiva completa in stile Almanacco con motion e suono; verifica multi-nazione; nazionalità in italiano; curve di crescita personali; collaudi complessivi). Resta SOLO il DoD, che è per definizione dello sviluppatore: attraversare le schermate e giudicarle, quando riavrà il Mac. Fino ad allora M11 è "completa salvo collaudo di persona".

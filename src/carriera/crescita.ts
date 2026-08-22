@@ -127,9 +127,12 @@ export function curvaReale(
   return punti
 }
 
-/** Fotografa nello storico le medie della MIA rosa (alla creazione della
-    carriera e a ogni fine stagione). */
-export function fotografaMiaRosa(db: Database, carriera: Carriera): void {
+/** Fotografa nello storico le medie della MIA rosa. Alla creazione della
+    carriera scarto = 0 (il punto di partenza, l'ancora del modello "come
+    da DB"); a fine stagione scarto = 1: la fotografia vale per l'età
+    SUCCESSIVA — è il valore con cui il giocatore entra nel nuovo anno —
+    così non sovrascrive il punto di inizio stagione (un punto per età). */
+export function fotografaMiaRosa(db: Database, carriera: Carriera, scarto: 0 | 1 = 0): void {
   if (!carriera.storiaMedie) carriera.storiaMedie = {}
   const ids = carriera.rose?.[carriera.clubId] ?? []
   if (ids.length === 0) return
@@ -138,17 +141,17 @@ export function fotografaMiaRosa(db: Database, carriera: Carriera): void {
     `SELECT * FROM giocatore WHERE id IN (${ids.map(() => '?').join(',')})`,
     ids,
   ))
-  for (const g of righe) fotografaGiocatore(carriera, g)
+  for (const g of righe) fotografaGiocatore(carriera, g, scarto)
 }
 
 /** Fotografa un singolo giocatore (alla firma di un acquisto o svincolato).
     La riga deve avere GIÀ la crescita applicata. */
-export function fotografaGiocatore(carriera: Carriera, g: GiocatoreRiga): void {
+export function fotografaGiocatore(carriera: Carriera, g: GiocatoreRiga, scarto: 0 | 1 = 0): void {
   if (!carriera.storiaMedie) carriera.storiaMedie = {}
-  const eta = etaNellaStagione(carriera, g)
+  const eta = etaNellaStagione(carriera, g) + scarto
   const media = mediaComplessiva(g)
   const storia = carriera.storiaMedie[g.id] ?? []
-  // un punto per età: l'ultimo scatto della stagione vince
+  // un punto per età: l'ultimo scatto vince
   carriera.storiaMedie[g.id] = [...storia.filter(([e]) => e !== eta), [eta, media] as [number, number]]
     .sort((a, b) => a[0] - b[0])
 }

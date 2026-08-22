@@ -14,7 +14,7 @@
 
 import type { Database } from 'sql.js'
 import { interroga } from '../db/query.ts'
-import { improntaDbCorrente } from '../db/database.ts'
+import { improntaDbCorrente } from '../db/impronta.ts'
 import { preparaSquadra, tatticaDefault } from '../motore/preparazione.ts'
 import { estendiMercatoAlMondo, fineStagioneMercato, inizializzaMercato, aggiungiNotizia } from '../mercato/stato.ts'
 import { creaCoppa, creaCoppaEuropa, giocaTurnoCoppaSeDovuto } from './coppa.ts'
@@ -490,8 +490,10 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
   // i primi 4 della prima divisione giocano la Coppa Europa l'anno dopo
   carriera.qualificatoEuropa = livello === 1 && posizione <= 4
   if (carriera.qualificatoEuropa) variaFama(carriera, 2, 'Qualificazione alla Coppa Europa')
+  // lo storico per la curva reale (M11): la fotografia di fine stagione
+  // vale per l'età successiva (scarto 1), il punto d'inizio resta intatto
   const crescita = crescitaFineStagione(db, carriera)
-  fotografaMiaRosa(db, carriera) // lo storico per la curva reale (M11)
+  fotografaMiaRosa(db, carriera, 1)
 
   // le promesse "di progetto" si verificano coi verdetti (M7, FRD §6.3)
   verificaPromesseFineStagione(db, carriera, promosso)

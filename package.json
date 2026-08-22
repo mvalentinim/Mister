@@ -15,7 +15,8 @@
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
-    "curve": "tsx src/carriera/verifica-curve-cli.ts"
+    "curve": "tsx src/carriera/verifica-curve-cli.ts",
+    "nazioni": "tsx src/carriera/verifica-nazioni-cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",
