@@ -674,3 +674,19 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - Annotato: le teste segnaposto dei tre fogli hanno geometrie leggermente diverse — la calibrazione fine (offset per categoria nel manifest) si farà contro le 8 BASI PELLE vere, che sono il riferimento definitivo e MANCANO ancora in source/.
 
 **Prossimi passi:** lo sheet delle 8 basi pelle dallo sviluppatore → estrazione basi → compositore deterministico (§5: ricolore a rampe, pesi regionali, brizzolatura per età) → griglia di collaudo §8 (rose di Norvegia, Nigeria, Giappone, Brasile, Italia). Resta anche da rigenerare la cella cornrows maschile.
+
+---
+
+## Sessione 31-bis — 2026-08-22 — Basi pelle, compositore deterministico e collaudo per nazioni
+
+**Obiettivo dichiarato:** con lo sheet delle 8 basi pelle arrivato, completare la filiera: estrazione basi, matrice parti×pelli, compositore (§5) e collaudo per nazioni (§8).
+
+**Fatto:**
+- **Basi pelle estratte**: qui si toglie solo il magenta e i colori si tengono (niente rampa); le teste, che riempivano la cella, vengono RISCALATE alla geometria del manichino dei capelli (alla risoluzione nativa: cranio e mento alle stesse righe, centro allineato, collo allungato fino al fondo). Anti-alone per i bordi tinti di magenta dal JPEG.
+- **Matrice parti×pelli**: pompadour su tutte e 8 le basi (allineamento perfetto: le basi sono identiche a parte la palette), tutti i capelli M, tutte le barbe, tutti i capelli F sulle basi vere.
+- **Tre correzioni dal collaudo visivo**: le barbe cascavano troppo in alto (sembravano occhiali!) → scostamento verticale di 4px alla composizione; maglietta bianca ridisegnata simmetrica col girocollo (§3.4); mohawk resi rari (campo `peso` 0.35 nel manifest, editabile).
+- **`componi-volto.py`** (§5): il compositore deterministico — porting ESATTO di xmur3+mulberry32 da src/motore/rng.ts (aritmetica a 32 bit replicata: stesso seed → stessi estratti quando si porterà in TypeScript); pesi regionali da nazionalità (regions.json ora ha la mappa completa delle 126 nazionalità del DB → 12 regioni), region_bias ×3, barba con probabilità regionale, brizzolatura dall'età; strati: pelle → maglietta → barba → capelli ricolorati con le rampe.
+- **Collaudi §8**: determinismo (1000 seed × 2 giri, byte identici) ✓; rose VERE dal DB di Norvegia, Nigeria, Giappone, Brasile e Italia: il colpo d'occhio regionale c'è, con varietà interna ✓.
+- Annotato: il DB non ha la colonna genere — i capelli F sono pronti ma inutilizzati finché non ci sarà (es. leggende donne); la cella cornrows maschile resta da rigenerare alla fonte.
+
+**Prossimi passi:** il porting del compositore nel gioco (TypeScript, con test di parità coi volti del prototipo), l'integrazione nella Figurina al posto dell'avatar attuale, il formato mini, e il bottone "rigenera volto" nell'editor (face_seed, §7).

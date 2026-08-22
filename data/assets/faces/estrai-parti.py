@@ -36,6 +36,11 @@ FOGLI = {
                       vuote=[], salva_testa=None),
     'barbe': dict(file='barbe-v2', griglia=(4, 3), cartella='beard', prefisso='beard',
                   vuote=[12], salva_testa=None, pulizia=False),
+    # le BASI PELLE: si toglie solo il magenta (la testa resta tutta),
+    # niente rampa grigia (i colori pelle vanno tenuti) e riscalatura
+    # alla geometria del manichino dei capelli (vedi sotto)
+    'basi-pelle': dict(file='basi-pelle-v2', griglia=(4, 2), cartella='skin', prefisso='skin',
+                       vuote=[], salva_testa=None, pulizia=False, rampa=False, riscala=True),
 }
 
 
@@ -96,6 +101,72 @@ def estrai(nome: str) -> None:
             contorno = (~magenta) & (~ciano) & vicinoTestaN & dilata(magenta, passi)
             capelliN = (~magenta) & (~ciano) & (~contorno)
 
+            # 3-quater. RISCALATURA (solo basi pelle): la testa del foglio
+            # riempie la cella, ma capelli e barbe sono calibrati sul
+            # manichino più piccolo (parts/testa-riferimento.png). Si
+            # riscala la cella nativa perché la testa combaci col
+            # manichino: cranio alla stessa riga, mento alla stessa riga,
+            # centro orizzontale allineato. Il collo si allunga fino in
+            # fondo (la maglietta lo coprirà).
+            if cfg.get('riscala'):
+                manich = np.asarray(Image.open(QUI / 'parts' / 'testa-riferimento.png'))[..., 3] > 0
+                righeM = np.where(manich.any(axis=1))[0]
+                topM, mentoM = int(righeM.min()), int(righeM.max())
+                pieno = ~magenta
+                larghezze = pieno.sum(axis=1)
+                maxW = int(larghezze.max())
+                righeP = np.where(larghezze > maxW * 0.2)[0]
+                topN = int(righeP.min())
+                mentoN = int(np.where(larghezze > maxW * 0.6)[0].max())
+                colonneP = np.where(pieno.any(axis=0))[0]
+                centroN = (int(colonneP.min()) + int(colonneP.max())) / 2
+                scala = (mentoM - topM) / max(1, mentoN - topN)
+                nuovaW = max(1, round(nativo.shape[1] * scala))
+                nuovaH = max(1, round(nativo.shape[0] * scala))
+                alfaFoglio = np.where(pieno, 255, 0).astype(np.uint8)
+                imgRid = Image.fromarray(nativo).resize((nuovaW, nuovaH), Image.BOX)
+                alfaRid = Image.fromarray(alfaFoglio).resize((nuovaW, nuovaH), Image.BOX)
+                telaC = np.zeros((CELLA, CELLA, 3), np.uint8)
+                telaA = np.zeros((CELLA, CELLA), np.uint8)
+                dx = round(CELLA / 2 - centroN * scala)
+                dy = round(topM - topN * scala)
+                arrC, arrA = np.asarray(imgRid), np.asarray(alfaRid)
+                for y in range(nuovaH):
+                    ty = y + dy
+                    if not (0 <= ty < CELLA):
+                        continue
+                    for x in range(nuovaW):
+                        tx = x + dx
+                        if 0 <= tx < CELLA and arrA[y, x] > 110:
+                            telaC[ty, tx] = arrC[y, x]
+                            telaA[ty, tx] = 255
+                # l'ALONE violaceo del JPEG sui bordi: i pixel tenuti ma
+                # tinti di magenta si sostituiscono col vicino più scuro
+                # non tinto (di solito il contorno inchiostro)
+                tr, tg, tb = telaC[..., 0].astype(int), telaC[..., 1].astype(int), telaC[..., 2].astype(int)
+                tinti = (tr - tg > 18) & (tb - tg > 18) & (telaA > 0)
+                for y, x in zip(*np.where(tinti)):
+                    vicini = [telaC[ny, nx] for ny in range(max(0, y-1), min(CELLA, y+2))
+                              for nx in range(max(0, x-1), min(CELLA, x+2))
+                              if telaA[ny, nx] > 0 and not tinti[ny, nx]]
+                    if vicini:
+                        telaC[y, x] = min(vicini, key=lambda c: int(c[0]) + int(c[1]) + int(c[2]))
+                    else:
+                        telaC[y, x] = (34, 26, 22)
+
+                # il collo si allunga fino al fondo della cella
+                righeT = np.where(telaA.any(axis=1))[0]
+                if len(righeT):
+                    ultima = int(righeT.max())
+                    for y in range(ultima + 1, CELLA):
+                        telaC[y] = telaC[ultima]
+                        telaA[y] = telaA[ultima]
+                px = telaC.astype(int)
+                trasparente = telaA < 110
+                esito = np.dstack([px.astype(np.uint8), np.where(trasparente, 0, 255).astype(np.uint8)])
+                Image.fromarray(esito).save(destinazione / f"{cfg['prefisso']}_{numero:02d}.png")
+                continue
+
             # 3-ter. riduzione a 48×48: alfa e colore premoltiplicato con
             #        media d'area, poi soglia sull'alfa
             alfaN = np.where(capelliN, 255, 0).astype(np.uint8)
@@ -155,12 +226,14 @@ def estrai(nome: str) -> None:
                                 trasparente[y, x] = True
 
             # 4. i grigi restanti si agganciano alla rampa neutra
+            #    (ma NON per le basi pelle: lì i colori si tengono)
             capelli = ~trasparente
             if capelli.sum() < 10:
                 print(f'  ⚠ cella {numero}: quasi vuota ({int(capelli.sum())} px) — da controllare')
-            colori = px[capelli].astype(int)
-            distanze = ((colori[:, None, :] - RAMPA[None, :, :]) ** 2).sum(axis=2)
-            px[capelli] = RAMPA[distanze.argmin(axis=1)]
+            if cfg.get('rampa', True):
+                colori = px[capelli].astype(int)
+                distanze = ((colori[:, None, :] - RAMPA[None, :, :]) ** 2).sum(axis=2)
+                px[capelli] = RAMPA[distanze.argmin(axis=1)]
 
             # 5. il PNG trasparente della parte
             esito = np.dstack([px.astype(np.uint8), np.where(trasparente, 0, 255).astype(np.uint8)])

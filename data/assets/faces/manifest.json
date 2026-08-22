@@ -161,7 +161,8 @@
    "recolorable": true,
    "tags": [
     "appariscente"
-   ]
+   ],
+   "peso": 0.35
   },
   {
    "id": "hair_m_20",
@@ -171,7 +172,8 @@
    "recolorable": true,
    "tags": [
     "appariscente"
-   ]
+   ],
+   "peso": 0.35
   },
   {
    "id": "hair_m_21",
