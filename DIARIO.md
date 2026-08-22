@@ -632,3 +632,15 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Confronto generato sulla rosa dell'Inter vera** (Sommer, Darmian, Mkhitaryan, de Vrij, Acerbi, Çalhanoğlu, Zieliński, Di Gennaro): 4 file di mini-figurine consegnate allo sviluppatore per la scelta.
 
 **In attesa:** lo stile vincitore. Poi: integrazione nella Figurina (e nelle mini-figurine future), eventuale cura delle varianti dello stile scelto (es. escludere le facce piangenti di open-peeps), e propagazione §6.
+
+---
+
+## Sessione 30 — 2026-08-22 — VOLTI-MISTER.md: i prompt per gli asset (priorità dichiarata)
+
+**Obiettivo dichiarato:** è arrivato VOLTI-MISTER.md — i volti si faranno con un COMPOSITORE A STRATI 48×48 (basi pelle + capelli + barbe da sprite sheet, ricolore a rampe, pesi regionali per nazionalità, maglietta bianca standard). Prima richiesta con precedenza: preparare i prompt esatti (§3.1 Strada A) per rigenerare con Gemini/Nano Banana i layer ISOLATI di capelli e barbe.
+
+**Fatto:**
+- **`data/assets/faces/source/PROMPTS.md`**: tre prompt pronti da incollare (acconciature maschili 6×4 con la cella 13 vuota = calvo; femminili 4×3; barbe 4×3 con l'ultima vuota) + il prompt di correzione per rigenerare una singola cella storta. Tutti impongono: SOLO capelli/barba su trasparente, allineamento sulla testa calva di riferimento allegata, griglia rigida di celle 48×48, pixel netti senza antialias, e la RAMPA NEUTRA a 4 grigi (#2E2E2E/#4A4A4A/#6E6E6E/#929292) che serve al ricolore di runtime del §4.
+- Documentato cosa allegare a ogni prompt (lo sheet originale per lo stile + il ritaglio di una base calva per l'allineamento) e il passo successivo (normalizzazione §3.3 con griglia di verifica visiva).
+
+**In attesa:** gli sheet generati dallo sviluppatore in `data/assets/faces/source/`. Poi: estrazione/normalizzazione delle parti, manifest.json, regions.json, compositore deterministico e griglia di collaudo §8. Il modulo DiceBear della 29-quater resta come ripiego se la Strada A non desse risultati allineati (c'è comunque la Strada B: estrazione dallo sheet attuale).
