@@ -25,3 +25,6 @@ dist-ssr
 
 # Fonti dati di terze parti: riscaricabili con `npm run importa-dati`
 data/fonti/
+
+# bytecode Python degli script asset
+__pycache__/
