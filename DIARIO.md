@@ -644,3 +644,5 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - Documentato cosa allegare a ogni prompt (lo sheet originale per lo stile + il ritaglio di una base calva per l'allineamento) e il passo successivo (normalizzazione §3.3 con griglia di verifica visiva).
 
 **In attesa:** gli sheet generati dallo sviluppatore in `data/assets/faces/source/`. Poi: estrazione/normalizzazione delle parti, manifest.json, regions.json, compositore deterministico e griglia di collaudo §8. Il modulo DiceBear della 29-quater resta come ripiego se la Strada A non desse risultati allineati (c'è comunque la Strada B: estrazione dallo sheet attuale).
+
+**Aggiornamento sessione 30:** primo sheet generato dallo sviluppatore esaminato — stile giusto, ma scacchiera di trasparenza disegnata, teste incluse e non identiche, scritta nella cella vuota: da rifare. PROMPTS.md portato alla v2 col trucco dei colori-chiave (sfondo magenta #FF00FF, testa segnaposto ciano #00FFFF senza contorno): il modello può disegnare la testa che gli serve per allineare, e l'estrazione la elimina al pixel.

@@ -1,5 +1,13 @@
 # PROMPTS.md — Prompt per la rigenerazione degli asset (VOLTI-MISTER.md §3.1)
 
+> **VERSIONE 2 (2026-08-22)** — la v1 ha prodotto: scacchiera di trasparenza
+> DISEGNATA (niente alfa vero), teste incluse coi capelli, teste non
+> identiche tra le celle, scritta "EMPTY" nella cella vuota. La v2 usa il
+> trucco dei COLORI-CHIAVE: sfondo magenta puro #FF00FF, testa segnaposto
+> ciano puro #00FFFF senza contorno, capelli in rampa di grigi. Lo script
+> di estrazione (§3.2) elimina magenta e ciano al pixel e ricava i layer
+> isolati, usando la testa ciano anche per la verifica di allineamento.
+
 Prompt pronti da incollare in **Gemini (Nano Banana)** per generare i layer
 ISOLATI di capelli e barbe. Le basi pelle del foglio attuale vanno già bene
 (sono complete e calve): NON vanno rigenerate.
@@ -40,15 +48,24 @@ management game. Use the two attached images as strict references: the
 sprite sheet defines the art style; the single bald head cell defines the
 EXACT head position, scale and proportions inside a 48x48 cell.
 
-TASK: draw HAIR ONLY layers — no face, no head, no skin, no eyes, no
-eyebrows, no neck, no clothing. Each hairstyle must be drawn as if worn
-by the attached bald reference head, in the exact same position, so that
-overlaying the hair layer on the bald head lines up perfectly.
+TASK: draw each hairstyle as if worn by the SAME identical placeholder
+head, one per cell.
+
+CHROMA-KEY RULES (critical — this replaces transparency):
+- Background: fill the ENTIRE background with pure flat magenta #FF00FF.
+  No transparency, no checkerboard pattern, no gradients.
+- Placeholder head: draw the SAME bald head silhouette in every cell,
+  filled with pure flat cyan #00FFFF, NO outline, NO shading, NO facial
+  features — identical shape, size and position, copied from the
+  attached bald reference.
+- Hair: drawn ON TOP of the cyan head, gray ramp only.
+- Exactly three color families: magenta background, cyan heads, gray
+  hair. No text, no labels, no watermark, no grid lines.
 
 FORMAT:
 - One strict 6-column x 4-row grid of identical 48x48 pixel cells
   (total canvas exactly 288x192 pixels). No visible grid lines, no
-  labels, no watermark, no background: fully transparent background.
+  labels, no watermark.
 - Crisp 1:1 pixel art, hard pixel edges only: no anti-aliasing, no
   gradients, no soft shadows, no outlines around the transparent area.
 - COLOR: use ONLY this neutral 4-tone gray ramp, flat fills:
@@ -60,8 +77,8 @@ CONTENT — exactly one hairstyle per cell, row-major order:
 1 short spiky · 2 buzz cut (very short, hugs the skull) · 3 pompadour ·
 4 side part · 5 mullet · 6 afro (large and round) · 7 undercut variant A ·
 8 undercut variant B · 9 long messy · 10 crew cut · 11 cornrows (braided
-rows on the scalp) · 12 dreadlocks (shoulder length) · 13 EMPTY CELL,
-fully transparent (this is the "bald" option) · 14 shaggy variant A ·
+rows on the scalp) · 12 dreadlocks (shoulder length) · 13 cell with ONLY the cyan
+placeholder head, no hair at all (this is the "bald" option) · 14 shaggy variant A ·
 15 shaggy variant B · 16 slick back · 17 curly (tight curls, medium
 volume) · 18 caesar (short straight fringe) · 19 mohawk variant A ·
 20 mohawk variant B · 21 ponytail (tied back, tail visible at one side) ·
@@ -79,15 +96,24 @@ management game. Use the two attached images as strict references: the
 sprite sheet defines the art style; the single bald head cell defines the
 EXACT head position, scale and proportions inside a 48x48 cell.
 
-TASK: draw HAIR ONLY layers — no face, no head, no skin, no eyes, no
-eyebrows, no neck, no clothing. Each hairstyle must be drawn as if worn
-by the attached bald reference head, in the exact same position, so that
-overlaying the hair layer on the bald head lines up perfectly.
+TASK: draw each hairstyle as if worn by the SAME identical placeholder
+head, one per cell.
+
+CHROMA-KEY RULES (critical — this replaces transparency):
+- Background: fill the ENTIRE background with pure flat magenta #FF00FF.
+  No transparency, no checkerboard pattern, no gradients.
+- Placeholder head: draw the SAME bald head silhouette in every cell,
+  filled with pure flat cyan #00FFFF, NO outline, NO shading, NO facial
+  features — identical shape, size and position, copied from the
+  attached bald reference.
+- Hair: drawn ON TOP of the cyan head, gray ramp only.
+- Exactly three color families: magenta background, cyan heads, gray
+  hair. No text, no labels, no watermark, no grid lines.
 
 FORMAT:
 - One strict 4-column x 3-row grid of identical 48x48 pixel cells
   (total canvas exactly 192x144 pixels). No visible grid lines, no
-  labels, no watermark, no background: fully transparent background.
+  labels, no watermark.
 - Crisp 1:1 pixel art, hard pixel edges only: no anti-aliasing, no
   gradients, no soft shadows.
 - COLOR: use ONLY this neutral 4-tone gray ramp, flat fills:
@@ -110,15 +136,23 @@ management game. Use the two attached images as strict references: the
 sprite sheet defines the art style; the single bald head cell defines the
 EXACT head position, scale and proportions inside a 48x48 cell.
 
-TASK: draw FACIAL HAIR ONLY layers — beards and mustaches with no face,
-no head, no skin, no lips, no neck. Each beard must be drawn as if worn
-by the attached bald reference head (same jaw position), so that
-overlaying the layer on the head lines up perfectly.
+TASK: draw each beard/mustache as if worn by the SAME identical
+placeholder head, one per cell.
+
+CHROMA-KEY RULES (critical — this replaces transparency):
+- Background: pure flat magenta #FF00FF everywhere. No transparency,
+  no checkerboard, no gradients.
+- Placeholder head: the SAME bald head silhouette in every cell, pure
+  flat cyan #00FFFF, NO outline, NO shading, NO facial features,
+  copied from the attached bald reference (same jaw position).
+- Facial hair: drawn ON TOP of the cyan head, gray ramp only.
+- Exactly three color families: magenta, cyan, grays. No text, no
+  labels, no watermark, no grid lines.
 
 FORMAT:
 - One strict 4-column x 3-row grid of identical 48x48 pixel cells
   (total canvas exactly 192x144 pixels). No visible grid lines, no
-  labels, no watermark, no background: fully transparent background.
+  labels, no watermark.
 - Crisp 1:1 pixel art, hard pixel edges only: no anti-aliasing, no
   gradients, no soft shadows.
 - COLOR: use ONLY this neutral 4-tone gray ramp, flat fills:
@@ -128,8 +162,8 @@ CONTENT — exactly one style per cell, row-major order:
 1 full beard · 2 stubble (sparse pixels along the jaw) · 3 goatee ·
 4 mustache · 5 handlebar mustache · 6 soul patch · 7 chin strap ·
 8 short full beard · 9 long beard · 10 mutton chops ·
-11 circle beard (goatee + mustache connected) · 12 EMPTY CELL, fully
-transparent.
+11 circle beard (goatee + mustache connected) · 12 cell with ONLY the
+cyan placeholder head, no facial hair at all.
 
 Every style must read clearly at 48x48 and stay inside its own cell.
 ```
