@@ -646,3 +646,17 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 **In attesa:** gli sheet generati dallo sviluppatore in `data/assets/faces/source/`. Poi: estrazione/normalizzazione delle parti, manifest.json, regions.json, compositore deterministico e griglia di collaudo §8. Il modulo DiceBear della 29-quater resta come ripiego se la Strada A non desse risultati allineati (c'è comunque la Strada B: estrazione dallo sheet attuale).
 
 **Aggiornamento sessione 30:** primo sheet generato dallo sviluppatore esaminato — stile giusto, ma scacchiera di trasparenza disegnata, teste incluse e non identiche, scritta nella cella vuota: da rifare. PROMPTS.md portato alla v2 col trucco dei colori-chiave (sfondo magenta #FF00FF, testa segnaposto ciano #00FFFF senza contorno): il modello può disegnare la testa che gli serve per allineare, e l'estrazione la elimina al pixel.
+
+---
+
+## Sessione 30-bis — 2026-08-22 — Lo sheet v2 promosso e l'estrazione funziona
+
+**Obiettivo dichiarato:** esaminare lo sheet maschile generato col prompt v2 (colori-chiave) e, se buono, costruire la pipeline di estrazione del §3.2-3.3.
+
+**Fatto:**
+- **Sheet v2 promosso**: magenta pieno, teste ciano coerenti, grigi in rampa, cella "calvo" pulita. Unico residuo: il contorno scuro attorno alle teste (gestito via software).
+- **`data/assets/faces/estrai-parti.py`**: la pipeline di estrazione — colori-chiave riconosciuti per TINTA (il JPEG scurisce i bordi: un magenta 133,12,131 è ancora magenta), estrazione ALLA RISOLUZIONE NATIVA e riduzione a 48×48 dopo (alfa e colore premoltiplicato con media d'area: ridurre prima mescolava le treccine sottili col ciano), rimozione del contorno-testa (pixel stretti tra ciano e magenta), pulizia dei frammenti (componenti minuscole o piccole e incollate al bordo della testa), riaggancio dei grigi alla rampa neutra a 4 toni. Configurata anche per i fogli femminile e barbe (stesso comando).
+- **Tre giri di critica sulla griglia di verifica** (imparata anche la lezione: la griglia HTML incorpora le immagini — va rigenerata a ogni giro!): 22 acconciature su 23 pulite e allineate sulla testa di riferimento. La **cella 11 (cornrows)** è irrecuperabile alla fonte (treccine troppo sottili disegnate sul ciano): da rigenerare con la variante del prompt di correzione.
+- Estratte in `parts/hair_m/` (22 PNG 48×48 trasparenti + testa-riferimento.png).
+
+**Prossimi passi:** lo sviluppatore rigenera la cella 11 (prompt di correzione con treccine più spesse) e genera femminili+barbe col prompt v2; poi manifest.json, regions.json e il compositore deterministico (§5-6). Nota qualità: se esiste il PNG originale (non JPEG), sostituirlo in source/ e rilanciare lo script = bordi ancora più netti.
