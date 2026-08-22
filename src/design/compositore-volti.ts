@@ -151,7 +151,7 @@ export async function voltoDataUrl(
   ctx.imageSmoothingEnabled = false
 
   ctx.drawImage(await caricaImmagine(urlParte(`skin/skin_${String(pelle + 1).padStart(2, '0')}.png`)), 0, 0)
-  ctx.drawImage(await caricaImmagine(urlParte('jersey/jersey_std.png')), 0, 0)
+  // niente maglietta (decisione dello sviluppatore: copriva mezza faccia)
 
   const strato = document.createElement('canvas')
   strato.width = strato.height = CELLA

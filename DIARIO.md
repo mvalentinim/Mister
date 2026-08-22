@@ -705,3 +705,5 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Collaudo end-to-end**: de Vrij aperto nell'editor → full beard castano scuro scelta → anteprima aggiornata → salvata → riletta dopo il reload (colonna nel DB personalizzato) → la Figurina nella scheda giocatore mostra il volto con la barba, al posto giusto ✓. Build, lint, tsc verdi.
 
 **Debiti/annotazioni:** VOLTI-MISTER.md annotato con le decisioni; restano la cella cornrows da rigenerare e (fuori perimetro per ora) i volti femminili; il formato mini per tattica/elenchi arriverà con la propagazione M11.
+
+**Correzione sessione 32:** via anche la maglietta bianca dalla composizione (copriva mezza faccia): resta il solo volto, col collo che arriva al bordo come un busto ritagliato. jersey_std.png resta tra gli asset, inutilizzato.

@@ -139,7 +139,8 @@ def componi(giocatore_id: int, nazionalita: str, eta: int = 25,
     # 5. composizione a strati
     tela = np.zeros((CELLA, CELLA, 4), np.uint8)
     _sovrapponi(tela, PELLI[pelle])
-    _sovrapponi(tela, MAGLIETTA)
+    # NIENTE maglietta (decisione dello sviluppatore: copriva mezza faccia
+    # — resta il solo volto; jersey_std.png rimane come asset inutilizzato)
     if barba_id:
         barba = _ricolora(BARBE[barba_id], rampa)
         barba = np.roll(barba, SCOSTAMENTO_BARBA, axis=0)
