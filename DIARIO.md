@@ -618,3 +618,17 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - **Occhi ricostruiti**: ovali sempre più alti che larghi, bianchi grandi, pupilla importante appesa alla palpebra (clip SVG per giocatore), palpebra a tre livelli (sveglio/velato/assonnato), sguardo a sinistra/centro/destra — e TRE espressioni di sopracciglia (preoccupato con l'arco alto e sottile alla Guybrush, neutro pieno, severo calato all'interno).
 - **Nasi come silhouette piene**: cuneo lungo alla Guybrush, aquilino con la gobba, patatone tondo — chiusi, con ombra sul dorso e narici accennate; larghezza e lunghezza variabili. Bocche con larghezza e asimmetria variabili.
 - Due giri sul banco di prova a 16 seed: adesso ogni faccia ha la sua espressione. Verificato nella Figurina; build, lint, tsc verdi.
+
+---
+
+## Sessione 29-quater — 2026-08-21 — I volti passano a DiceBear (istruzioni dello sviluppatore)
+
+**Obiettivo dichiarato:** basta ritratti disegnati a mano da Claude Code (tre bocciature): i volti li genera DiceBear (@dicebear/core + collection), seed = id del giocatore. Quattro stili candidati da mostrare affiancati sulla stessa rosa — pixel-art, notionists, lorelei, open-peeps — e la scelta è dello sviluppatore. La maglia sotto il volto invece resta disegnata: geometria semplice nei colori del club.
+
+**Fatto:**
+- **`src/design/volto.ts`**: generazione locale (niente rete, ok per l'app nativa) con OPZIONI BLOCCATE per coerenza — sfondo sempre carta (--paper-2), pelle e capelli limitati alla palette di stampa, vestiti dell'avatar tinti col primario del club (dove lo stile li prevede), niente occhiali/cappelli/accessori, stessa dimensione ovunque.
+- **Bug reale trovato e risolto**: gli SVG DiceBear usano id interni fissi (la mask del riquadro) — con più avatar in pagina il browser risolve tutto sulla prima mask del documento e i volti spariscono. Ora ogni id viene rinominato per giocatore (`conIdUnici`).
+- **`src/design/MagliaGeometrica.tsx`**: il torso a 5 rettangoli (spalle oblique, torso, colletto a V) coi colori sociali e il motivo del club (palato/fascia/metà) — completa l'effetto figurina sotto qualunque stile di volto.
+- **Confronto generato sulla rosa dell'Inter vera** (Sommer, Darmian, Mkhitaryan, de Vrij, Acerbi, Çalhanoğlu, Zieliński, Di Gennaro): 4 file di mini-figurine consegnate allo sviluppatore per la scelta.
+
+**In attesa:** lo stile vincitore. Poi: integrazione nella Figurina (e nelle mini-figurine future), eventuale cura delle varianti dello stile scelto (es. escludere le facce piangenti di open-peeps), e propagazione §6.
