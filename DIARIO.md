@@ -660,3 +660,17 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 - Estratte in `parts/hair_m/` (22 PNG 48×48 trasparenti + testa-riferimento.png).
 
 **Prossimi passi:** lo sviluppatore rigenera la cella 11 (prompt di correzione con treccine più spesse) e genera femminili+barbe col prompt v2; poi manifest.json, regions.json e il compositore deterministico (§5-6). Nota qualità: se esiste il PNG originale (non JPEG), sostituirlo in source/ e rilanciare lo script = bordi ancora più netti.
+
+---
+
+## Sessione 31 — 2026-08-22 — Estratti tutti e tre i fogli + manifest e tabelle regionali
+
+**Obiettivo dichiarato:** lo sviluppatore ha caricato i tre sheet v2 (JPG: va bene, la pipeline riconosce i colori-chiave per tinta). Estrarre tutto e preparare i file dati del compositore.
+
+**Fatto:**
+- Fogli rinominati (`capelli-f-v2.jpg`, `barbe-v2.jpg`; il terzo era un doppione del maschile, eliminato) ed **estratti: 12 acconciature femminili e 11 barbe**, tutte pulite alla griglia di verifica. Un aggiusto necessario: la pulizia anti-residui (nata per i capelli) mangiava stubble e soul patch — per le barbe è spenta (`pulizia=False`), i loro residui veri li toglie già la regola del contorno.
+- **`manifest.json`** (§2.1): 55 voci — 24 capelli M (calvo incluso come "nessun layer"), 12 F, 11 barbe, 8 basi pelle segnate IN ATTESA — con etichette, tag e `region_bias` (afro/cornrows/dreadlocks/short curly/braided bun verso le regioni del documento).
+- **`regions.json`** (§6): le 12 regioni coi pesi pelle/colori/barba ricopiati dal documento, la rampa neutra e le **9 rampe colore dei capelli** (4 toni ciascuna) per il ricolore di runtime.
+- Annotato: le teste segnaposto dei tre fogli hanno geometrie leggermente diverse — la calibrazione fine (offset per categoria nel manifest) si farà contro le 8 BASI PELLE vere, che sono il riferimento definitivo e MANCANO ancora in source/.
+
+**Prossimi passi:** lo sheet delle 8 basi pelle dallo sviluppatore → estrazione basi → compositore deterministico (§5: ricolore a rampe, pesi regionali, brizzolatura per età) → griglia di collaudo §8 (rose di Norvegia, Nigeria, Giappone, Brasile, Italia). Resta anche da rigenerare la cella cornrows maschile.

@@ -1,0 +1,444 @@
+{
+ "versione": 1,
+ "parti": [
+  {
+   "id": "hair_m_01",
+   "category": "hair_m",
+   "label": "short spiky",
+   "file": "parts/hair_m/hair_m_01.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_02",
+   "category": "hair_m",
+   "label": "buzz cut",
+   "file": "parts/hair_m/hair_m_02.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_03",
+   "category": "hair_m",
+   "label": "pompadour",
+   "file": "parts/hair_m/hair_m_03.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_04",
+   "category": "hair_m",
+   "label": "side part",
+   "file": "parts/hair_m/hair_m_04.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_05",
+   "category": "hair_m",
+   "label": "mullet",
+   "file": "parts/hair_m/hair_m_05.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_06",
+   "category": "hair_m",
+   "label": "afro",
+   "file": "parts/hair_m/hair_m_06.png",
+   "recolorable": true,
+   "tags": [
+    "voluminoso"
+   ],
+   "region_bias": [
+    "africa_ovest_centro",
+    "africa_est",
+    "centroamerica_caraibi"
+   ]
+  },
+  {
+   "id": "hair_m_07",
+   "category": "hair_m",
+   "label": "undercut A",
+   "file": "parts/hair_m/hair_m_07.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_08",
+   "category": "hair_m",
+   "label": "undercut B",
+   "file": "parts/hair_m/hair_m_08.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_09",
+   "category": "hair_m",
+   "label": "long messy",
+   "file": "parts/hair_m/hair_m_09.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_10",
+   "category": "hair_m",
+   "label": "crew cut",
+   "file": "parts/hair_m/hair_m_10.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_11",
+   "category": "hair_m",
+   "label": "cornrows",
+   "file": "parts/hair_m/hair_m_11.png",
+   "recolorable": true,
+   "tags": [
+    "treccine"
+   ],
+   "region_bias": [
+    "africa_ovest_centro",
+    "africa_est",
+    "centroamerica_caraibi"
+   ]
+  },
+  {
+   "id": "hair_m_12",
+   "category": "hair_m",
+   "label": "dreadlocks",
+   "file": "parts/hair_m/hair_m_12.png",
+   "recolorable": true,
+   "tags": [
+    "voluminoso"
+   ],
+   "region_bias": [
+    "africa_ovest_centro",
+    "centroamerica_caraibi"
+   ]
+  },
+  {
+   "id": "hair_m_13",
+   "category": "hair_m",
+   "label": "bald",
+   "file": null,
+   "recolorable": true,
+   "tags": [
+    "nessun-layer"
+   ]
+  },
+  {
+   "id": "hair_m_14",
+   "category": "hair_m",
+   "label": "shaggy A",
+   "file": "parts/hair_m/hair_m_14.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_15",
+   "category": "hair_m",
+   "label": "shaggy B",
+   "file": "parts/hair_m/hair_m_15.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_16",
+   "category": "hair_m",
+   "label": "slick back",
+   "file": "parts/hair_m/hair_m_16.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_17",
+   "category": "hair_m",
+   "label": "curly",
+   "file": "parts/hair_m/hair_m_17.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_18",
+   "category": "hair_m",
+   "label": "caesar",
+   "file": "parts/hair_m/hair_m_18.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_19",
+   "category": "hair_m",
+   "label": "mohawk A",
+   "file": "parts/hair_m/hair_m_19.png",
+   "recolorable": true,
+   "tags": [
+    "appariscente"
+   ]
+  },
+  {
+   "id": "hair_m_20",
+   "category": "hair_m",
+   "label": "mohawk B",
+   "file": "parts/hair_m/hair_m_20.png",
+   "recolorable": true,
+   "tags": [
+    "appariscente"
+   ]
+  },
+  {
+   "id": "hair_m_21",
+   "category": "hair_m",
+   "label": "ponytail",
+   "file": "parts/hair_m/hair_m_21.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_22",
+   "category": "hair_m",
+   "label": "messy top",
+   "file": "parts/hair_m/hair_m_22.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_23",
+   "category": "hair_m",
+   "label": "spiky A",
+   "file": "parts/hair_m/hair_m_23.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_m_24",
+   "category": "hair_m",
+   "label": "spiky B",
+   "file": "parts/hair_m/hair_m_24.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_f_01",
+   "category": "hair_f",
+   "label": "short bob",
+   "file": "parts/hair_f/hair_f_01.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_f_02",
+   "category": "hair_f",
+   "label": "long straight",
+   "file": "parts/hair_f/hair_f_02.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_f_03",
+   "category": "hair_f",
+   "label": "curly ponytail",
+   "file": "parts/hair_f/hair_f_03.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_f_04",
+   "category": "hair_f",
+   "label": "pigtails",
+   "file": "parts/hair_f/hair_f_04.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_f_05",
+   "category": "hair_f",
+   "label": "high bun",
+   "file": "parts/hair_f/hair_f_05.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_f_06",
+   "category": "hair_f",
+   "label": "pixie cut",
+   "file": "parts/hair_f/hair_f_06.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_f_07",
+   "category": "hair_f",
+   "label": "side braid",
+   "file": "parts/hair_f/hair_f_07.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_f_08",
+   "category": "hair_f",
+   "label": "wavy",
+   "file": "parts/hair_f/hair_f_08.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_f_09",
+   "category": "hair_f",
+   "label": "short curly",
+   "file": "parts/hair_f/hair_f_09.png",
+   "recolorable": true,
+   "tags": [
+    "voluminoso"
+   ],
+   "region_bias": [
+    "africa_ovest_centro",
+    "africa_est"
+   ]
+  },
+  {
+   "id": "hair_f_10",
+   "category": "hair_f",
+   "label": "braided bun",
+   "file": "parts/hair_f/hair_f_10.png",
+   "recolorable": true,
+   "tags": [
+    "treccine"
+   ],
+   "region_bias": [
+    "africa_ovest_centro",
+    "africa_est"
+   ]
+  },
+  {
+   "id": "hair_f_11",
+   "category": "hair_f",
+   "label": "medium wave",
+   "file": "parts/hair_f/hair_f_11.png",
+   "recolorable": true
+  },
+  {
+   "id": "hair_f_12",
+   "category": "hair_f",
+   "label": "long",
+   "file": "parts/hair_f/hair_f_12.png",
+   "recolorable": true
+  },
+  {
+   "id": "beard_01",
+   "category": "beard",
+   "label": "full beard",
+   "file": "parts/beard/beard_01.png",
+   "recolorable": true
+  },
+  {
+   "id": "beard_02",
+   "category": "beard",
+   "label": "stubble",
+   "file": "parts/beard/beard_02.png",
+   "recolorable": true
+  },
+  {
+   "id": "beard_03",
+   "category": "beard",
+   "label": "goatee",
+   "file": "parts/beard/beard_03.png",
+   "recolorable": true
+  },
+  {
+   "id": "beard_04",
+   "category": "beard",
+   "label": "mustache",
+   "file": "parts/beard/beard_04.png",
+   "recolorable": true
+  },
+  {
+   "id": "beard_05",
+   "category": "beard",
+   "label": "handlebar",
+   "file": "parts/beard/beard_05.png",
+   "recolorable": true
+  },
+  {
+   "id": "beard_06",
+   "category": "beard",
+   "label": "soul patch",
+   "file": "parts/beard/beard_06.png",
+   "recolorable": true
+  },
+  {
+   "id": "beard_07",
+   "category": "beard",
+   "label": "chin strap",
+   "file": "parts/beard/beard_07.png",
+   "recolorable": true
+  },
+  {
+   "id": "beard_08",
+   "category": "beard",
+   "label": "short full beard",
+   "file": "parts/beard/beard_08.png",
+   "recolorable": true
+  },
+  {
+   "id": "beard_09",
+   "category": "beard",
+   "label": "long beard",
+   "file": "parts/beard/beard_09.png",
+   "recolorable": true
+  },
+  {
+   "id": "beard_10",
+   "category": "beard",
+   "label": "mutton chops",
+   "file": "parts/beard/beard_10.png",
+   "recolorable": true
+  },
+  {
+   "id": "beard_11",
+   "category": "beard",
+   "label": "circle beard",
+   "file": "parts/beard/beard_11.png",
+   "recolorable": true
+  },
+  {
+   "id": "skin_01",
+   "category": "skin",
+   "label": "PALE",
+   "file": "parts/skin/skin_01.png",
+   "recolorable": false,
+   "nota": "IN ATTESA dello sheet delle basi pelle (VOLTI-MISTER.md §2)"
+  },
+  {
+   "id": "skin_02",
+   "category": "skin",
+   "label": "FAIR",
+   "file": "parts/skin/skin_02.png",
+   "recolorable": false,
+   "nota": "IN ATTESA dello sheet delle basi pelle (VOLTI-MISTER.md §2)"
+  },
+  {
+   "id": "skin_03",
+   "category": "skin",
+   "label": "LIGHT",
+   "file": "parts/skin/skin_03.png",
+   "recolorable": false,
+   "nota": "IN ATTESA dello sheet delle basi pelle (VOLTI-MISTER.md §2)"
+  },
+  {
+   "id": "skin_04",
+   "category": "skin",
+   "label": "TAN",
+   "file": "parts/skin/skin_04.png",
+   "recolorable": false,
+   "nota": "IN ATTESA dello sheet delle basi pelle (VOLTI-MISTER.md §2)"
+  },
+  {
+   "id": "skin_05",
+   "category": "skin",
+   "label": "MEDIUM",
+   "file": "parts/skin/skin_05.png",
+   "recolorable": false,
+   "nota": "IN ATTESA dello sheet delle basi pelle (VOLTI-MISTER.md §2)"
+  },
+  {
+   "id": "skin_06",
+   "category": "skin",
+   "label": "OLIVE",
+   "file": "parts/skin/skin_06.png",
+   "recolorable": false,
+   "nota": "IN ATTESA dello sheet delle basi pelle (VOLTI-MISTER.md §2)"
+  },
+  {
+   "id": "skin_07",
+   "category": "skin",
+   "label": "DARK",
+   "file": "parts/skin/skin_07.png",
+   "recolorable": false,
+   "nota": "IN ATTESA dello sheet delle basi pelle (VOLTI-MISTER.md §2)"
+  },
+  {
+   "id": "skin_08",
+   "category": "skin",
+   "label": "VERY_DARK",
+   "file": "parts/skin/skin_08.png",
+   "recolorable": false,
+   "nota": "IN ATTESA dello sheet delle basi pelle (VOLTI-MISTER.md §2)"
+  }
+ ]
+}

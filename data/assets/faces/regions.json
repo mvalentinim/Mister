@@ -1,0 +1,295 @@
+{
+ "versione": 1,
+ "rampa_neutra": [
+  "#2E2E2E",
+  "#4A4A4A",
+  "#6E6E6E",
+  "#929292"
+ ],
+ "rampe_capelli": {
+  "nero": [
+   "#0e0c0a",
+   "#1c1814",
+   "#2a241e",
+   "#3a322a"
+  ],
+  "castano_scuro": [
+   "#1f1610",
+   "#332318",
+   "#472f1f",
+   "#5c3d28"
+  ],
+  "castano": [
+   "#2e2013",
+   "#4a331e",
+   "#654527",
+   "#7d5730"
+  ],
+  "castano_chiaro": [
+   "#3e2c19",
+   "#5e4326",
+   "#7d5a33",
+   "#997042"
+  ],
+  "biondo": [
+   "#6b5122",
+   "#94722f",
+   "#bd943c",
+   "#d9b153"
+  ],
+  "biondo_chiaro": [
+   "#8a743a",
+   "#b39a50",
+   "#d4ba67",
+   "#e8d489"
+  ],
+  "rosso": [
+   "#4a1d10",
+   "#742d16",
+   "#9c3e1c",
+   "#bf5426"
+  ],
+  "grigio": [
+   "#3a3a3a",
+   "#5c5c5c",
+   "#7e7e7e",
+   "#9e9e9e"
+  ],
+  "bianco": [
+   "#6e6e6e",
+   "#949494",
+   "#bcbcbc",
+   "#dedede"
+  ]
+ },
+ "regioni": {
+  "europa_nord": {
+   "skin_weights": [
+    30,
+    30,
+    25,
+    10,
+    3,
+    1,
+    1,
+    0
+   ],
+   "hair_color_weights": {
+    "biondo": 30,
+    "biondo_chiaro": 15,
+    "castano": 20,
+    "castano_scuro": 10,
+    "castano_chiaro": 10,
+    "rosso": 8,
+    "nero": 7
+   },
+   "beard_prob": 0.35
+  },
+  "europa_ovest": {
+   "skin_weights": [
+    15,
+    25,
+    30,
+    15,
+    8,
+    4,
+    2,
+    1
+   ],
+   "hair_color_weights": {
+    "castano": 30,
+    "castano_scuro": 15,
+    "castano_chiaro": 10,
+    "nero": 20,
+    "biondo": 18,
+    "rosso": 7
+   },
+   "beard_prob": 0.4
+  },
+  "europa_sud": {
+   "skin_weights": [
+    5,
+    15,
+    30,
+    30,
+    12,
+    6,
+    1,
+    1
+   ],
+   "hair_color_weights": {
+    "nero": 35,
+    "castano_scuro": 35,
+    "castano": 22,
+    "biondo": 8
+   },
+   "beard_prob": 0.45
+  },
+  "europa_est_balcani": {
+   "skin_weights": [
+    15,
+    25,
+    30,
+    18,
+    7,
+    3,
+    1,
+    1
+   ],
+   "hair_color_weights": {
+    "castano": 30,
+    "castano_scuro": 20,
+    "nero": 28,
+    "biondo": 20,
+    "rosso": 2
+   },
+   "beard_prob": 0.35
+  },
+  "nordafrica_medioriente": {
+   "skin_weights": [
+    1,
+    4,
+    12,
+    25,
+    30,
+    20,
+    6,
+    2
+   ],
+   "hair_color_weights": {
+    "nero": 70,
+    "castano_scuro": 25,
+    "castano": 5
+   },
+   "beard_prob": 0.55
+  },
+  "africa_ovest_centro": {
+   "skin_weights": [
+    0,
+    0,
+    1,
+    3,
+    8,
+    20,
+    38,
+    30
+   ],
+   "hair_color_weights": {
+    "nero": 92,
+    "castano_scuro": 8
+   },
+   "beard_prob": 0.4
+  },
+  "africa_est": {
+   "skin_weights": [
+    0,
+    0,
+    1,
+    4,
+    12,
+    28,
+    35,
+    20
+   ],
+   "hair_color_weights": {
+    "nero": 90,
+    "castano_scuro": 10
+   },
+   "beard_prob": 0.35
+  },
+  "sudamerica": {
+   "skin_weights": [
+    3,
+    10,
+    20,
+    25,
+    22,
+    12,
+    6,
+    2
+   ],
+   "hair_color_weights": {
+    "nero": 45,
+    "castano_scuro": 30,
+    "castano": 18,
+    "biondo": 7
+   },
+   "beard_prob": 0.4
+  },
+  "centroamerica_caraibi": {
+   "skin_weights": [
+    1,
+    4,
+    10,
+    18,
+    25,
+    22,
+    13,
+    7
+   ],
+   "hair_color_weights": {
+    "nero": 60,
+    "castano_scuro": 28,
+    "castano": 8,
+    "biondo": 4
+   },
+   "beard_prob": 0.35
+  },
+  "nordamerica": {
+   "skin_weights": [
+    10,
+    18,
+    22,
+    18,
+    13,
+    9,
+    6,
+    4
+   ],
+   "hair_color_weights": {
+    "castano": 25,
+    "castano_scuro": 20,
+    "nero": 30,
+    "biondo": 20,
+    "rosso": 5
+   },
+   "beard_prob": 0.4
+  },
+  "asia_est": {
+   "skin_weights": [
+    8,
+    20,
+    35,
+    25,
+    9,
+    2,
+    1,
+    0
+   ],
+   "hair_color_weights": {
+    "nero": 88,
+    "castano_scuro": 10,
+    "castano": 2
+   },
+   "beard_prob": 0.15
+  },
+  "asia_sud_oceania": {
+   "skin_weights": [
+    2,
+    6,
+    15,
+    25,
+    28,
+    15,
+    6,
+    3
+   ],
+   "hair_color_weights": {
+    "nero": 80,
+    "castano_scuro": 15,
+    "castano": 5
+   },
+   "beard_prob": 0.35
+  }
+ }
+}

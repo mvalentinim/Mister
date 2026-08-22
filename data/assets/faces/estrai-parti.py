@@ -35,7 +35,7 @@ FOGLI = {
     'capelli-f': dict(file='capelli-f-v2', griglia=(4, 3), cartella='hair_f', prefisso='hair_f',
                       vuote=[], salva_testa=None),
     'barbe': dict(file='barbe-v2', griglia=(4, 3), cartella='beard', prefisso='beard',
-                  vuote=[12], salva_testa=None),
+                  vuote=[12], salva_testa=None, pulizia=False),
 }
 
 
@@ -144,7 +144,11 @@ def estrai(nome: str) -> None:
                                         pila.append((ny, nx))
                         # via se: minuscolo, oppure piccolo e INCOLLATO al
                         # bordo della testa (è contorno residuo, non ciocca:
-                        # le ciocche vere sporgono oltre i 2px dal ciano)
+                        # le ciocche vere sporgono oltre i 2px dal ciano).
+                        # Le BARBE sono per natura piccole e incollate al
+                        # viso: per loro la pulizia è spenta (pulizia=False).
+                        if not cfg.get('pulizia', True):
+                            continue
                         incollato = all(vicinoTesta[y, x] for y, x in gruppo)
                         if len(gruppo) < 5 or (len(gruppo) < 25 and incollato):
                             for y, x in gruppo:
