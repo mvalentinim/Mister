@@ -18,9 +18,9 @@
   justify-content: center;
 }
 
-/* la figurina "attaccata storta", come su un album vero */
+/* la figurina, dritta (lo sviluppatore ha bocciato l'inclinazione
+   "da album": meglio in squadra) */
 .scheda-colonne .figurina {
-  transform: rotate(-1.2deg);
   flex: none;
 }
 

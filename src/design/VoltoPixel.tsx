@@ -27,6 +27,12 @@ export function VoltoPixel({ giocatore: g, lato = 96, extra }: Props) {
     capelli: g.volto_capelli ?? null,
     colore: g.volto_colore ?? null,
     barba: g.volto_barba ?? null,
+    barbaDx: g.volto_barba_dx ?? null,
+    barbaDy: g.volto_barba_dy ?? null,
+    barbaScala: g.volto_barba_scala ?? null,
+    capelliDx: g.volto_capelli_dx ?? null,
+    capelliDy: g.volto_capelli_dy ?? null,
+    capelliScala: g.volto_capelli_scala ?? null,
   }
 
   useEffect(() => {
@@ -36,7 +42,7 @@ export function VoltoPixel({ giocatore: g, lato = 96, extra }: Props) {
       .catch(() => { if (attivo) setUrl(null) })
     return () => { attivo = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [g.id, g.volto_seme, g.volto_pelle, g.volto_capelli, g.volto_colore, g.volto_barba, JSON.stringify(extra ?? null)])
+  }, [g.id, JSON.stringify(dalDb), JSON.stringify(extra ?? null)])
 
   return url ? (
     <img

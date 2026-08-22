@@ -707,3 +707,5 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 **Debiti/annotazioni:** VOLTI-MISTER.md annotato con le decisioni; restano la cella cornrows da rigenerare e (fuori perimetro per ora) i volti femminili; il formato mini per tattica/elenchi arriverà con la propagazione M11.
 
 **Correzione sessione 32:** via anche la maglietta bianca dalla composizione (copriva mezza faccia): resta il solo volto, col collo che arriva al bordo come un busto ritagliato. jersey_std.png resta tra gli asset, inutilizzato.
+
+**Aggiustamenti sessione 32 (richiesti):** (1) nell'editor della figurina ora si REGOLANO barba e capigliatura: frecce nelle quattro direzioni (1px della griglia 48 per passo) e scala ±10% (attorno al centro, pixel netti), col tasto ↺ per azzerare — sei nuove colonne volto_*_dx/dy/scala per giocatore, salvate nel DB personalizzato come il resto; (2) raddrizzata la figurina nella scheda giocatore (l'inclinazione "da album" di −1.2° è stata bocciata). Collaudo: barba full beard giù di 2 e −10%, salvata, riletta, figurina dritta (transform: none verificato).

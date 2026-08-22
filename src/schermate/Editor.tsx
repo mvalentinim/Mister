@@ -123,9 +123,10 @@ function Editor({ db }: Props) {
         parametri.push(valore === '' ? null : Number(valore))
       } else if (nome.startsWith('volto_')) {
         // la FIGURINA: testo o numero, vuoto = automatico (NULL)
+        const numerico = nome === 'volto_seme' || nome === 'volto_pelle'
+          || nome.endsWith('_dx') || nome.endsWith('_dy') || nome.endsWith('_scala')
         set.push(`${nome} = ?`)
-        parametri.push(valore === '' ? null
-          : nome === 'volto_seme' || nome === 'volto_pelle' ? Number(valore) : valore)
+        parametri.push(valore === '' ? null : numerico ? Number(valore) : valore)
       } else if (testuali.has(nome)) {
         set.push(`${nome} = ?`)
         parametri.push(valore)
@@ -559,6 +560,12 @@ function Editor({ db }: Props) {
                 capelli: campo('volto_capelli') || null,
                 colore: campo('volto_colore') || null,
                 barba: campo('volto_barba') || null,
+                barbaDx: campo('volto_barba_dx') === '' ? null : Number(campo('volto_barba_dx')),
+                barbaDy: campo('volto_barba_dy') === '' ? null : Number(campo('volto_barba_dy')),
+                barbaScala: campo('volto_barba_scala') === '' ? null : Number(campo('volto_barba_scala')),
+                capelliDx: campo('volto_capelli_dx') === '' ? null : Number(campo('volto_capelli_dx')),
+                capelliDy: campo('volto_capelli_dy') === '' ? null : Number(campo('volto_capelli_dy')),
+                capelliScala: campo('volto_capelli_scala') === '' ? null : Number(campo('volto_capelli_scala')),
               }}
             />
             <div className="griglia-editor" style={{ flex: 1 }}>
@@ -594,6 +601,34 @@ function Editor({ db }: Props) {
                   🎲 Rigenera volto
                 </button>
               </label>
+
+              {/* le REGOLAZIONI fini: sposta e scala barba e capigliatura */}
+              {([['barba', 'volto_barba'], ['capelli', 'volto_capelli']] as const).map(([nome, prefisso]) => {
+                const aggiusta = (suffisso: string, delta: number, base: number) => () =>
+                  setModifiche({
+                    ...modifiche,
+                    [`${prefisso}${suffisso}`]: String(Number(campo(`${prefisso}${suffisso}`) || base) + delta),
+                  })
+                return (
+                  <label key={nome}>Regola {nome}{' '}
+                    <span className="regolatori">
+                      <button title="sposta a sinistra" onClick={aggiusta('_dx', -1, 0)}>◀</button>
+                      <button title="sposta a destra" onClick={aggiusta('_dx', +1, 0)}>▶</button>
+                      <button title="sposta in su" onClick={aggiusta('_dy', -1, 0)}>▲</button>
+                      <button title="sposta in giù" onClick={aggiusta('_dy', +1, 0)}>▼</button>
+                      <button title="rimpicciolisci" onClick={aggiusta('_scala', -10, 100)}>−</button>
+                      <button title="ingrandisci" onClick={aggiusta('_scala', +10, 100)}>+</button>
+                      <button
+                        title="azzera le regolazioni"
+                        onClick={() => setModifiche({
+                          ...modifiche,
+                          [`${prefisso}_dx`]: '', [`${prefisso}_dy`]: '', [`${prefisso}_scala`]: '',
+                        })}
+                      >↺</button>
+                    </span>
+                  </label>
+                )
+              })}
             </div>
           </div>
 

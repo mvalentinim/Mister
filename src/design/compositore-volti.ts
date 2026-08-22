@@ -65,6 +65,14 @@ export interface PersonalizzazioneVolto {
   capelli?: string | null // id del manifest (hair_m_XX)
   colore?: string | null // nome della rampa
   barba?: string | null // id del manifest (beard_XX); assente = niente
+  /** regolazioni fini per giocatore: spostamento in px della griglia 48
+      e scala in percento (100 = originale) */
+  barbaDx?: number | null
+  barbaDy?: number | null
+  barbaScala?: number | null
+  capelliDx?: number | null
+  capelliDy?: number | null
+  capelliScala?: number | null
 }
 
 /* cache delle immagini caricate e dei volti già composti */
@@ -158,19 +166,34 @@ export async function voltoDataUrl(
   const ctxStrato = strato.getContext('2d')!
   ctxStrato.imageSmoothingEnabled = false
 
-  if (extra?.barba) {
+  // disegna una parte con le regolazioni: la scala avviene attorno al
+  // centro della cella (pixel netti: nearest neighbor), poi lo spostamento
+  const disegnaParte = (img: HTMLImageElement, dx: number, dy: number, scala: number) => {
     ctxStrato.clearRect(0, 0, CELLA, CELLA)
-    ctxStrato.drawImage(await caricaImmagine(urlParte(`beard/${extra.barba}.png`)), 0, SCOSTAMENTO_BARBA)
+    const latoScalato = Math.max(1, Math.round(CELLA * (scala / 100)))
+    const angolo = Math.round((CELLA - latoScalato) / 2)
+    ctxStrato.drawImage(img, angolo + dx, angolo + dy, latoScalato, latoScalato)
     ricolora(ctxStrato, rampa)
     ctx.drawImage(strato, 0, 0)
   }
 
+  if (extra?.barba) {
+    disegnaParte(
+      await caricaImmagine(urlParte(`beard/${extra.barba}.png`)),
+      extra.barbaDx ?? 0,
+      SCOSTAMENTO_BARBA + (extra.barbaDy ?? 0),
+      extra.barbaScala ?? 100,
+    )
+  }
+
   const voceCapelli = manifest.parti.find((p) => p.id === capelliId)
   if (voceCapelli?.file) { // "bald" = nessun layer
-    ctxStrato.clearRect(0, 0, CELLA, CELLA)
-    ctxStrato.drawImage(await caricaImmagine(urlParte(`hair_m/${capelliId}.png`)), 0, 0)
-    ricolora(ctxStrato, rampa)
-    ctx.drawImage(strato, 0, 0)
+    disegnaParte(
+      await caricaImmagine(urlParte(`hair_m/${capelliId}.png`)),
+      extra?.capelliDx ?? 0,
+      extra?.capelliDy ?? 0,
+      extra?.capelliScala ?? 100,
+    )
   }
 
   const url = tela.toDataURL('image/png')

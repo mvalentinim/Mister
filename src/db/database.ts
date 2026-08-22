@@ -53,6 +53,9 @@ export function assicuraColonneVolto(db: Database): void {
   for (const colonna of [
     'volto_seme INTEGER', 'volto_pelle INTEGER', 'volto_capelli TEXT',
     'volto_colore TEXT', 'volto_barba TEXT',
+    // le REGOLAZIONI fini: spostamento (px della griglia 48) e scala (%)
+    'volto_barba_dx INTEGER', 'volto_barba_dy INTEGER', 'volto_barba_scala INTEGER',
+    'volto_capelli_dx INTEGER', 'volto_capelli_dy INTEGER', 'volto_capelli_scala INTEGER',
   ]) {
     try {
       db.run(`ALTER TABLE giocatore ADD COLUMN ${colonna}`)

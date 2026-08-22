@@ -43,6 +43,12 @@ export interface GiocatoreRiga {
   volto_capelli?: string | null
   volto_colore?: string | null
   volto_barba?: string | null
+  volto_barba_dx?: number | null
+  volto_barba_dy?: number | null
+  volto_barba_scala?: number | null
+  volto_capelli_dx?: number | null
+  volto_capelli_dy?: number | null
+  volto_capelli_scala?: number | null
   piede: string
   categoria: 'normale' | 'icon' | 'hero'
   // tecnici (null per i portieri)

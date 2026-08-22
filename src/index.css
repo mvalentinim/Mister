@@ -1281,3 +1281,21 @@ h1, h2, h3, h4 {
   padding: 0.8rem;
   margin-bottom: 0.8rem;
 }
+
+/* i pulsanti di regolazione fine della figurina (sposta/scala) */
+.regolatori {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.regolatori button {
+  min-width: 26px;
+  padding: 0.25rem 0.35rem;
+  border: 1px solid var(--bordo);
+  border-radius: 6px;
+  background: var(--superficie);
+  font: inherit;
+  cursor: pointer;
+}
+
+.regolatori button:hover { border-color: var(--accento); }
