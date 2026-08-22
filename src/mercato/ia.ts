@@ -14,6 +14,7 @@ import { mediaComplessiva, calcolaEta, type GiocatoreRiga } from '../db/tipi.ts'
 import { REPARTO } from '../motore/preparazione.ts'
 import { creaRng, semeDaStringa } from '../motore/rng.ts'
 import type { Carriera } from '../carriera/tipi.ts'
+import { fotografaGiocatore } from '../carriera/crescita.ts'
 import { euro } from './valore.ts'
 import {
   aggiungiNotizia, anniContratto, clubDiGiocatore, giocatoriPerId, monteStipendi,
@@ -365,6 +366,10 @@ export function eseguiAcquisto(
   carriera.budget.mercato -= costoCartellino
   venditore.budgetMercato += Math.round(costoCartellino * 0.9)
 
+  // da adesso è mio: scopro il suo potenziale e comincio a scriverne la
+  // storia — il primo punto della curva reale è la firma (M11)
+  fotografaGiocatore(carriera, g)
+
   if (p.prestito) {
     spostaGiocatore(carriera, p.giocatoreId, carriera.clubId) // contratto resta del proprietario
     carriera.prestiti.push({
@@ -519,6 +524,7 @@ export function ingaggiaSvincolato(
     stipendio,
     scadenza: carriera.anno + (contratto?.durataAnni ?? 2),
   })
+  fotografaGiocatore(carriera, g) // la firma apre la sua storia (M11)
   aggiungiNotizia(carriera, `UFFICIALE: ${g.nome} ${g.cognome} firma da svincolato!`, 'ufficiale')
   return null
 }

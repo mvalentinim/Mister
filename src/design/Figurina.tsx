@@ -47,10 +47,15 @@ interface Props {
   nomeClub: string | null
   /** id del club per i colori sociali (null = veste neutra) */
   clubId: number | null
+  /** false = il potenziale resta segreto (giocatori non miei, in carriera) */
+  mostraPotenziale?: boolean
+  /** età da mostrare al posto di quella anagrafica (in carriera gli anni
+      avanzano anche se l'orologio reale no) */
+  etaMostrata?: number
 }
 
 /** La figurina intera: il ritratto del giocatore in formato album. */
-export function Figurina({ giocatore: g, nomeClub, clubId }: Props) {
+export function Figurina({ giocatore: g, nomeClub, clubId, mostraPotenziale = true, etaMostrata }: Props) {
   const colori = coloriClub(clubId)
   const numero = numeroMaglia(g.id, g.ruolo)
   const media = mediaComplessiva(g)
@@ -81,7 +86,7 @@ export function Figurina({ giocatore: g, nomeClub, clubId }: Props) {
 
       {/* la riga anagrafica: club, età, nazionalità, piede */}
       <p className="fig-anagrafica">
-        {nomeClub ?? (leggenda ? 'LEGGENDA' : 'SVINCOLATO')} · {calcolaEta(g.data_nascita)} ANNI
+        {nomeClub ?? (leggenda ? 'LEGGENDA' : 'SVINCOLATO')} · {etaMostrata ?? calcolaEta(g.data_nascita)} ANNI
         · {nazionalitaInItaliano(g.nazionalita)} · {g.piede === 'sinistro' ? 'SX' : g.piede === 'destro' ? 'DX' : 'AMBI'}
       </p>
 
@@ -96,7 +101,10 @@ export function Figurina({ giocatore: g, nomeClub, clubId }: Props) {
       <footer className="fig-piede">
         <span className="fig-marchio">MISTER</span>
         <span className="etichetta-almanacco">
-          POT <strong className={`fascia-${fascia(g.potenziale)}`}>{g.potenziale}</strong>
+          POT{' '}
+          {mostraPotenziale
+            ? <strong className={`fascia-${fascia(g.potenziale)}`}>{g.potenziale}</strong>
+            : <strong title="Il potenziale si scopre solo comprandolo">??</strong>}
         </span>
       </footer>
     </article>

@@ -125,6 +125,13 @@ export function migra(caricato: Omit<Carriera, 'versioneSchema'> & { versioneSch
     // rigenerato è quello del DB, niente più campi extra da aggiungere
     caricato.versioneSchema = 13
   }
+  if (caricato.versioneSchema === 13) {
+    // v13 → v14 (M11): lo storico delle medie della propria rosa, per la
+    // curva di crescita "reale". I vecchi salvataggi partono vuoti: la
+    // storia comincia dalla prossima fotografia (fine stagione o firma).
+    salvataggio.storiaMedie = {}
+    caricato.versioneSchema = 14
+  }
   return salvataggio
 }
 

@@ -14,7 +14,8 @@
     "legends": "node data/importa/04-squadre-legend.mjs",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "curve": "tsx src/carriera/verifica-curve-cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",

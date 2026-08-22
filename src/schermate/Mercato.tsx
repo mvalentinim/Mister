@@ -22,6 +22,7 @@ import { registraPromessa } from '../comportamento/comportamento.ts'
 import { suona } from '../design/suoni.ts'
 import type { OffertaIngaggio } from '../trattativa/interesse.ts'
 import DialogoIngaggio from './DialogoIngaggio.tsx'
+import { SchedaGiocatoreCarriera } from './SchedaGiocatoreCarriera.tsx'
 
 interface Props {
   db: Database
@@ -63,6 +64,9 @@ function Mercato({ db, carriera, onModificata }: Props) {
   const [decrescente, setDecrescente] = useState(true)
   const [trattativa, setTrattativa] = useState<Trattativa | null>(null)
   const [avviso, setAvviso] = useState<string | null>(null)
+  // la scheda giocatore (figurina + curva, M11): dei non-miei si vede solo
+  // la carriera reale — potenziale e previsione restano segreti
+  const [scheda, setScheda] = useState<{ id: number; club: string | null; clubId: number | null } | null>(null)
   // trattativa col GIOCATORE (M7): dopo l'accordo col club, o per gli svincolati
   const [ingaggio, setIngaggio] = useState<
     | { tipo: 'acquisto'; proposta: Proposta; giocatore: GiocatoreRiga }
@@ -468,9 +472,15 @@ function Mercato({ db, carriera, onModificata }: Props) {
                   <tr><th>Giocatore</th><th>Ruolo</th><th>Naz.</th><th className="num">Età</th><th className="num">Media</th><th>Club</th><th className="num">Scad.</th><th className="num">Valore</th><th></th></tr>
                 </thead>
                 <tbody>
-                  {risultati.map(({ g, club }) => (
+                  {risultati.map(({ g, club, clubId }) => (
                     <tr key={g.id}>
-                      <td className="grassetto">{g.nome} {g.cognome}</td>
+                      <td
+                        className="grassetto cella-cliccabile"
+                        title="Apri la scheda (figurina e curva di carriera)"
+                        onClick={() => setScheda({ id: g.id, club, clubId })}
+                      >
+                        {g.nome} {g.cognome}
+                      </td>
                       <td>{g.ruolo}</td>
                       <td>{nazionalitaInItaliano(g.nazionalita)}</td>
                       <td className="num">{calcolaEta(g.data_nascita)}</td>
@@ -491,12 +501,18 @@ function Mercato({ db, carriera, onModificata }: Props) {
       {/* ── svincolati ── */}
       {m.aperto && svincolati.length > 0 && !trattativa && !ingaggio && (
         <>
-          <h3>🆓 Svincolati</h3>
+          <h3>Svincolati</h3>
           <table className="tabella">
             <tbody>
               {svincolati.map((g) => (
                 <tr key={g.id}>
-                  <td className="grassetto">{g.categoria !== 'normale' ? '★ ' : ''}{g.nome} {g.cognome}</td>
+                  <td
+                    className="grassetto cella-cliccabile"
+                    title="Apri la scheda (figurina e curva di carriera)"
+                    onClick={() => setScheda({ id: g.id, club: null, clubId: null })}
+                  >
+                    {g.categoria !== 'normale' ? '★ ' : ''}{g.nome} {g.cognome}
+                  </td>
                   <td>{g.ruolo}</td>
                   <td className="num">{calcolaEta(g.data_nascita)}</td>
                   <td className="num evidenza">{mediaComplessiva(g)}</td>
@@ -526,11 +542,21 @@ function Mercato({ db, carriera, onModificata }: Props) {
             const cedibile = m.cedibili.includes(g.id)
             return (
               <tr key={g.id} className={inScadenza ? 'riga-scadenza' : ''}>
-                <td className="grassetto">{g.nome} {g.cognome}{cedibile ? ' 🏷️' : ''}</td>
+                <td
+                  className="grassetto cella-cliccabile"
+                  title="Apri la scheda (figurina e curva di crescita)"
+                  onClick={() => setScheda({
+                    id: g.id,
+                    club: carriera.club.find((c) => c.id === carriera.clubId)?.nome ?? null,
+                    clubId: carriera.clubId,
+                  })}
+                >
+                  {g.nome} {g.cognome}{cedibile ? ' · cedibile' : ''}
+                </td>
                 <td>{g.ruolo}</td>
                 <td className="num evidenza">{mediaComplessiva(g)}</td>
                 <td className="num">{euro(contratto?.stipendio ?? 0)}</td>
-                <td className="num">{contratto?.scadenza}{inScadenza ? ' ⚠️' : ''}</td>
+                <td className="num">{contratto?.scadenza}{inScadenza ? ' !' : ''}</td>
                 <td className="num">{euro(valoreInCarriera(carriera, g))}</td>
                 <td className="num">
                   <button className="bottone-secondario"
@@ -562,6 +588,18 @@ function Mercato({ db, carriera, onModificata }: Props) {
           })}
         </tbody>
       </table>
+
+      {/* ── la scheda giocatore sovrapposta (figurina + curva, M11) ── */}
+      {scheda && (
+        <SchedaGiocatoreCarriera
+          db={db}
+          carriera={carriera}
+          giocatoreId={scheda.id}
+          nomeClub={scheda.club}
+          clubId={scheda.clubId}
+          onChiudi={() => setScheda(null)}
+        />
+      )}
 
       {/* ── notiziario ── */}
       <h3>Notiziario</h3>

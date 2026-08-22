@@ -27,6 +27,7 @@ import { estendiMercatoAlMondo, inizializzaMercato } from '../mercato/stato.ts'
 import MatchDay from './MatchDay.tsx'
 import Mercato from './Mercato.tsx'
 import Rosa from './Rosa.tsx'
+import { SchedaGiocatoreCarriera } from './SchedaGiocatoreCarriera.tsx'
 import Tattica from './Tattica.tsx'
 
 /** Trasforma un evento del motore in una riga di cronaca in italiano. */
@@ -96,6 +97,8 @@ function SchermataCarriera({ db, carriera }: Props) {
   const [linguetta, setLinguetta] = useState<Linguetta>('partite')
   const [esitoStagione, setEsitoStagione] = useState<EsitoStagione | null>(null)
   const [matchDayAperto, setMatchDayAperto] = useState(false)
+  // la scheda di un giocatore della mia rosa (figurina + curva, M11)
+  const [schedaGiocatore, setSchedaGiocatore] = useState<number | null>(null)
   // contatore usato solo per forzare il ridisegno dopo aver mutato la carriera
   const [, setVersione] = useState(0)
 
@@ -791,7 +794,19 @@ function SchermataCarriera({ db, carriera }: Props) {
           squadra={{ tipo: 'club', id: carriera.clubId }}
           giocatoriIds={carriera.rose?.[carriera.clubId]}
           crescita={carriera.crescita}
-          onApriGiocatore={() => {}}
+          onApriGiocatore={setSchedaGiocatore}
+        />
+      )}
+
+      {/* la scheda del giocatore (figurina + curva di crescita, M11) */}
+      {schedaGiocatore !== null && (
+        <SchedaGiocatoreCarriera
+          db={db}
+          carriera={carriera}
+          giocatoreId={schedaGiocatore}
+          nomeClub={nomeClub}
+          clubId={carriera.clubId}
+          onChiudi={() => setSchedaGiocatore(null)}
         />
       )}
     </section>

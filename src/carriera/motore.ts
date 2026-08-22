@@ -19,7 +19,7 @@ import { preparaSquadra, tatticaDefault } from '../motore/preparazione.ts'
 import { estendiMercatoAlMondo, fineStagioneMercato, inizializzaMercato, aggiungiNotizia } from '../mercato/stato.ts'
 import { creaCoppa, creaCoppaEuropa, giocaTurnoCoppaSeDovuto } from './coppa.ts'
 import { aggiornaFiducia, controllaEsonero, famaFineStagione, obiettivoDelClub, offerteFineStagione, variaFama } from './fama.ts'
-import { crescitaFineStagione, type NotaCrescita } from './crescita.ts'
+import { crescitaFineStagione, fotografaMiaRosa, type NotaCrescita } from './crescita.ts'
 import { avanzaNazionale, offertaNazionale } from './nazionale.ts'
 import { rosaLegendIds, squadreLegend } from '../db/legends.ts'
 import { ingressoLeggendeSeDovuto, ritiroLeggendeSeDovuto } from './leggende.ts'
@@ -207,8 +207,9 @@ export function creaCarriera(
   )
   const carriera: Carriera = {
     id: `carriera-${Date.now()}`,
-    versioneSchema: 13,
+    versioneSchema: 14,
     rinati: {}, // i rigenerati post-ritiro (sessione 24)
+    storiaMedie: {}, // fotografata subito sotto, dopo la creazione
     dbImpronta: improntaDbCorrente(), // il DB con cui nasce la carriera
     leggendeMercato: leggendeDaAnno === undefined
       ? null
@@ -267,6 +268,7 @@ export function creaCarriera(
   // poi estende il mercato a tutti i campionati del DB
   inizializzaMercato(db, carriera)
   estendiMercatoAlMondo(db, carriera)
+  fotografaMiaRosa(db, carriera) // il primo punto della curva reale (M11)
   if (legend) {
     // la rosa leggendaria entra nella carriera con contratti pesanti
     carriera.rose[legend.clubCarriera.id] = legend.rosaIds
@@ -489,6 +491,7 @@ export function chiudiStagione(db: Database, carriera: Carriera) {
   carriera.qualificatoEuropa = livello === 1 && posizione <= 4
   if (carriera.qualificatoEuropa) variaFama(carriera, 2, 'Qualificazione alla Coppa Europa')
   const crescita = crescitaFineStagione(db, carriera)
+  fotografaMiaRosa(db, carriera) // lo storico per la curva reale (M11)
 
   // le promesse "di progetto" si verificano coi verdetti (M7, FRD §6.3)
   verificaPromesseFineStagione(db, carriera, promosso)

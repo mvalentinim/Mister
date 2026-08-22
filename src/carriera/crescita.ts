@@ -24,6 +24,135 @@ const ATTRIBUTI_MUTABILI = [
 /** Il declino massimo accumulabile in carriera (oltre non si scende). */
 const DECLINO_MASSIMO = -12
 
+// ── M11: la CURVA PERSONALE — la personalità modella crescita e declino ──
+//
+// Ogni giocatore ha la SUA parabola, ricavata (deterministicamente) da due
+// tratti del carattere:
+// - PROFESSIONALITÀ: sposta l'età del picco (chi si cura dura di più) e
+//   frena — o aggrava — il declino;
+// - AMBIZIONE: spinge (o smorza) la crescita giovanile.
+// Vale per tutti, RIGENERATI compresi: rinascono con la stessa personalità,
+// quindi con la stessa curva.
+
+export interface ParametriCurva {
+  /** l'età in cui finisce la maturità e comincia il declino (26-30) */
+  etaPicco: number
+  /** correzione alla crescita giovanile: +1 ambiziosi, -1 svogliati */
+  spintaGiovanile: number
+  /** correzione al declino: +1 lo frena (professionali), -1 lo aggrava */
+  frenoDeclino: number
+}
+
+/** I parametri personali della curva, dalla personalità (deterministici). */
+export function parametriCurva(g: GiocatoreRiga): ParametriCurva {
+  return {
+    // professionalità 50 → picco a 28 (il modello base); 1-99 → 26-30
+    etaPicco: 28 + Math.max(-2, Math.min(2, Math.round((g.professionalita - 50) / 25))),
+    spintaGiovanile: g.ambizione >= 75 ? 1 : g.ambizione <= 30 ? -1 : 0,
+    frenoDeclino: g.professionalita >= 75 ? 1 : g.professionalita <= 30 ? -1 : 0,
+  }
+}
+
+/** Il delta ATTESO in un anno (la media delle fasce del motore, senza dadi):
+    è il "passo" con cui si disegnano le curve del grafico. La crescita è
+    PROPORZIONALE al margine verso il potenziale: chi è lontano dal suo
+    tetto brucia le tappe, chi ci è vicino rifinisce — così un talento (o
+    un rigenerato sedicenne) arriva DAVVERO a ridosso del potenziale. */
+export function passoAtteso(eta: number, p: ParametriCurva, margine: number): number {
+  if (margine > 0) {
+    if (eta <= p.etaPicco - 7) // esplosione giovanile: chiude ~35% del gap
+      return Math.max(0, Math.max(1, Math.min(6, margine * 0.35)) + 0.5 + p.spintaGiovanile)
+    if (eta <= p.etaPicco - 4) // rifinitura: ~20% del gap
+      return Math.max(0, Math.min(3, margine * 0.2) + p.spintaGiovanile * 0.5)
+    if (eta <= p.etaPicco) // maturità: ultimo 10% l'anno
+      return Math.min(1, margine * 0.1)
+  }
+  if (eta <= p.etaPicco) return 0
+  if (eta <= p.etaPicco + 3) return Math.min(0, -0.5 + p.frenoDeclino * 0.5)
+  if (eta <= p.etaPicco + 6) return Math.min(0, -1.5 + p.frenoDeclino)
+  return Math.min(0, -2.5 + p.frenoDeclino)
+}
+
+/** Un'ETÀ di riferimento del grafico. */
+export const ETA_INIZIO_CURVA = 16
+export const ETA_FINE_CURVA = 40
+
+/**
+ * La curva IPOTETICA "come da DB" (solo per i giocatori della propria rosa):
+ * parte dal punto certo (età e media di oggi), integra i passi attesi in
+ * avanti (tetto: il potenziale) e a ritroso fino a 16 anni. È il destino
+ * sulla carta; quella reale può fare meglio o peggio.
+ */
+export function curvaModello(g: GiocatoreRiga, eta: number, media: number): Array<[number, number]> {
+  const p = parametriCurva(g)
+  const punti: Array<[number, number]> = [[eta, media]]
+  // in avanti, verso il potenziale e poi giù
+  let valore = media
+  for (let e = eta + 1; e <= ETA_FINE_CURVA; e++) {
+    valore = Math.min(g.potenziale, Math.max(30, valore + passoAtteso(e, p, g.potenziale - valore)))
+    punti.push([e, valore])
+  }
+  // a ritroso, togliendo il passo che quell'età avrebbe dato
+  valore = media
+  for (let e = eta - 1; e >= ETA_INIZIO_CURVA; e--) {
+    valore = Math.min(g.potenziale, Math.max(30, valore - passoAtteso(e + 1, p, 1)))
+    punti.unshift([e, valore])
+  }
+  return punti
+}
+
+/**
+ * La curva REALE fino a oggi: i punti fotografati nello storico (firma e
+ * fini stagione), più il punto attuale; il passato precedente allo storico
+ * viene ricostruito a ritroso col modello. Per i giocatori NON della rosa
+ * (mercato) lo storico è vuoto: si vede solo la ricostruzione — il futuro
+ * e il potenziale restano nascosti finché non si compra.
+ */
+export function curvaReale(
+  g: GiocatoreRiga, eta: number, media: number,
+  storia: Array<[number, number]> | undefined,
+): Array<[number, number]> {
+  const p = parametriCurva(g)
+  // i punti certi: storico (se c'è) + oggi, ordinati e senza doppioni d'età
+  const certi = new Map<number, number>()
+  for (const [e, m] of storia ?? []) certi.set(e, m)
+  certi.set(eta, media)
+  const punti = [...certi.entries()].sort((a, b) => a[0] - b[0]) as Array<[number, number]>
+  // il passato ignoto, a ritroso dal primo punto certo
+  let [primaEta, valore] = punti[0]
+  for (let e = primaEta - 1; e >= ETA_INIZIO_CURVA; e--) {
+    valore = Math.max(30, valore - passoAtteso(e + 1, p, 1))
+    punti.unshift([e, valore])
+  }
+  return punti
+}
+
+/** Fotografa nello storico le medie della MIA rosa (alla creazione della
+    carriera e a ogni fine stagione). */
+export function fotografaMiaRosa(db: Database, carriera: Carriera): void {
+  if (!carriera.storiaMedie) carriera.storiaMedie = {}
+  const ids = carriera.rose?.[carriera.clubId] ?? []
+  if (ids.length === 0) return
+  const righe = applicaCrescita(carriera, interroga<GiocatoreRiga>(
+    db,
+    `SELECT * FROM giocatore WHERE id IN (${ids.map(() => '?').join(',')})`,
+    ids,
+  ))
+  for (const g of righe) fotografaGiocatore(carriera, g)
+}
+
+/** Fotografa un singolo giocatore (alla firma di un acquisto o svincolato).
+    La riga deve avere GIÀ la crescita applicata. */
+export function fotografaGiocatore(carriera: Carriera, g: GiocatoreRiga): void {
+  if (!carriera.storiaMedie) carriera.storiaMedie = {}
+  const eta = etaNellaStagione(carriera, g)
+  const media = mediaComplessiva(g)
+  const storia = carriera.storiaMedie[g.id] ?? []
+  // un punto per età: l'ultimo scatto della stagione vince
+  carriera.storiaMedie[g.id] = [...storia.filter(([e]) => e !== eta), [eta, media] as [number, number]]
+    .sort((a, b) => a[0] - b[0])
+}
+
 /** Applica un registro di delta a delle righe giocatore. Restituisce COPIE
     modificate: le righe lette dal DB restano intatte. */
 export function applicaDelta(
@@ -58,9 +187,9 @@ export function applicaCrescita(carriera: Carriera, righe: GiocatoreRiga[]): Gio
   })
 }
 
-/** L'età "di gioco" a fine stagione: gli anni della carriera avanzano
-    anche se l'orologio reale no (l'anno di nascita si legge dalla data). */
-function etaNellaStagione(carriera: Carriera, g: GiocatoreRiga): number {
+/** L'età "di gioco" nella stagione corrente: gli anni della carriera
+    avanzano anche se l'orologio reale no (l'anno di nascita dalla data). */
+export function etaNellaStagione(carriera: Carriera, g: GiocatoreRiga): number {
   const annoNascita = parseInt(g.data_nascita, 10)
   if (Number.isNaN(annoNascita)) return calcolaEta(g.data_nascita)
   return carriera.anno + 1 - annoNascita
@@ -112,14 +241,23 @@ export function crescitaFineStagione(db: Database, carriera: Carriera): NotaCres
       const media = mediaComplessiva(g) // già col delta attuale
       const margine = g.potenziale - media // quanto può ancora crescere
 
-      // ── il cuore della regola: età + potenziale… ──
+      // ── il cuore della regola: età + potenziale, sulla CURVA PERSONALE
+      //    (M11): le fasce scorrono con l'età di picco del giocatore, e la
+      //    personalità spinge la crescita o frena il declino ──
+      const p = parametriCurva(g)
       let delta = 0
-      if (eta <= 21) delta = margine > 0 ? 1 + rng.intero(3) : 0 // +1..+3
-      else if (eta <= 24) delta = margine > 0 ? rng.intero(3) : 0 // 0..+2
-      else if (eta <= 28) delta = margine > 0 && rng.evento(0.15) ? 1 : rng.evento(0.1) ? -1 : 0
-      else if (eta <= 31) delta = rng.evento(0.5) ? -1 : 0
-      else if (eta <= 34) delta = -1 - rng.intero(2) // -1..-2
+      if (eta <= p.etaPicco - 7)
+        // esplosione giovanile: proporzionale al margine (chi è lontano dal
+        // potenziale brucia le tappe) + il dado; tetto +6 l'anno
+        delta = margine > 0 ? Math.max(1, Math.min(6, Math.round(margine * 0.35))) + rng.intero(2) : 0
+      else if (eta <= p.etaPicco - 4)
+        delta = margine > 0 ? Math.min(3, Math.round(margine * 0.2)) + rng.intero(2) : 0 // rifinitura
+      else if (eta <= p.etaPicco) delta = margine > 0 && rng.evento(0.3) ? 1 : rng.evento(0.1) ? -1 : 0
+      else if (eta <= p.etaPicco + 3) delta = rng.evento(0.5) ? -1 : 0 // primo declino
+      else if (eta <= p.etaPicco + 6) delta = -1 - rng.intero(2) // -1..-2
       else delta = -2 - rng.intero(2) // -2..-3
+      if (delta > 0) delta = Math.max(0, delta + p.spintaGiovanile) // ambizione
+      if (delta < 0) delta = Math.min(0, delta + p.frenoDeclino) // professionalità
 
       // ── …più utilizzo e prestazioni (solo per la squadra dell'utente,
       //    l'unica di cui esistono statistiche vere) ──

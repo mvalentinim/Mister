@@ -254,7 +254,7 @@ export interface Carriera {
       carriere normali, la mette duplicaCarriera. Facoltativa: i vecchi
       salvataggi non ne hanno bisogno. */
   nomeSlot?: string
-  versioneSchema: 13 // per le migrazioni dei salvataggi (FRD §11)
+  versioneSchema: 14 // per le migrazioni dei salvataggi (FRD §11)
   /** i giocatori RIGENERATI (post-ritiro): id → l'anno di nascita nuovo,
       che sovrascrive quello del DB in lettura (come la crescita): il resto
       del gioco li vede sedicenni. Il POTENZIALE resta quello del DB — il
@@ -295,6 +295,11 @@ export interface Carriera {
   fiducia: number
   /** crescita/declino accumulato dei giocatori (giocatoreId → delta attributi) */
   crescita: Record<number, number>
+  /** lo STORICO delle medie dei giocatori della MIA rosa (M11): id →
+      punti [età, media] fotografati alla firma e a ogni fine stagione.
+      Alimenta la curva "reale" del grafico di crescita; i giocatori mai
+      stati miei non ne hanno (il loro passato resta un'ipotesi). */
+  storiaMedie: Record<number, Array<[number, number]>>
   /** la coppa nazionale della stagione (null nei salvataggi migrati a metà stagione) */
   coppa: CoppaStagione | null
   // ── M8 parte 2: Europa e contratto dell'allenatore ──
