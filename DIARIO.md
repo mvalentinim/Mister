@@ -709,3 +709,26 @@ Log delle sessioni di lavoro. Regola (piano §0.1): ogni sessione = un obiettivo
 **Correzione sessione 32:** via anche la maglietta bianca dalla composizione (copriva mezza faccia): resta il solo volto, col collo che arriva al bordo come un busto ritagliato. jersey_std.png resta tra gli asset, inutilizzato.
 
 **Aggiustamenti sessione 32 (richiesti):** (1) nell'editor della figurina ora si REGOLANO barba e capigliatura: frecce nelle quattro direzioni (1px della griglia 48 per passo) e scala ±10% (attorno al centro, pixel netti), col tasto ↺ per azzerare — sei nuove colonne volto_*_dx/dy/scala per giocatore, salvate nel DB personalizzato come il resto; (2) raddrizzata la figurina nella scheda giocatore (l'inclinazione "da album" di −1.2° è stata bocciata). Collaudo: barba full beard giù di 2 e −10%, salvata, riletta, figurina dritta (transform: none verificato).
+
+---
+
+## Sessione 33 — 2026-08-22 — M11: lo stile Almanacco propagato a TUTTO il gioco
+
+**Obiettivo dichiarato:** riprendere il piano di progetto e completare la milestone M11 — propagare il linguaggio Almanacco (approvato su token, Figurina e Match Day) a ogni schermata (§6 di DESIGN-MISTER.md), con gli elementi dedicati e le rifiniture del piano (nazionalità in italiano, verifica multi-nazione).
+
+**Fatto:**
+- **`src/index.css` riscritto da capo** in linguaggio Almanacco: i vecchi nomi di variabile (--sfondo, --superficie, --accento…) ora sono ALIAS dei token di tokens.css, così tutte le schermate parlano carta/inchiostro senza toccare i componenti. Spariti gradienti, ombre sfocate e angoli tondi: bordi 2px, ombre dure 4px 4px 0, raggio max 4px, animazioni a scatti steps() (§5) con rispetto di prefers-reduced-motion.
+- **Schermata titolo**: logo in font pixel verde con ombra dura, retino a punti sul fondo, bandierina verde/inchiostro/oro, voci del menu come schede di carta che si "premono". Emoji-icona rimosse dal telaio di TUTTA l'interfaccia (§4.1: menu, titoli, bottoni, linguette — restano solo nella prosa della cronaca).
+- **Tabelle da almanacco** (§4.3): header inchiostro pieno in Oswald maiuscolo, righe alternate carta/carta-2, numeri in IBM Plex Mono.
+- **Linguette da raccoglitore**: schede col bordo che spuntano dal dorso (filetto 3px), l'attiva verde che "esce" di 3px.
+- **HUD carriera** (§6): barra d'inchiostro in testa alla stagione con casacca nei colori sociali del club (riusa colori-club.ts della Figurina), stagione, giornata, fama, fiducia, contratto, obiettivo, trofei e il bottone Copia di sicurezza.
+- **Rosa con "Album figurine"**: interruttore elenco/album; la griglia di figurine mini (volto composto 96px, cognome, ruolo, media colorata per fascia) — il "formato mini" annunciato in sessione 32.
+- **Classifica coi filetti di zona** (§6): verde sulle prime 3 in seconda divisione (promozione), rosso sulle ultime 3 in prima (retrocessione), con didascalia; regole lette dal motore (3 su, 3 giù).
+- **Ticker del mercato** (§6): striscia "ULTIM'ORA" arancione con le ultime notizie che scorrono in monospazio, come un telex.
+- **Albo d'oro** (§6): bacheca con filetto oro nella linguetta Partite, anni in Archivo Black dorato.
+- **Notiziario a ritagli**: ogni notizia è un riquadro di carta bordato (ufficiale marcata, rumor corsiva su carta-2, avvisi su verde pieno).
+- **Nazionalità in italiano** (M11): nuova `src/db/nazionalita.ts` con la traduzione delle 126 nazionalità del DB (chiavi inglesi intatte per filtri e volti); applicata a Rosa, Mercato (filtro ordinato sull'italiano), Elenco squadre, Editor e Figurina.
+- **Font Outfit rimosso** (era dello stile bocciato): restano i 5 font dell'Almanacco (§3).
+- **Collaudi**: tsc, oxlint, build e `npm run calibra` verdi. Collaudo visivo Playwright su TUTTE le schermate (titolo, squadre, rosa elenco+album, scheda giocatore, editor, wizard nuova carriera, offerte, carriera/partite, classifica, mercato aperto e chiuso col ticker, tattica, Match Day, carica carriera) con iterazione critica sugli screenshot. **Verifica multi-nazione**: carriera in Germania (2. Bundesliga) — mercato, 3 giornate, classifica coi filetti e album volti regionali ✓ (la calibrazione del motore è indipendente dalla nazione ed è verde).
+
+**Debiti/annotazioni:** il SUONO (§5, 6-8 effetti con volume regolabile) resta come rifinitura facoltativa a valle del giudizio visivo dello sviluppatore; curve di crescita personali dalla personalità in lista M11; cella cornrows da rigenerare alla fonte; il collaudo di persona (DoD M11: giudizio visivo delle schermate) spetta allo sviluppatore quando riavrà il Mac.

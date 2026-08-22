@@ -112,7 +112,7 @@ function Amichevole({ db }: Props) {
     <select value={valore} onChange={(e) => cambia(e.target.value)}>
       <option value="">Scegli una squadra…</option>
       {legend.length > 0 && (
-        <optgroup label="⭐ Squadre Legend">
+        <optgroup label="★ Squadre Legend">
           {legend.map((s) => <option key={s.id} value={`legend:${s.id}`}>{s.nome}</option>)}
         </optgroup>
       )}
@@ -128,7 +128,7 @@ function Amichevole({ db }: Props) {
 
   return (
     <section className="schermata">
-      <h2>🤝 Amichevole</h2>
+      <h2>Amichevole</h2>
       <p className="nota">
         Qualunque sfida ti venga in mente: le squadre Legend contro i club di
         oggi, o le leggende tra loro. Il risultato non tocca le carriere.
@@ -144,7 +144,7 @@ function Amichevole({ db }: Props) {
       </div>
 
       {/* ── il torneo fantasy (FRD §5.3) ── */}
-      <h3>🏆 Torneo fantasy</h3>
+      <h3>Torneo fantasy</h3>
       <p className="nota">Scegli 4 oppure 8 squadre: eliminazione diretta secca, il tabellone si gioca in un colpo.</p>
       <div className="riga-bottoni filtri-mercato">
         {opzioni('', (v) => { if (v && !partecipanti.includes(v) && partecipanti.length < 8) setPartecipanti([...partecipanti, v]) })}
@@ -157,12 +157,12 @@ function Amichevole({ db }: Props) {
         <button className="bottone-primario"
           disabled={partecipanti.length !== 4 && partecipanti.length !== 8}
           onClick={giocaTorneo}>
-          🏆 Gioca il torneo ({partecipanti.length}/4 o 8)
+          Gioca il torneo ({partecipanti.length}/4 o 8)
         </button>
       </div>
       {torneo && (
         <div className="cronaca">
-          <h3>🏆 {torneo.campione} vince il torneo!</h3>
+          <h3>{torneo.campione} vince il torneo!</h3>
           {torneo.turni.map((t) => (
             <div key={t.nome}>
               <h4>{t.nome}</h4>

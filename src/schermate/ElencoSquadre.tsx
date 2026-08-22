@@ -4,6 +4,7 @@
 
 import type { Database } from 'sql.js'
 import { interroga } from '../db/database.ts'
+import { nazionalitaInItaliano } from '../db/nazionalita.ts'
 import type { ClubRiga, NazionaleRiga } from '../db/tipi.ts'
 
 interface Props {
@@ -80,7 +81,7 @@ function ElencoSquadre({ db, onApriRosa, onApriGiocatore }: Props) {
 
       <h3 className="titolo-competizione">Nazionali</h3>
       <p className="nota">
-        ⭐ = qualificata al Mondiale 2026. Le rose contrassegnate con «selezione
+        ★ = qualificata al Mondiale 2026. Le rose contrassegnate con «selezione
         automatica» non sono convocazioni ufficiali: sono i migliori giocatori
         di quella nazionalità presenti nel database (vedi docs/dati.md).
       </p>
@@ -100,7 +101,7 @@ function ElencoSquadre({ db, onApriRosa, onApriGiocatore }: Props) {
               className="riga-cliccabile"
               onClick={() => onApriRosa({ tipo: 'nazionale', id: n.id })}
             >
-              <td className="grassetto">{n.mondiale_2026 ? '⭐ ' : ''}{n.nome}</td>
+              <td className="grassetto">{n.mondiale_2026 ? '★ ' : ''}{n.nome}</td>
               <td className="num">{n.fama}</td>
               <td className="num">{n.numero_giocatori}</td>
               <td className="nota">{n.generata ? 'selezione automatica' : 'ufficiale (fonte FIFA 23)'}</td>
@@ -126,9 +127,9 @@ function ElencoSquadre({ db, onApriRosa, onApriGiocatore }: Props) {
               {leggende.map((l) => (
                 <tr key={l.id} className="riga-cliccabile" onClick={() => onApriGiocatore(l.id)}>
                   <td className="grassetto">{l.nome} {l.cognome}</td>
-                  <td>{l.categoria === 'icon' ? '★ Icon' : '⚡ Hero'}</td>
+                  <td>{l.categoria === 'icon' ? '★ Icon' : '☆ Hero'}</td>
                   <td>{l.ruolo}</td>
-                  <td>{l.nazionalita}</td>
+                  <td>{nazionalitaInItaliano(l.nazionalita)}</td>
                 </tr>
               ))}
             </tbody>

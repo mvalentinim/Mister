@@ -11,6 +11,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Database } from 'sql.js'
 import { assegnaImprontaSeMancante, improntaDbCorrente, interroga, interrogaUna } from '../db/database.ts'
 import { calcolaEta, mediaComplessiva, type GiocatoreRiga } from '../db/tipi.ts'
+import { nazionalitaInItaliano } from '../db/nazionalita.ts'
 import { eliminaDatabaseUtente, esisteDatabaseUtente, salvaDatabaseUtente } from '../db/persistenza.ts'
 import { eliminaSquadraLegend, rosaLegendIds, salvaSquadraLegend, squadreLegend } from '../db/legends.ts'
 import { scaricaFile } from '../scarica.ts'
@@ -402,7 +403,7 @@ function Editor({ db }: Props) {
 
   return (
     <section className="schermata editor">
-      <h2>🛠 Editor del database</h2>
+      <h2>Editor del database</h2>
       <p className="nota">
         Le modifiche valgono per le NUOVE carriere (quelle in corso fotografano il
         database alla creazione, FRD §5.4).{' '}
@@ -412,33 +413,33 @@ function Editor({ db }: Props) {
       </p>
       <div className="riga-bottoni">
         <button className="bottone-secondario" onClick={esporta}>
-          ⬇️ Esporta database (.sqlite)
+          Esporta database (.sqlite)
         </button>
         <label className="bottone-secondario" style={{ cursor: 'pointer' }}>
-          ⬆️ Importa database da file
+          Importa database da file
           <input type="file" accept=".sqlite" hidden
             onChange={(e) => { const f = e.target.files?.[0]; if (f) void importa(f) }} />
         </label>
         <button className="bottone-secondario" onClick={esportaJson}>
-          ⬇️ Esporta JSON
+          Esporta JSON
         </button>
         <label className="bottone-secondario" style={{ cursor: 'pointer' }}>
-          ⬆️ Importa JSON
+          Importa JSON
           <input type="file" accept=".json" hidden
             onChange={(e) => { const f = e.target.files?.[0]; if (f) void importaJson(f) }} />
         </label>
         {personalizzato && (
           <button className="bottone-secondario" onClick={() => void ripristina()}>
-            ♻️ Ripristina il database originale
+            Ripristina il database originale
           </button>
         )}
       </div>
       {avviso && <p className="avviso">{avviso}</p>}
 
       {/* ── ricerca ── */}
-      <h3>🔎 Cerca giocatori</h3>
+      <h3>Cerca giocatori</h3>
       <div className="riga-bottoni">
-        <button className="bottone-secondario" onClick={() => void nuovoGiocatore()}>➕ Nuovo giocatore</button>
+        <button className="bottone-secondario" onClick={() => void nuovoGiocatore()}>Nuovo giocatore</button>
       </div>
       <div className="riga-bottoni filtri-mercato">
         <input placeholder="Nome (min 2 lettere)…" value={ricerca}
@@ -511,7 +512,7 @@ function Editor({ db }: Props) {
       {/* ── la scheda di modifica ── */}
       {aperto && (
         <div className="scheda-editor">
-          <h3>✏️ {aperto.nome} {aperto.cognome} <span className="nota">(id {aperto.id})</span></h3>
+          <h3>{aperto.nome} {aperto.cognome} <span className="nota">(id {aperto.id})</span></h3>
 
           <h4>Anagrafica</h4>
           <div className="griglia-editor">
@@ -598,7 +599,7 @@ function Editor({ db }: Props) {
                   className="bottone-secondario"
                   onClick={() => setModifiche({ ...modifiche, volto_seme: String(1 + Math.floor(Math.random() * 2_000_000_000)) })}
                 >
-                  🎲 Rigenera volto
+                  Rigenera volto
                 </button>
               </label>
 
@@ -661,14 +662,14 @@ function Editor({ db }: Props) {
           </div>
 
           <div className="riga-bottoni">
-            <button className="bottone-primario" onClick={() => void salvaGiocatore()}>💾 Salva giocatore</button>
+            <button className="bottone-primario" onClick={() => void salvaGiocatore()}>Salva giocatore</button>
             <button className="bottone-secondario" onClick={() => { setApertoId(null); setModifiche({}) }}>Chiudi</button>
           </div>
         </div>
       )}
 
       {/* ── le squadre Legend (wizard, FRD §5.3) ── */}
-      <h3>⭐ Squadre Legend</h3>
+      <h3>Squadre Legend</h3>
       <p className="nota">
         Rose leggendarie pescate da Icon e Heroes: si sfidano in amichevole
         (voce "Amichevole" nel menu principale).
@@ -690,7 +691,7 @@ function Editor({ db }: Props) {
           </tbody>
         </table>
       )}
-      <button className="bottone-primario" onClick={() => apriLegend(null)}>➕ Nuova squadra Legend</button>
+      <button className="bottone-primario" onClick={() => apriLegend(null)}>Nuova squadra Legend</button>
 
       {legendAperta !== undefined && (
         <div className="scheda-editor">
@@ -712,7 +713,7 @@ function Editor({ db }: Props) {
                   <tr key={g.id}>
                     <td className="grassetto">{g.nome} {g.cognome}</td>
                     <td>{g.ruolo}</td>
-                    <td className="nota">{g.nazionalita}</td>
+                    <td className="nota">{nazionalitaInItaliano(g.nazionalita)}</td>
                     <td className="num evidenza">{mediaComplessiva(g)}</td>
                     <td><button className="bottone-secondario"
                       onClick={() => setLegendRosa(legendRosa.filter((id) => id !== g.id))}>Togli</button></td>
@@ -738,7 +739,7 @@ function Editor({ db }: Props) {
                   <tr key={g.id}>
                     <td className="grassetto">{g.nome} {g.cognome}</td>
                     <td>{g.ruolo}</td>
-                    <td className="nota">{g.nazionalita} · {g.categoria}</td>
+                    <td className="nota">{nazionalitaInItaliano(g.nazionalita)} · {g.categoria}</td>
                     <td className="num evidenza">{mediaComplessiva(g)}</td>
                     <td><button className="bottone-secondario"
                       onClick={() => setLegendRosa([...legendRosa, g.id])}>Aggiungi</button></td>
@@ -750,7 +751,7 @@ function Editor({ db }: Props) {
 
           <div className="riga-bottoni">
             <button className="bottone-primario" disabled={!legendValida} onClick={() => void salvaLegend()}>
-              💾 Salva squadra Legend
+              Salva squadra Legend
             </button>
             <button className="bottone-secondario" onClick={() => setLegendAperta(undefined)}>Chiudi</button>
           </div>
@@ -774,7 +775,7 @@ function Editor({ db }: Props) {
           ))}
         </select>
         <select value="" onChange={(e) => { if (e.target.value) void nuovoClub(e.target.value) }}>
-          <option value="">➕ Nuovo club in…</option>
+          <option value="">+ Nuovo club in…</option>
           {campionati.map((k) => <option key={k} value={k}>{k}</option>)}
         </select>
       </div>
@@ -797,7 +798,7 @@ function Editor({ db }: Props) {
             carriere; meglio tenere pari il numero di squadre per lega (con un
             numero dispari il calendario prevede un turno di riposo).
           </p>
-          <button className="bottone-primario" onClick={() => void salvaClub()}>💾 Salva club</button>
+          <button className="bottone-primario" onClick={() => void salvaClub()}>Salva club</button>
         </div>
       )}
     </section>

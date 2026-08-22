@@ -11,7 +11,6 @@ import '@fontsource-variable/oswald'
 import '@fontsource-variable/inter'
 import '@fontsource/press-start-2p'
 import '@fontsource/ibm-plex-mono'
-import '@fontsource-variable/outfit' // in uscita: resta finché le vecchie schermate non migrano
 import './design/tokens.css'
 import './index.css'
 import App from './App.tsx'

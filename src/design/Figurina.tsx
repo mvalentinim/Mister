@@ -8,6 +8,7 @@
 
 import type { GiocatoreRiga } from '../db/tipi.ts'
 import { mediaComplessiva, calcolaEta } from '../db/tipi.ts'
+import { nazionalitaInItaliano } from '../db/nazionalita.ts'
 import { coloriClub, numeroMaglia } from './colori-club.ts'
 import { fascia } from './fasce.ts'
 import { VoltoPixel } from './VoltoPixel.tsx'
@@ -81,7 +82,7 @@ export function Figurina({ giocatore: g, nomeClub, clubId }: Props) {
       {/* la riga anagrafica: club, età, nazionalità, piede */}
       <p className="fig-anagrafica">
         {nomeClub ?? (leggenda ? 'LEGGENDA' : 'SVINCOLATO')} · {calcolaEta(g.data_nascita)} ANNI
-        · {g.nazionalita} · {g.piede === 'sinistro' ? 'SX' : g.piede === 'destro' ? 'DX' : 'AMBI'}
+        · {nazionalitaInItaliano(g.nazionalita)} · {g.piede === 'sinistro' ? 'SX' : g.piede === 'destro' ? 'DX' : 'AMBI'}
       </p>
 
       {/* gli attributi: barre squadrate su due colonne */}

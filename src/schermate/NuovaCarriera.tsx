@@ -92,7 +92,7 @@ function NuovaCarriera({ db, onCarrieraCreata }: Props) {
       </p>
       {/* le LEGGENDE nel mercato come free agent (M9): opzionale */}
       <p className="nota">
-        ⭐ Leggende nel mercato come free agent?{' '}
+        Leggende nel mercato come free agent?{' '}
         <select value={leggendeOffset} onChange={(e) => setLeggendeOffset(e.target.value === '' ? '' : Number(e.target.value))}>
           <option value="">No</option>
           <option value={0}>Sì, da subito</option>
@@ -106,7 +106,7 @@ function NuovaCarriera({ db, onCarrieraCreata }: Props) {
       {/* la Legend nel campionato (M9, FRD §5.3): opzionale */}
       {legends.length > 0 && (
         <p className="nota">
-          ⭐ Vuoi una squadra Legend nel tuo campionato?{' '}
+          Vuoi una squadra Legend nel tuo campionato?{' '}
           <select value={legendScelta} onChange={(e) => setLegendScelta(e.target.value === '' ? '' : Number(e.target.value))}>
             <option value="">No, campionato normale</option>
             {legends.map((l) => <option key={l.id} value={l.id}>{l.nome}</option>)}

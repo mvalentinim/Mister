@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react'
 import type { Database } from 'sql.js'
 import type { Carriera } from '../carriera/tipi.ts'
 import { salvaCarriera } from '../carriera/salvataggio.ts'
+import { nazionalitaInItaliano } from '../db/nazionalita.ts'
 import { calcolaEta, mediaComplessiva, type GiocatoreRiga } from '../db/tipi.ts'
 import {
   accettaOfferta, eseguiAcquisto, giornoDiMercato, ingaggiaSvincolato,
@@ -97,7 +98,8 @@ function Mercato({ db, carriera, onModificata }: Props) {
 
   // le opzioni dei filtri, ricavate dal bacino reale
   const nazionalita = useMemo(
-    () => [...new Set(tuttiGliAltri.map(({ g }) => g.nazionalita))].sort((a, b) => a.localeCompare(b)),
+    () => [...new Set(tuttiGliAltri.map(({ g }) => g.nazionalita))]
+      .sort((a, b) => nazionalitaInItaliano(a).localeCompare(nazionalitaInItaliano(b))),
     [tuttiGliAltri],
   )
   const campionati = useMemo(
@@ -222,9 +224,9 @@ function Mercato({ db, carriera, onModificata }: Props) {
       <div className="mercato-testata">
         <div>
           {m.aperto ? (
-            <strong>🟢 Mercato {m.finestra === 'estiva' ? 'estivo' : 'invernale'} aperto — {m.giorniRimasti} giorni rimasti</strong>
+            <strong>MERCATO {m.finestra === 'estiva' ? 'ESTIVO' : 'INVERNALE'} APERTO — {m.giorniRimasti} giorni rimasti</strong>
           ) : (
-            <strong>🔴 Mercato chiuso (riapre {carriera.giornata < carriera.calendario.length / 2 ? 'a gennaio' : 'in estate'})</strong>
+            <strong>Mercato chiuso (riapre {carriera.giornata < carriera.calendario.length / 2 ? 'a gennaio' : 'in estate'})</strong>
           )}
           <p className="nota">
             Budget mercato: <strong>{euro(carriera.budget.mercato)}</strong> · monte stipendi:{' '}
@@ -234,24 +236,36 @@ function Mercato({ db, carriera, onModificata }: Props) {
         {m.aperto && (
           <div className="riga-bottoni">
             <button className="bottone-primario" onClick={() => void applica(() => giornoDiMercato(db, carriera))}>
-              ▶ Avanza un giorno
+              Avanza un giorno
             </button>
             <button
               className="bottone-secondario"
               onClick={() => void applica(() => { while (carriera.mercato.aperto) giornoDiMercato(db, carriera) })}
             >
-              ⏩ Fino a chiusura
+              Fino a chiusura
             </button>
           </div>
         )}
       </div>
+
+      {/* il TICKER (§6): le ultime notizie scorrono come su un telex */}
+      {m.notizie.length > 0 && (
+        <div className="ticker-mercato" aria-hidden>
+          <span className="ticker-etichetta">Ultim'ora</span>
+          <span className="ticker-testo">
+            <span>
+              {m.notizie.slice(0, 8).map((n) => `+++ ${n.testo}`).join('  ')} +++
+            </span>
+          </span>
+        </div>
+      )}
 
       {avviso && <p className="avviso">{avviso}</p>}
 
       {/* ── offerte ricevute ── */}
       {m.offerteRicevute.length > 0 && (
         <>
-          <h3>📨 Offerte ricevute</h3>
+          <h3>Offerte ricevute</h3>
           <table className="tabella">
             <tbody>
               {m.offerteRicevute.map((o) => {
@@ -374,7 +388,7 @@ function Mercato({ db, carriera, onModificata }: Props) {
       {/* ── ricerca giocatori ── */}
       {m.aperto && !trattativa && !ingaggio && (
         <>
-          <h3>🔎 Cerca un rinforzo</h3>
+          <h3>Cerca un rinforzo</h3>
           {/* prima riga: chi cerchi (nome, squadra, ruolo, nazionalità) */}
           <div className="riga-bottoni filtri-mercato">
             <input placeholder="Nome del giocatore (min 2 lettere)…" value={ricerca}
@@ -404,7 +418,7 @@ function Mercato({ db, carriera, onModificata }: Props) {
             </select>
             <select value={filtroNazione} onChange={(e) => setFiltroNazione(e.target.value)}>
               <option value="">Tutte le nazionalità</option>
-              {nazionalita.map((n) => <option key={n} value={n}>{n}</option>)}
+              {nazionalita.map((n) => <option key={n} value={n}>{nazionalitaInItaliano(n)}</option>)}
             </select>
           </div>
           {/* seconda riga: filtri numerici e ordinamento */}
@@ -453,7 +467,7 @@ function Mercato({ db, carriera, onModificata }: Props) {
                     <tr key={g.id}>
                       <td className="grassetto">{g.nome} {g.cognome}</td>
                       <td>{g.ruolo}</td>
-                      <td>{g.nazionalita}</td>
+                      <td>{nazionalitaInItaliano(g.nazionalita)}</td>
                       <td className="num">{calcolaEta(g.data_nascita)}</td>
                       <td className="num evidenza">{mediaComplessiva(g)}</td>
                       <td>{club}</td>
@@ -477,7 +491,7 @@ function Mercato({ db, carriera, onModificata }: Props) {
             <tbody>
               {svincolati.map((g) => (
                 <tr key={g.id}>
-                  <td className="grassetto">{g.categoria !== 'normale' ? '⭐ ' : ''}{g.nome} {g.cognome}</td>
+                  <td className="grassetto">{g.categoria !== 'normale' ? '★ ' : ''}{g.nome} {g.cognome}</td>
                   <td>{g.ruolo}</td>
                   <td className="num">{calcolaEta(g.data_nascita)}</td>
                   <td className="num evidenza">{mediaComplessiva(g)}</td>
@@ -495,7 +509,7 @@ function Mercato({ db, carriera, onModificata }: Props) {
       )}
 
       {/* ── la mia rosa: rinnovi e cedibili ── */}
-      <h3>👥 La tua rosa (contratti)</h3>
+      <h3>La tua rosa (contratti)</h3>
       <table className="tabella">
         <thead>
           <tr><th>Giocatore</th><th>Ruolo</th><th className="num">Media</th><th className="num">Stipendio</th><th className="num">Scad.</th><th className="num">Valore</th><th></th></tr>
@@ -545,7 +559,7 @@ function Mercato({ db, carriera, onModificata }: Props) {
       </table>
 
       {/* ── notiziario ── */}
-      <h3>📰 Notiziario</h3>
+      <h3>Notiziario</h3>
       <ul className="notiziario">
         {m.notizie.slice(0, 40).map((n, i) => (
           <li key={i} className={`notizia ${n.tipo}`}>

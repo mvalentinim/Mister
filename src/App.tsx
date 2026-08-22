@@ -116,30 +116,30 @@ function App() {
 
         <nav className="menu">
           <button className="voce-menu attiva" disabled={!db} onClick={() => setVista({ tipo: 'nuova-carriera' })}>
-            <span className="voce-etichetta">⚽ Nuova carriera</span>
+            <span className="voce-etichetta">Nuova carriera</span>
             <span className="voce-descrizione">Scegli una nazione e inizia la scalata dalla seconda divisione</span>
           </button>
           <button className="voce-menu attiva" disabled={!db} onClick={apriCaricaCarriera}>
-            <span className="voce-etichetta">📂 Carica carriera</span>
+            <span className="voce-etichetta">Carica carriera</span>
             <span className="voce-descrizione">Riprendi una carriera salvata</span>
           </button>
           <button className="voce-menu attiva" disabled={!db && !erroreDb} onClick={() => setVista({ tipo: 'squadre' })}>
-            <span className="voce-etichetta">🌍 Database</span>
+            <span className="voce-etichetta">Database</span>
             <span className="voce-descrizione">
               {db ? 'Sfoglia squadre, nazionali e leggende' : erroreDb ?? 'Caricamento database…'}
             </span>
           </button>
           <button className="voce-menu attiva" disabled={!db} onClick={() => setVista({ tipo: 'amichevole' })}>
-            <span className="voce-etichetta">🏟 Amichevole</span>
+            <span className="voce-etichetta">Amichevole</span>
             <span className="voce-descrizione">Sfide libere: le squadre Legend contro chiunque</span>
           </button>
           <button className="voce-menu attiva" disabled={!db} onClick={() => setVista({ tipo: 'editor' })}>
-            <span className="voce-etichetta">🛠 Editor</span>
+            <span className="voce-etichetta">Editor</span>
             <span className="voce-descrizione">Modifica giocatori e club, crea le tue leggende (M9)</span>
           </button>
         </nav>
 
-        <footer className="versione">versione 0.10 · M10 — salvataggi portabili</footer>
+        <footer className="versione">versione 0.11 · M11 — l'almanacco</footer>
       </main>
     )
   }
@@ -151,7 +151,7 @@ function App() {
       {/* Barra di navigazione con il percorso a ritroso */}
       <header className="barra-navigazione">
         <button className="bottone-indietro" onClick={() => setVista({ tipo: 'menu' })}>
-          ⌂ Menu
+          ‹ Menu
         </button>
         {(vista.tipo === 'rosa' || vista.tipo === 'giocatore') && (
           <button className="bottone-indietro" onClick={() => setVista({ tipo: 'squadre' })}>
@@ -205,7 +205,7 @@ function App() {
           </p>
           <p>
             <button className="bottone-secondario" onClick={() => inputImporta.current?.click()}>
-              ⬆ Importa da file (.mister)
+              Importa da file (.mister)
             </button>
             <input
               ref={inputImporta}
@@ -230,7 +230,7 @@ function App() {
                     {c.allenatore.nome} — {c.nazionale
                       ? `CT ${c.nazionale.nome}`
                       : c.club.find((x) => x.id === c.clubId)?.nome}
-                    {c.nomeSlot ? ` · 📌 ${c.nomeSlot}` : ''}
+                    {c.nomeSlot ? ` · «${c.nomeSlot}»` : ''}
                   </span>
                   <span className="voce-descrizione">
                     {c.nazione.nome} · stagione {etichettaStagione(c.anno)} · giornata{' '}

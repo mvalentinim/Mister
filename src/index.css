@@ -1,10 +1,9 @@
-/* index.css — il DESIGN SYSTEM dell'app (M11, "videogame 2026").
-   Tema CHIARO su toni di grigio (scelta dello sviluppatore, sessione 3),
-   ma con la cura di un videogame moderno: tipografia dedicata (Inter per
-   i testi, Outfit per i titoli — impacchettati nell'app, niente rete),
-   una scala di colori con profondità, ombre morbide, angoli generosi,
-   micro-animazioni. Tutto parte dai "token" qui sotto: cambiare un token
-   cambia l'intera app. */
+/* index.css — la PELLE dell'app in stile "ALMANACCO" (DESIGN-MISTER.md §6,
+   propagazione globale della sessione 33). I valori vivono nei token di
+   src/design/tokens.css (caricato prima di questo file): qui i vecchi nomi
+   di variabile usati dalle schermate vengono MAPPATI sui token, così ogni
+   schermata parla subito il nuovo linguaggio — carta, inchiostro, bordi
+   netti 2px, ombre dure senza sfocatura, niente gradienti. */
 
 /* Reset minimo: azzera i margini di default del browser */
 * {
@@ -14,80 +13,72 @@
 }
 
 :root {
-  /* ── I TOKEN DEL TEMA ─────────────────────────────────────────── */
-  /* superfici, dal fondo alla carta */
-  --sfondo: #eef0f4;            /* grigio chiaro di fondo */
-  --sfondo-carta: #f6f7f9;      /* intestazioni tabella, chip */
-  --superficie: #ffffff;        /* pannelli, tabelle, bottoni */
-  --velo: rgb(255 255 255 / 82%); /* barre sticky sfocate */
-  --bordo: #dcdfe6;
-  --bordo-forte: #c3c8d2;
+  /* ── ALIAS: i vecchi nomi puntano ai token dell'Almanacco ───────── */
+  --sfondo: var(--paper);
+  --sfondo-carta: var(--paper-2);
+  --superficie: var(--paper);
+  --velo: var(--paper);
+  --bordo: var(--ink);
+  --bordo-forte: var(--ink);
 
-  /* testo */
-  --testo: #1b2027;             /* quasi nero, ma caldo */
-  --testo-attenuato: #626977;   /* note e didascalie */
+  --testo: var(--ink);
+  --testo-attenuato: var(--ink-2);
 
-  /* il VERDE del calcio: una scala, non un colore solo */
-  --accento: #17724a;           /* il verde principale */
-  --accento-vivo: #1d9257;      /* gradienti e hover */
-  --accento-scuro: #0d4930;     /* testo su tenue, bordi marcati */
-  --accento-tenue: #e4f2ea;     /* sfondi evidenziati */
+  --accento: var(--green-pitch);
+  --accento-vivo: var(--green-pitch);
+  --accento-scuro: var(--green-pitch);
+  --accento-tenue: var(--paper-2);
 
-  /* colori di servizio */
-  --oro: #b8860b;               /* leggende e trofei */
-  --oro-tenue: #fdf3d7;
-  --pericolo: #c0392b;
-  --attenzione: #e0a800;
+  --oro: var(--gold);
+  --oro-tenue: var(--paper-2);
+  --pericolo: var(--red-card);
+  --attenzione: var(--orange-hot);
 
-  /* profondità: tre livelli di ombra */
-  --ombra-1: 0 1px 2px rgb(16 24 40 / 6%), 0 1px 3px rgb(16 24 40 / 7%);
-  --ombra-2: 0 6px 16px rgb(16 24 40 / 9%), 0 2px 4px rgb(16 24 40 / 6%);
-  --ombra-3: 0 16px 40px rgb(16 24 40 / 16%);
+  /* le "ombre" ora sono DURE: piene, spostate, senza blur (§4.1) */
+  --ombra-1: var(--ombra-dura);
+  --ombra-2: var(--ombra-dura);
+  --ombra-3: 6px 6px 0 var(--ink);
 
-  /* forme e movimenti */
-  --raggio: 12px;
-  --raggio-grande: 18px;
-  --scatto: 0.16s cubic-bezier(0.3, 0.7, 0.4, 1);
+  /* forme: angoli quasi vivi, movimenti a scatti */
+  --raggio: var(--raggio-max);
+  --raggio-grande: var(--raggio-max);
+  --scatto: 0.08s steps(2);
 
-  /* tipografia */
-  --font-testo: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-titoli: 'Outfit Variable', var(--font-testo);
+  --font-testo: var(--font-body);
+  --font-titoli: var(--font-heading);
   font-family: var(--font-testo);
 }
 
 body {
-  /* il fondo non è piatto: due aloni verdi appena percettibili agli angoli
-     danno "aria da stadio" senza rinunciare al tema chiaro */
-  background:
-    radial-gradient(900px 480px at 88% -8%, rgb(23 114 74 / 7%), transparent 65%),
-    radial-gradient(700px 420px at -6% 100%, rgb(23 114 74 / 5%), transparent 60%),
-    var(--sfondo);
-  background-attachment: fixed;
-  color: var(--testo);
+  /* carta piena, senza aloni né gradienti: come una pagina stampata */
+  background: var(--paper);
+  color: var(--ink);
   min-height: 100vh;
   font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-/* titoli sempre col font display */
+/* i titoli parlano in MAIUSCOLO condensato (§3) */
 h1, h2, h3, h4 {
-  font-family: var(--font-titoli);
-  letter-spacing: 0.01em;
-  line-height: 1.25;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
 }
 
-/* anello di fuoco uniforme per la navigazione da tastiera */
+/* anello di fuoco per la navigazione da tastiera: netto, da stampa */
 :focus-visible {
-  outline: 2px solid var(--accento-vivo);
+  outline: 2px solid var(--green-pitch);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
-/* barre di scorrimento discrete, da app nativa */
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: var(--bordo-forte); border-radius: 999px; border: 2px solid var(--sfondo); }
-::-webkit-scrollbar-track { background: transparent; }
+/* barre di scorrimento squadrate, coerenti con la carta */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-thumb { background: var(--ink-2); border: 3px solid var(--paper); }
+::-webkit-scrollbar-track { background: var(--paper-2); }
 
 /* ---- Schermata titolo ---- */
 
@@ -104,46 +95,41 @@ h1, h2, h3, h4 {
   overflow: hidden;
 }
 
-/* il "campo" dietro il titolo: cerchio di centrocampo e linea mediana,
-   disegnati in CSS, così tenui da sembrare un ricordo */
+/* il retino a punti sul fondo: pagina di almanacco, non schermo vuoto */
 .schermata-titolo::before {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle 260px at 50% 32%, transparent 258px, rgb(23 114 74 / 10%) 259px, transparent 262px),
-    linear-gradient(to bottom, transparent calc(32% - 1px), rgb(23 114 74 / 8%) 32%, transparent calc(32% + 1px));
+  background-image: radial-gradient(rgb(26 26 26 / 6%) 1.2px, transparent 1.2px);
+  background-size: 8px 8px;
   pointer-events: none;
 }
 
+/* il logo: font pixel (l'unico posto dove domina, §3) con ombra dura */
 .logo {
-  font-family: var(--font-titoli);
-  font-weight: 800;
-  font-size: clamp(3.2rem, 12vw, 6.5rem);
-  letter-spacing: 0.32em;
-  /* compensa lo spazio extra dopo l'ultima lettera */
-  margin-right: -0.32em;
-  /* verde profondo che sfuma verso il quasi-nero: presenza, non colore piatto */
-  background: linear-gradient(160deg, var(--accento-scuro) 20%, var(--testo) 80%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: titolo-entra 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  font-family: var(--font-pixel);
+  font-size: clamp(2rem, 8vw, 4.2rem);
+  letter-spacing: 0.12em;
+  margin-right: -0.12em;
+  color: var(--green-pitch);
+  text-shadow: 4px 4px 0 var(--ink);
+  animation: apparizione-scatti 0.3s steps(3) both;
 }
 
-/* la "bandierina" sotto il logo: tre strisce da kit di gioco */
 .sottotitolo {
-  font-size: 1.05rem;
+  font-family: var(--font-heading);
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--testo-attenuato);
+  color: var(--ink-2);
   margin-bottom: 2.2rem;
   padding-top: 0.9rem;
   position: relative;
-  animation: titolo-entra 0.5s 0.08s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation: apparizione-scatti 0.3s 0.1s steps(3) both;
 }
 
+/* la bandierina sotto il logo: tre blocchi pieni, da stampa */
 .sottotitolo::before {
   content: '';
   position: absolute;
@@ -151,75 +137,56 @@ h1, h2, h3, h4 {
   left: 50%;
   transform: translateX(-50%);
   width: 72px;
-  height: 4px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--accento-vivo), var(--accento) 55%, var(--oro));
-}
-
-@keyframes titolo-entra {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: none; }
+  height: 5px;
+  background: linear-gradient(90deg,
+    var(--green-pitch) 0 33%, var(--ink) 33% 66%, var(--gold) 66% 100%);
 }
 
 .menu {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.9rem;
   width: min(460px, 100%);
+  position: relative;
 }
 
-/* le voci del menu entrano una dopo l'altra, come in un titolo di gioco */
-.schermata-titolo .menu .voce-menu { animation: titolo-entra 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
-.schermata-titolo .menu .voce-menu:nth-child(1) { animation-delay: 0.12s; }
-.schermata-titolo .menu .voce-menu:nth-child(2) { animation-delay: 0.18s; }
-.schermata-titolo .menu .voce-menu:nth-child(3) { animation-delay: 0.24s; }
-.schermata-titolo .menu .voce-menu:nth-child(4) { animation-delay: 0.3s; }
-.schermata-titolo .menu .voce-menu:nth-child(5) { animation-delay: 0.36s; }
+/* le voci del menu entrano una dopo l'altra, a scatti da videogame */
+.schermata-titolo .menu .voce-menu { animation: apparizione-scatti 0.25s steps(3) both; }
+.schermata-titolo .menu .voce-menu:nth-child(1) { animation-delay: 0.1s; }
+.schermata-titolo .menu .voce-menu:nth-child(2) { animation-delay: 0.16s; }
+.schermata-titolo .menu .voce-menu:nth-child(3) { animation-delay: 0.22s; }
+.schermata-titolo .menu .voce-menu:nth-child(4) { animation-delay: 0.28s; }
+.schermata-titolo .menu .voce-menu:nth-child(5) { animation-delay: 0.34s; }
 
+/* voce del menu: scheda di carta con filetto e ombra dura che si preme */
 .voce-menu {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding: 0.95rem 1.25rem;
-  border: 1px solid var(--bordo);
-  border-radius: var(--raggio);
-  background: var(--superficie);
-  color: var(--testo);
+  padding: 0.9rem 1.2rem;
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
+  background: var(--paper);
+  color: var(--ink);
   font: inherit;
   text-align: left;
   cursor: pointer;
-  box-shadow: var(--ombra-1);
+  box-shadow: var(--ombra-dura);
   position: relative;
-  overflow: hidden;
-  transition: transform var(--scatto), border-color var(--scatto), box-shadow var(--scatto);
-}
-
-/* la banda verde che si accende sul fianco al passaggio del mouse */
-.voce-menu::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: linear-gradient(180deg, var(--accento-vivo), var(--accento));
-  transform: scaleY(0);
-  transition: transform var(--scatto);
+  transition: box-shadow var(--scatto), transform var(--scatto), background var(--scatto);
 }
 
 .voce-menu:hover {
-  transform: translateY(-2px);
-  border-color: var(--accento);
-  box-shadow: var(--ombra-2);
+  box-shadow: var(--ombra-dura-premuta);
+  transform: translate(2px, 2px);
+  background: var(--paper-2);
 }
-
-.voce-menu:hover::before { transform: scaleY(1); }
 
 .voce-menu.attiva {
-  border-color: var(--accento);
+  background: var(--paper-2);
+  box-shadow: var(--ombra-dura-premuta);
+  transform: translate(2px, 2px);
 }
-
-.voce-menu.attiva::before { transform: scaleY(1); }
 
 .voce-menu:disabled {
   opacity: 0.6;
@@ -227,140 +194,141 @@ h1, h2, h3, h4 {
 }
 
 .voce-etichetta {
-  font-family: var(--font-titoli);
-  font-size: 1.18rem;
-  font-weight: 700;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .voce-descrizione {
   font-size: 0.85rem;
-  color: var(--testo-attenuato);
+  color: var(--ink-2);
 }
 
 .avviso {
   margin-top: 1.5rem;
   padding: 0.7rem 1.1rem;
-  border-radius: var(--raggio);
-  background: var(--accento-tenue);
-  border: 1px solid var(--accento);
-  color: var(--accento-scuro);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
+  background: var(--paper-2);
+  color: var(--ink);
   max-width: 520px;
-  box-shadow: var(--ombra-1);
+  box-shadow: var(--ombra-dura-premuta);
+  position: relative;
 }
 
 .versione {
   margin-top: 3rem;
-  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
-  color: var(--testo-attenuato);
+  color: var(--ink-2);
+  position: relative;
 }
 
-/* ---- Schermate del database ---- */
+/* ---- Le schermate ---- */
 
 .schermata {
   max-width: 860px;
   margin: 0 auto;
   padding: 1.5rem 1rem 3rem;
-  animation: schermata-entra 0.28s ease both;
-}
-
-/* ogni cambio di schermata è un piccolo sipario che si apre */
-@keyframes schermata-entra {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
+  animation: apparizione-scatti 0.2s steps(3) both;
 }
 
 .schermata h2 {
   font-size: 1.6rem;
-  font-weight: 800;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
   gap: 0.6rem;
 }
 
-/* il segnalino verde davanti ai titoli: il "gagliardetto" della schermata */
+/* il segnalino davanti ai titoli: blocco pieno d'inchiostro con spigolo */
 .schermata h2::before {
   content: '';
-  width: 6px;
-  height: 1.35em;
+  width: 10px;
+  height: 1.1em;
   flex: none;
-  border-radius: 999px;
-  background: linear-gradient(180deg, var(--accento-vivo), var(--accento));
+  background: var(--green-pitch);
+  border: 2px solid var(--ink);
 }
 
 .schermata h3 {
   margin: 1.5rem 0 0.6rem;
-  font-weight: 700;
 }
 
 .titolo-competizione {
-  border-bottom: 2px solid var(--accento);
+  border-bottom: 3px solid var(--ink);
   padding-bottom: 0.3rem;
 }
 
+/* barra di navigazione: una striscia d'inchiostro fissa in alto */
 .barra-navigazione {
   display: flex;
   gap: 0.5rem;
-  padding: 0.7rem 1rem;
-  background: var(--velo);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--bordo);
+  padding: 0.6rem 1rem;
+  background: var(--ink);
+  border-bottom: 3px solid var(--ink);
   position: sticky;
   top: 0;
   z-index: 20;
 }
 
 .bottone-indietro {
-  padding: 0.4rem 0.9rem;
-  border: 1px solid var(--bordo);
-  border-radius: 8px;
-  background: var(--superficie);
-  color: var(--testo);
+  padding: 0.35rem 0.9rem;
+  border: 2px solid var(--paper);
+  border-radius: var(--raggio-max);
+  background: var(--ink);
+  color: var(--paper);
   font: inherit;
+  font-family: var(--font-heading);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   cursor: pointer;
-  transition: border-color var(--scatto), color var(--scatto), transform var(--scatto);
+  transition: background var(--scatto), color var(--scatto);
 }
 
 .bottone-indietro:hover {
-  border-color: var(--accento);
-  color: var(--accento);
-  transform: translateY(-1px);
+  background: var(--paper);
+  color: var(--ink);
 }
 
-/* ---- Tabelle (squadre, rose) ---- */
+/* ---- Tabelle da almanacco (§4.3) ---- */
 
 .tabella {
   width: 100%;
   border-collapse: collapse;
-  background: var(--superficie);
-  border: 1px solid var(--bordo);
-  border-radius: var(--raggio);
+  background: var(--paper);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   overflow: hidden;
   margin-bottom: 1.5rem;
-  box-shadow: var(--ombra-1);
+  box-shadow: var(--ombra-dura);
 }
 
 .tabella th,
 .tabella td {
-  padding: 0.55rem 0.8rem;
+  padding: 0.5rem 0.8rem;
   text-align: left;
-  border-bottom: 1px solid var(--bordo);
+  border-bottom: 1px solid var(--paper-3);
 }
 
 .tabella tr:last-child td {
   border-bottom: none;
 }
 
+/* header di tabella: inchiostro pieno, carattere condensato MAIUSCOLO */
 .tabella th {
-  background: var(--sfondo-carta);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-heading);
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--testo-attenuato);
+  letter-spacing: 0.08em;
+  border-bottom: none;
   user-select: none;
 }
 
@@ -370,7 +338,12 @@ h1, h2, h3, h4 {
 }
 
 .tabella th.ordinabile:hover {
-  color: var(--accento);
+  color: var(--gold);
+}
+
+/* righe alternate come le pagine dei risultati */
+.tabella tbody tr:nth-child(even) {
+  background: var(--paper-2);
 }
 
 .riga-cliccabile {
@@ -379,11 +352,13 @@ h1, h2, h3, h4 {
 }
 
 .riga-cliccabile:hover {
-  background: var(--accento-tenue);
+  background: var(--paper-3);
 }
 
+/* i numeri in tabella: monospazio da telescrivente */
 .num {
   text-align: right;
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
@@ -392,13 +367,29 @@ h1, h2, h3, h4 {
 }
 
 .evidenza {
-  color: var(--accento);
+  color: var(--green-pitch);
   font-weight: 700;
 }
 
 .nota {
   font-size: 0.85rem;
-  color: var(--testo-attenuato);
+  color: var(--ink-2);
+}
+
+/* la riga della squadra dell'utente: evidenziata col filetto pieno */
+.riga-mia {
+  background: var(--paper-3) !important;
+  box-shadow: inset 4px 0 0 var(--club-primary, var(--green-pitch));
+  font-weight: 700;
+}
+
+/* filetti delle zone di classifica (§6): promozione verde, retrocessione rossa */
+.riga-promozione td:first-child {
+  box-shadow: inset 4px 0 0 var(--green-pitch);
+}
+
+.riga-retrocessione td:first-child {
+  box-shadow: inset 4px 0 0 var(--red-card);
 }
 
 /* ---- Scheda giocatore ---- */
@@ -409,23 +400,31 @@ h1, h2, h3, h4 {
 
 .etichetta-ruolo {
   display: inline-block;
-  padding: 0.12rem 0.55rem;
-  border-radius: 6px;
-  background: linear-gradient(160deg, var(--accento-vivo), var(--accento));
-  color: #ffffff;
-  font-weight: 700;
+  padding: 0.1rem 0.55rem;
+  border: 2px solid var(--ink);
+  border-radius: var(--raggio-max);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-heading);
+  font-weight: 600;
   font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-/* Badge dorato per Icons e Heroes */
+/* badge dorato per Icons e Heroes */
 .etichetta-leggenda {
   display: inline-block;
-  padding: 0.12rem 0.55rem;
-  border-radius: 6px;
-  background: linear-gradient(160deg, #d4a017, var(--oro));
-  color: #ffffff;
-  font-weight: 700;
+  padding: 0.1rem 0.55rem;
+  border: 2px solid var(--ink);
+  border-radius: var(--raggio-max);
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--font-heading);
+  font-weight: 600;
   font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .griglia-attributi {
@@ -442,26 +441,28 @@ h1, h2, h3, h4 {
   font-size: 0.9rem;
 }
 
+/* barra attributo: riempimento a SCATTI, come tacche stampate */
 .attributo-barra {
-  height: 0.55rem;
-  border-radius: 999px;
-  background: #e3e6eb;
+  height: 0.6rem;
+  border: 1px solid var(--ink);
+  background: var(--paper-2);
   overflow: hidden;
 }
 
 .attributo-riempimento {
   height: 100%;
-  border-radius: 999px;
-  /* il colore viene impostato dal componente in base al valore */
+  animation: riempi-scatti 0.4s steps(8) both;
+  /* il colore viene impostato dal componente in base alla fascia */
 }
 
 .attributo-valore {
   text-align: right;
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-weight: 700;
 }
 
-/* ---- Carriera (M2) ---- */
+/* ---- Moduli e bottoni ---- */
 
 .modulo {
   display: flex;
@@ -474,52 +475,58 @@ h1, h2, h3, h4 {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+  font-family: var(--font-heading);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.85rem;
 }
 
 .modulo input {
   padding: 0.55rem 0.75rem;
-  border: 1px solid var(--bordo);
-  border-radius: 8px;
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   font: inherit;
-  background: var(--superficie);
-  color: var(--testo);
-  transition: border-color var(--scatto), box-shadow var(--scatto);
+  background: var(--paper);
+  color: var(--ink);
 }
 
 .modulo input:focus {
-  border-color: var(--accento);
-  box-shadow: 0 0 0 3px rgb(23 114 74 / 12%);
-  outline: none;
+  outline: 2px solid var(--green-pitch);
+  outline-offset: 1px;
 }
 
+/* i bottoni: pieni, bordo netto, ombra dura che "si preme" (§4.1) */
 .bottone-primario,
 .bottone-secondario {
-  padding: 0.6rem 1.2rem;
-  border-radius: 10px;
+  padding: 0.55rem 1.2rem;
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   font: inherit;
-  font-family: var(--font-titoli);
-  font-weight: 700;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   cursor: pointer;
-  transition: transform var(--scatto), box-shadow var(--scatto), border-color var(--scatto), filter var(--scatto);
+  box-shadow: var(--ombra-dura);
+  transition: box-shadow var(--scatto), transform var(--scatto);
 }
 
 .bottone-primario {
-  background: linear-gradient(170deg, var(--accento-vivo), var(--accento));
-  color: #ffffff;
-  border: 1px solid var(--accento);
-  box-shadow: var(--ombra-1), inset 0 1px 0 rgb(255 255 255 / 22%);
+  background: var(--green-pitch);
+  color: var(--paper);
 }
 
-.bottone-primario:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: var(--ombra-2), inset 0 1px 0 rgb(255 255 255 / 22%);
-  filter: brightness(1.04);
+.bottone-primario:hover:not(:disabled),
+.bottone-secondario:hover {
+  box-shadow: var(--ombra-dura-premuta);
+  transform: translate(2px, 2px);
 }
 
-.bottone-primario:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: var(--ombra-1);
+.bottone-primario:active:not(:disabled),
+.bottone-secondario:active {
+  box-shadow: none;
+  transform: translate(4px, 4px);
 }
 
 .bottone-primario:disabled {
@@ -528,84 +535,75 @@ h1, h2, h3, h4 {
 }
 
 .bottone-secondario {
-  background: var(--superficie);
-  color: var(--testo);
-  border: 1px solid var(--bordo);
-  box-shadow: var(--ombra-1);
-}
-
-.bottone-secondario:hover {
-  border-color: var(--accento);
-  color: var(--accento-scuro);
-  transform: translateY(-1px);
-  box-shadow: var(--ombra-2);
-}
-
-.bottone-secondario:active {
-  transform: translateY(0);
-  box-shadow: var(--ombra-1);
+  background: var(--paper);
+  color: var(--ink);
 }
 
 .riga-bottoni {
   display: flex;
-  gap: 0.8rem;
+  gap: 1rem;
   margin: 1rem 0 1.5rem;
   flex-wrap: wrap;
 }
 
-/* le linguette: non più sottolineature, ma un segmento "pill" da console */
+/* ---- Linguette da raccoglitore (§4.1): schede che spuntano dal bordo ---- */
+
 .linguette {
   display: inline-flex;
-  gap: 0.25rem;
-  margin: 1rem 0;
-  padding: 0.3rem;
-  background: var(--sfondo-carta);
-  border: 1px solid var(--bordo);
-  border-radius: 999px;
-  box-shadow: inset 0 1px 2px rgb(16 24 40 / 5%);
+  gap: 0.3rem;
+  margin: 1rem 0 0;
   flex-wrap: wrap;
+  align-items: flex-end;
+  position: relative;
+  z-index: 1;
 }
 
 .linguetta {
-  padding: 0.45rem 1.05rem;
-  border: none;
-  border-radius: 999px;
-  background: transparent;
+  padding: 0.4rem 1rem 0.5rem;
+  border: var(--bordo-vivo);
+  border-bottom: none;
+  border-radius: var(--raggio-max) var(--raggio-max) 0 0;
+  background: var(--paper-2);
   font: inherit;
-  font-family: var(--font-titoli);
+  font-family: var(--font-heading);
   font-weight: 600;
-  color: var(--testo-attenuato);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-2);
   cursor: pointer;
-  transition: color var(--scatto), background var(--scatto), box-shadow var(--scatto);
+  transition: background var(--scatto), transform var(--scatto);
 }
 
 .linguetta:hover {
-  color: var(--testo);
+  background: var(--paper);
+  color: var(--ink);
 }
 
+/* la linguetta attiva "esce" dal raccoglitore, piena di verde */
 .linguetta.attiva {
-  color: #ffffff;
-  background: linear-gradient(170deg, var(--accento-vivo), var(--accento));
-  box-shadow: var(--ombra-1);
+  background: var(--green-pitch);
+  color: var(--paper);
+  transform: translateY(-3px);
+  padding-bottom: calc(0.5rem + 3px);
 }
 
-/* la riga della squadra dell'utente, evidenziata in risultati e classifica */
-.riga-mia {
-  background: var(--accento-tenue);
-  box-shadow: inset 3px 0 0 var(--accento);
+/* il filetto sotto le linguette: il dorso del raccoglitore */
+.linguette + * {
+  border-top: 3px solid var(--ink);
+  padding-top: 1rem;
 }
 
 .riquadro-esito {
-  background: var(--superficie);
-  border: 1px solid var(--bordo);
-  border-radius: var(--raggio-grande);
+  background: var(--paper);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   padding: 1.2rem 1.5rem;
   margin: 1rem 0 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
   font-size: 1.05rem;
-  box-shadow: var(--ombra-2);
+  box-shadow: var(--ombra-dura);
 }
 
 /* dentro le schermate (es. Carica carriera) la lista occupa tutta la
@@ -630,16 +628,16 @@ h1, h2, h3, h4 {
   flex: none;
 }
 
-/* ---- Cronaca partita (M3) ---- */
+/* ---- Cronaca partita ---- */
 
 .cronaca {
-  background: var(--superficie);
-  border: 1px solid var(--bordo);
-  border-left: 4px solid var(--accento);
-  border-radius: var(--raggio);
+  background: var(--paper);
+  border: var(--bordo-vivo);
+  border-left: 6px solid var(--green-pitch);
+  border-radius: var(--raggio-max);
   padding: 1rem 1.3rem;
   margin-bottom: 1.5rem;
-  box-shadow: var(--ombra-1);
+  box-shadow: var(--ombra-dura);
 }
 
 .eventi {
@@ -653,8 +651,9 @@ h1, h2, h3, h4 {
 .eventi .minuto {
   display: inline-block;
   min-width: 2.4rem;
+  font-family: var(--font-mono);
   font-weight: 700;
-  color: var(--testo-attenuato);
+  color: var(--ink-2);
   font-variant-numeric: tabular-nums;
 }
 
@@ -669,71 +668,10 @@ h1, h2, h3, h4 {
   font-size: 0.9rem;
 }
 
-/* ---- Match Day (anticipo M5) ---- */
+/* ---- Match Day (stili residui: la plancia vive in matchday.css) ---- */
 
 .matchday {
   max-width: 1100px;
-}
-
-.md-intestazione {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.8rem;
-}
-
-.md-intestazione h2 {
-  margin: 0;
-  color: var(--testo);
-}
-
-.md-punteggio {
-  color: var(--accento);
-  font-variant-numeric: tabular-nums;
-  padding: 0 0.3rem;
-}
-
-.md-controlli {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.md-minuto {
-  font-family: var(--font-titoli);
-  font-size: 1.5rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  min-width: 3rem;
-  text-align: right;
-  margin-right: 0.5rem;
-  color: var(--accento-scuro);
-}
-
-.md-bottone {
-  padding: 0.38rem 0.75rem;
-  border: 1px solid var(--bordo);
-  border-radius: 8px;
-  background: var(--superficie);
-  color: var(--testo);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: var(--ombra-1);
-  transition: transform var(--scatto), border-color var(--scatto), box-shadow var(--scatto);
-}
-
-.md-bottone:hover {
-  border-color: var(--accento);
-  transform: translateY(-1px);
-}
-
-.md-bottone.attivo {
-  background: linear-gradient(170deg, var(--accento-vivo), var(--accento));
-  border-color: var(--accento);
-  color: #ffffff;
 }
 
 .md-corpo {
@@ -745,17 +683,16 @@ h1, h2, h3, h4 {
 .md-campo {
   flex: 1.4;
   min-width: 0;
-  border-radius: var(--raggio);
-  box-shadow: var(--ombra-2);
+  border-radius: var(--raggio-max);
 }
 
 /* la palla scivola tra una posizione e l'altra */
 .md-palla {
-  transition: cx 0.6s ease, cy 0.6s ease;
+  transition: cx 0.6s steps(6), cy 0.6s steps(6);
 }
 
 .gettone circle {
-  transition: r 0.3s ease;
+  transition: r 0.3s steps(3);
 }
 
 .nome-gettone {
@@ -775,92 +712,11 @@ h1, h2, h3, h4 {
   gap: 0.6rem;
 }
 
-/* pannello di pausa: cambi e regolazioni */
-.md-pannello {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-  background: var(--superficie);
-  border: 1px solid var(--accento);
-  border-radius: var(--raggio);
-  padding: 0.8rem 1.2rem;
-  margin-bottom: 0.8rem;
-  box-shadow: var(--ombra-2);
-}
-
-.md-cambi,
-.md-regolazioni {
-  display: flex;
-  gap: 0.6rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.md-pannello select {
-  padding: 0.35rem 0.5rem;
-  border: 1px solid var(--bordo);
-  border-radius: 8px;
-  font: inherit;
-  background: var(--superficie);
-  color: var(--testo);
-}
-
-/* pagelle live sotto la telecronaca */
-.md-voti {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.8rem;
-  background: var(--superficie);
-  border: 1px solid var(--bordo);
-  border-radius: var(--raggio);
-  padding: 0.5rem 0.8rem;
-  font-size: 0.82rem;
-  box-shadow: var(--ombra-1);
-}
-
-.md-telecronaca {
-  flex: 1;
-  min-width: 260px;
-  max-height: 380px;
-  overflow-y: auto;
-  background: var(--superficie);
-  border: 1px solid var(--bordo);
-  border-radius: var(--raggio);
-  padding: 0.8rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  box-shadow: var(--ombra-1);
-}
-
-.md-riga {
-  font-size: 0.9rem;
-  animation: apparizione 0.25s ease;
-}
-
-.md-riga .minuto {
-  display: inline-block;
-  min-width: 2.2rem;
-  font-weight: 700;
-  color: var(--testo-attenuato);
-  font-variant-numeric: tabular-nums;
-}
-
-.md-riga.evidenza {
-  font-weight: 700;
-  color: var(--accento);
-}
-
-@keyframes apparizione {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: none; }
-}
-
 @media (max-width: 800px) {
   .md-corpo { flex-direction: column; }
 }
 
-/* ---- Schermata Tattica (M4) ---- */
+/* ---- Schermata Tattica ---- */
 
 .tattica-controlli {
   display: flex;
@@ -874,26 +730,37 @@ h1, h2, h3, h4 {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  font-size: 0.85rem;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--testo-attenuato);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-2);
 }
 
+/* tutte le tendine e i campi parlano la stessa lingua di carta */
 .tattica-controlli select,
-.pannello-slot select {
-  padding: 0.4rem 0.6rem;
-  border: 1px solid var(--bordo);
-  border-radius: 8px;
+.pannello-slot select,
+.md-pannello select,
+.mercato select,
+.griglia-editor input,
+.griglia-editor select,
+.campo-numero,
+.leve input[type='number'] {
+  padding: 0.35rem 0.5rem;
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   font: inherit;
-  background: var(--superficie);
-  color: var(--testo);
+  background: var(--paper);
+  color: var(--ink);
 }
 
 .campo-tattico {
   width: 100%;
   max-width: 640px;
-  border-radius: var(--raggio);
-  box-shadow: var(--ombra-2);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
+  box-shadow: var(--ombra-dura);
   margin-bottom: 1rem;
 }
 
@@ -909,11 +776,11 @@ h1, h2, h3, h4 {
 }
 
 .pannello-slot {
-  background: var(--superficie);
-  border: 1px solid var(--bordo);
-  border-radius: var(--raggio-grande);
+  background: var(--paper);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   padding: 1rem 1.3rem;
-  box-shadow: var(--ombra-2);
+  box-shadow: var(--ombra-dura);
 }
 
 .pannello-slot h3 {
@@ -938,21 +805,25 @@ h1, h2, h3, h4 {
   cursor: pointer;
 }
 
+/* le pilloline di idoneità: piene, col bordo d'inchiostro */
 .idoneita {
   margin-left: auto;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  color: #ffffff;
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.08rem 0.5rem;
+  border: 1px solid var(--ink);
+  border-radius: var(--raggio-max);
+  color: var(--paper);
 }
 
-.idoneita.ottima { background: #27ae60; }
-.idoneita.buona { background: #7cb342; }
-.idoneita.scarsa { background: #e0a800; }
-.idoneita.pessima { background: #c0392b; }
+.idoneita.ottima { background: var(--green-pitch); }
+.idoneita.buona { background: #558b2f; }
+.idoneita.scarsa { background: var(--orange-hot); }
+.idoneita.pessima { background: var(--red-card); }
 
-/* ---- Mercato (M6) ---- */
+/* ---- Mercato ---- */
 
 .mercato-testata {
   display: flex;
@@ -960,12 +831,12 @@ h1, h2, h3, h4 {
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  background: var(--superficie);
-  border: 1px solid var(--bordo);
-  border-radius: var(--raggio);
+  background: var(--paper);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   padding: 0.8rem 1.2rem;
   margin-bottom: 1rem;
-  box-shadow: var(--ombra-1);
+  box-shadow: var(--ombra-dura);
 }
 
 .mercato h3 {
@@ -976,31 +847,18 @@ h1, h2, h3, h4 {
   flex: 1;
   min-width: 220px;
   padding: 0.5rem 0.7rem;
-  border: 1px solid var(--bordo);
-  border-radius: 8px;
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   font: inherit;
-  background: var(--superficie);
-  color: var(--testo);
-  transition: border-color var(--scatto), box-shadow var(--scatto);
+  background: var(--paper);
+  color: var(--ink);
 }
 
 .campo-ricerca:focus {
-  border-color: var(--accento);
-  box-shadow: 0 0 0 3px rgb(23 114 74 / 12%);
-  outline: none;
+  outline: 2px solid var(--green-pitch);
+  outline-offset: 1px;
 }
 
-.mercato select {
-  padding: 0.45rem 0.6rem;
-  border: 1px solid var(--bordo);
-  border-radius: 8px;
-  font: inherit;
-  background: var(--superficie);
-  color: var(--testo);
-}
-
-/* la barra dei filtri della ricerca giocatori (squadra, ruolo, nazionalità,
-   media, età, scadenza e ordinamento) */
 .filtri-mercato {
   flex-wrap: wrap;
   align-items: center;
@@ -1008,19 +866,70 @@ h1, h2, h3, h4 {
 }
 
 .filtri-mercato label {
-  font-size: 0.85rem;
-  color: var(--testo-attenuato);
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
   white-space: nowrap;
 }
 
-/* l'editor del database (M9) */
+/* il TICKER del mercato (§6): striscia arancione che scorre come un telex */
+.ticker-mercato {
+  display: flex;
+  align-items: stretch;
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
+  background: var(--paper);
+  box-shadow: var(--ombra-dura);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.ticker-etichetta {
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+  background: var(--orange-hot);
+  color: var(--paper);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  border-right: 2px solid var(--ink);
+}
+
+.ticker-testo {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.ticker-testo span {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding-left: 100%;
+  animation: ticker-scorri 40s linear infinite;
+}
+
+@keyframes ticker-scorri {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+/* l'editor del database */
 .scheda-editor {
-  border: 1px solid var(--bordo);
-  border-radius: var(--raggio);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   padding: 1rem;
   margin: 1rem 0;
-  background: var(--superficie);
-  box-shadow: var(--ombra-1);
+  background: var(--paper);
+  box-shadow: var(--ombra-dura);
 }
 
 .scheda-editor h4 {
@@ -1037,28 +946,18 @@ h1, h2, h3, h4 {
   display: flex;
   flex-direction: column;
   font-size: 0.82rem;
-  color: var(--testo-attenuato);
+  color: var(--ink-2);
   gap: 0.15rem;
 }
 
-.griglia-editor input,
-.griglia-editor select {
-  padding: 0.35rem 0.5rem;
-  border: 1px solid var(--bordo);
-  border-radius: 8px;
-  font: inherit;
-  background: var(--superficie);
-  color: var(--testo);
-}
-
-/* il riquadro della coppa nazionale (M8) */
+/* il riquadro della coppa nazionale */
 .riquadro-coppa {
-  border: 1px solid var(--bordo);
-  border-radius: var(--raggio);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   padding: 0.8rem 1rem;
   margin: 1rem 0;
-  background: var(--superficie);
-  box-shadow: var(--ombra-1);
+  background: var(--paper);
+  box-shadow: var(--ombra-dura);
 }
 
 .riquadro-coppa h3 {
@@ -1067,22 +966,16 @@ h1, h2, h3, h4 {
 
 .campo-numero {
   width: 4.2rem;
-  padding: 0.45rem 0.5rem;
-  border: 1px solid var(--bordo);
-  border-radius: 8px;
-  font: inherit;
-  background: var(--superficie);
-  color: var(--testo);
 }
 
 .pannello-trattativa {
-  background: var(--superficie);
-  border: 1px solid var(--bordo);
-  border-left: 4px solid var(--accento);
-  border-radius: var(--raggio-grande);
+  background: var(--paper);
+  border: var(--bordo-vivo);
+  border-left: 6px solid var(--green-pitch);
+  border-radius: var(--raggio-max);
   padding: 1rem 1.3rem;
   margin: 1rem 0;
-  box-shadow: var(--ombra-2);
+  box-shadow: var(--ombra-dura);
 }
 
 .leve {
@@ -1097,17 +990,16 @@ h1, h2, h3, h4 {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  font-size: 0.8rem;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--testo-attenuato);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
 }
 
 .leve input[type='number'] {
   width: 8.5rem;
-  padding: 0.45rem 0.6rem;
-  border: 1px solid var(--bordo);
-  border-radius: 8px;
-  font: inherit;
 }
 
 .leva-spunta {
@@ -1126,50 +1018,75 @@ h1, h2, h3, h4 {
 }
 
 .riga-scadenza {
-  background: var(--oro-tenue);
+  background: var(--paper-3) !important;
 }
 
+/* il notiziario: RITAGLI di giornale, ognuno un riquadro di carta */
 .notiziario {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.6rem;
 }
 
-.notizia.ufficiale { font-weight: 600; }
-.notizia.rumor { color: var(--testo-attenuato); font-style: italic; }
-.notizia.avviso { color: var(--accento); font-weight: 700; }
+.notiziario .notizia {
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--ink);
+  border-radius: var(--raggio-max);
+  background: var(--paper);
+  box-shadow: 2px 2px 0 var(--paper-3);
+}
 
-/* ---- Trattativa col giocatore e spogliatoio (M7) ---- */
+.notizia.ufficiale {
+  font-weight: 600;
+  border: 2px solid var(--ink);
+}
+
+.notizia.rumor {
+  color: var(--ink-2);
+  font-style: italic;
+  background: var(--paper-2);
+}
+
+.notizia.avviso {
+  color: var(--paper);
+  background: var(--green-pitch);
+  font-weight: 700;
+}
+
+/* ---- Trattativa col giocatore e spogliatoio ---- */
 
 .riepilogo-offerta {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
-  background: var(--accento-tenue);
-  border: 1px solid var(--accento);
-  border-radius: var(--raggio);
+  background: var(--paper-2);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   padding: 0.6rem 0.9rem;
   margin: 0.8rem 0;
 }
 
 .termometro {
   margin-left: auto;
-  padding: 0.15rem 0.7rem;
-  border-radius: 999px;
-  font-weight: 700;
-  color: #ffffff;
+  padding: 0.12rem 0.7rem;
+  border: 2px solid var(--ink);
+  border-radius: var(--raggio-max);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--paper);
 }
 
-.termometro.caldo { background: #27ae60; }
-.termometro.tiepido { background: #e0a800; }
-.termometro.freddo { background: #c0392b; }
+.termometro.caldo { background: var(--green-pitch); }
+.termometro.tiepido { background: var(--orange-hot); }
+.termometro.freddo { background: var(--red-card); }
 
 .fattori summary {
   cursor: pointer;
   font-weight: 600;
-  color: var(--testo-attenuato);
+  color: var(--ink-2);
   margin-bottom: 0.4rem;
 }
 
@@ -1191,37 +1108,37 @@ h1, h2, h3, h4 {
   overflow-y: auto;
 }
 
+/* le battute del dialogo: biglietti di carta, non "bolle" da chat */
 .battuta {
   padding: 0.5rem 0.8rem;
-  border-radius: 12px;
+  border: 2px solid var(--ink);
+  border-radius: var(--raggio-max);
   font-size: 0.93rem;
   max-width: 85%;
-  box-shadow: var(--ombra-1);
-  animation: apparizione 0.25s ease;
+  box-shadow: 2px 2px 0 var(--paper-3);
+  animation: apparizione-scatti 0.2s steps(2);
 }
 
 .battuta.allenatore {
-  background: var(--accento-tenue);
+  background: var(--paper-2);
   align-self: flex-end;
-  border-bottom-right-radius: 4px;
+  font-style: italic;
 }
 
 .battuta.giocatore {
-  background: var(--superficie);
-  border: 1px solid var(--bordo);
+  background: var(--paper);
   align-self: flex-start;
-  border-bottom-left-radius: 4px;
 }
 
 .campo-discorso {
   width: 100%;
   padding: 0.6rem 0.8rem;
-  border: 1px solid var(--bordo);
-  border-radius: 10px;
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   font: inherit;
   resize: vertical;
-  background: var(--superficie);
-  color: var(--testo);
+  background: var(--paper);
+  color: var(--ink);
 }
 
 .scelte-promesse {
@@ -1238,16 +1155,16 @@ h1, h2, h3, h4 {
 
 .impostazioni-llm summary {
   cursor: pointer;
-  color: var(--testo-attenuato);
+  color: var(--ink-2);
 }
 
 .spogliatoio {
-  background: var(--superficie);
-  border: 1px solid var(--bordo);
-  border-radius: var(--raggio-grande);
+  background: var(--paper);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   padding: 0.8rem 1.2rem;
   margin-bottom: 1.2rem;
-  box-shadow: var(--ombra-1);
+  box-shadow: var(--ombra-dura);
 }
 
 .spogliatoio h3 {
@@ -1259,25 +1176,193 @@ h1, h2, h3, h4 {
   padding: 0.2rem 0;
 }
 
-.msg-spogliatoio.negativo strong { color: var(--pericolo); }
-.msg-spogliatoio.positivo strong { color: #27ae60; }
+.msg-spogliatoio.negativo strong { color: var(--red-card); }
+.msg-spogliatoio.positivo strong { color: var(--green-pitch); }
 
-/* chi preferisce meno movimento, ha meno movimento (accessibilità) */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+/* ---- HUD carriera (§6): la barra d'inchiostro coi dati vivi ---- */
+
+.hud-carriera {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  background: var(--ink);
+  color: var(--paper);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
+  padding: 0.6rem 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--ombra-dura);
 }
 
-/* il pannello Figurina dell'editor (VOLTI): anteprima + scelte affiancate */
+.hud-club {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 1.05rem;
+}
+
+/* la casacca del club: quadratino coi colori sociali */
+.hud-casacca {
+  width: 18px;
+  height: 22px;
+  flex: none;
+  border: 2px solid var(--paper);
+  background: linear-gradient(90deg,
+    var(--club-primary, var(--green-pitch)) 0 50%,
+    var(--club-secondary, var(--ink)) 50% 100%);
+}
+
+.hud-voce {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.hud-etichetta {
+  font-family: var(--font-heading);
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--paper-3);
+}
+
+.hud-valore {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-azioni {
+  margin-left: auto;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.hud-azioni .bottone-secondario {
+  box-shadow: none;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+.hud-azioni .bottone-secondario:hover {
+  transform: none;
+  background: var(--paper-2);
+}
+
+/* ---- Griglia di figurine mini (§6, Rosa) ---- */
+
+.griglia-figurine {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.figurina-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.5rem 0.4rem 0.4rem;
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
+  background: var(--paper);
+  box-shadow: var(--ombra-dura);
+  cursor: pointer;
+  font: inherit;
+  color: var(--ink);
+  transition: box-shadow var(--scatto), transform var(--scatto);
+}
+
+.figurina-mini:hover {
+  box-shadow: var(--ombra-dura-premuta);
+  transform: translate(2px, 2px);
+}
+
+.mini-volto {
+  border: 2px solid var(--ink);
+  background: var(--paper-2);
+  line-height: 0;
+}
+
+.mini-nome {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  text-align: center;
+  line-height: 1.15;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mini-riga {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.mini-media {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.mini-ruolo {
+  font-family: var(--font-heading);
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.05rem 0.3rem;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 2px;
+}
+
+/* ---- Albo d'oro (§6, profilo allenatore) ---- */
+
+.albo-doro {
+  border: var(--bordo-vivo);
+  border-left: 6px solid var(--gold);
+  border-radius: var(--raggio-max);
+  background: var(--paper);
+  box-shadow: var(--ombra-dura);
+  padding: 0.8rem 1.2rem;
+  margin: 1rem 0;
+}
+
+.albo-doro ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.trofeo-anno {
+  font-family: var(--font-display);
+  color: var(--gold);
+  margin-right: 0.5rem;
+}
+
+/* ---- Il pannello Figurina dell'editor (VOLTI) ---- */
+
 .riga-figurina {
   display: flex;
   gap: 1.2rem;
   align-items: flex-start;
-  background: var(--sfondo-carta);
-  border: 1px solid var(--bordo);
-  border-radius: var(--raggio);
+  background: var(--paper-2);
+  border: var(--bordo-vivo);
+  border-radius: var(--raggio-max);
   padding: 0.8rem;
   margin-bottom: 0.8rem;
 }
@@ -1290,12 +1375,37 @@ h1, h2, h3, h4 {
 
 .regolatori button {
   min-width: 26px;
-  padding: 0.25rem 0.35rem;
-  border: 1px solid var(--bordo);
-  border-radius: 6px;
-  background: var(--superficie);
+  padding: 0.2rem 0.35rem;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  background: var(--paper);
   font: inherit;
   cursor: pointer;
 }
 
-.regolatori button:hover { border-color: var(--accento); }
+.regolatori button:hover { background: var(--paper-3); }
+
+/* ---- Animazioni a scatti (§5: 150-200ms, steps, mai fluide) ---- */
+
+@keyframes apparizione-scatti {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes riempi-scatti {
+  from { width: 0; }
+}
+
+/* alias per il codice esistente che usa "apparizione" */
+@keyframes apparizione {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* chi preferisce meno movimento, ha meno movimento (accessibilità) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,12 +1,16 @@
-// Rosa.tsx — la rosa di un club: tabella ordinabile dei giocatori.
-// Cliccando l'intestazione di una colonna si ordina per quella colonna;
-// cliccando un giocatore si apre la sua scheda.
+// Rosa.tsx — la rosa di un club: tabella ordinabile dei giocatori,
+// oppure — a scelta — la GRIGLIA DELLE FIGURINE (DESIGN-MISTER.md §6),
+// come la pagina di un album. Cliccando l'intestazione di una colonna si
+// ordina per quella colonna; cliccando un giocatore si apre la sua scheda.
 
 import { useState } from 'react'
 import type { Database } from 'sql.js'
 import { applicaDelta } from '../carriera/crescita.ts'
 import { interroga, interrogaUna } from '../db/database.ts'
+import { nazionalitaInItaliano } from '../db/nazionalita.ts'
 import { calcolaEta, mediaComplessiva, type GiocatoreRiga } from '../db/tipi.ts'
+import { fascia } from '../design/fasce.ts'
+import { VoltoPixel } from '../design/VoltoPixel.tsx'
 
 interface Props {
   db: Database
@@ -37,6 +41,8 @@ const ORDINE_RUOLI = ['POR', 'DC', 'TD', 'TS', 'MED', 'CC', 'TRQ', 'ED', 'ES', '
 function Rosa({ db, squadra, giocatoriIds, crescita, onApriGiocatore }: Props) {
   const [colonnaOrdine, setColonnaOrdine] = useState<ChiaveColonna>('ruolo')
   const [discendente, setDiscendente] = useState(false)
+  // vista "elenco" (tabella da almanacco) o "album" (griglia di figurine)
+  const [aAlbum, setAAlbum] = useState(false)
 
   // Club e nazionali usano tabelle diverse: la rosa di un club è "giocatori
   // con quel club_id", quella di una nazionale passa dalle convocazioni
@@ -91,6 +97,33 @@ function Rosa({ db, squadra, giocatoriIds, crescita, onApriGiocatore }: Props) {
   return (
     <section className="schermata">
       <h2>Rosa — {nomeClub}</h2>
+
+      {/* l'interruttore elenco / album di figurine */}
+      <nav className="linguette">
+        <button className={aAlbum ? 'linguetta' : 'linguetta attiva'} onClick={() => setAAlbum(false)}>
+          Elenco
+        </button>
+        <button className={aAlbum ? 'linguetta attiva' : 'linguetta'} onClick={() => setAAlbum(true)}>
+          Album figurine
+        </button>
+      </nav>
+
+      {aAlbum ? (
+        <div className="griglia-figurine">
+          {ordinati.map((g) => (
+            <button key={g.id} className="figurina-mini" onClick={() => onApriGiocatore(g.id)}>
+              <span className="mini-volto"><VoltoPixel giocatore={g} lato={96} /></span>
+              <span className="mini-nome" title={`${g.nome} ${g.cognome}`}>{g.cognome}</span>
+              <span className="mini-riga">
+                <span className="mini-ruolo">{g.ruolo}</span>
+                <span className={`mini-media fascia-${fascia(mediaComplessiva(g))}`}>
+                  {mediaComplessiva(g)}
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : (
       <table className="tabella">
         <thead>
           <tr>
@@ -108,13 +141,14 @@ function Rosa({ db, squadra, giocatoriIds, crescita, onApriGiocatore }: Props) {
               <td className="grassetto">{g.nome} {g.cognome}</td>
               <td>{g.ruolo}</td>
               <td className="num">{calcolaEta(g.data_nascita)}</td>
-              <td>{g.nazionalita}</td>
-              <td className="num evidenza">{mediaComplessiva(g)}</td>
+              <td>{nazionalitaInItaliano(g.nazionalita)}</td>
+              <td className={`num grassetto fascia-${fascia(mediaComplessiva(g))}`}>{mediaComplessiva(g)}</td>
               <td className="num">{g.potenziale}</td>
             </tr>
           ))}
         </tbody>
       </table>
+      )}
     </section>
   )
 }

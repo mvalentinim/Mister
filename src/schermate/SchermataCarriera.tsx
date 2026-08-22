@@ -20,6 +20,7 @@ import {
 import { accettaOffertaPanchina } from '../carriera/fama.ts'
 import { accettaPanchinaNazionale, classificaGirone, nuovoCicloStessaNazionale } from '../carriera/nazionale.ts'
 import { euro } from '../mercato/valore.ts'
+import { coloriClub } from '../design/colori-club.ts'
 import type { EventoPartita } from '../motore/tipi.ts'
 import { estendiMercatoAlMondo, inizializzaMercato } from '../mercato/stato.ts'
 import MatchDay from './MatchDay.tsx'
@@ -193,7 +194,7 @@ function SchermataCarriera({ db, carriera }: Props) {
   if (carriera.offerteSpeciali?.contesto === 'esonero') {
     return (
       <section className="schermata">
-        <h2>⚡ Esonerato</h2>
+        <h2>Esonerato</h2>
         <div className="riquadro-esito">
           <p>
             La dirigenza ha perso la pazienza: sei stato sollevato dall'incarico.
@@ -244,10 +245,10 @@ function SchermataCarriera({ db, carriera }: Props) {
 
     return (
       <section className="schermata">
-        <h2>🌍 {incarico.nome} — Commissario Tecnico</h2>
+        <h2>{incarico.nome} — Commissario Tecnico</h2>
         <p className="nota">
           Allenatore: {carriera.allenatore.nome} (fama {carriera.famaAllenatore})
-          {carriera.trofei.length > 0 && <> · 🏆 {carriera.trofei.length}</>} ·
+          {carriera.trofei.length > 0 && <> · trofei {carriera.trofei.length}</>} ·
           {incarico.fase === 'qualificazioni'
             ? ` qualificazioni — data ${Math.min(incarico.data + 1, 10)} di 10`
             : incarico.fase === 'torneo' ? ' TORNEO INTERNAZIONALE' : ' ciclo concluso'}
@@ -256,10 +257,10 @@ function SchermataCarriera({ db, carriera }: Props) {
         {!conclusa && (
           <div className="riga-bottoni">
             <button className="bottone-primario" onClick={() => void passo()}>
-              ▶ {incarico.fase === 'qualificazioni' ? `Gioca la data ${incarico.data + 1}` : `Gioca: ${incarico.torneo?.[incarico.turnoTorneo]?.nome}`}
+              {incarico.fase === 'qualificazioni' ? `Gioca la data ${incarico.data + 1}` : `Gioca: ${incarico.torneo?.[incarico.turnoTorneo]?.nome}`}
             </button>
             <button className="bottone-secondario" onClick={() => void tuttoIlCiclo()}>
-              ⏩ Simula tutto il ciclo
+              Simula tutto il ciclo
             </button>
           </div>
         )}
@@ -274,7 +275,7 @@ function SchermataCarriera({ db, carriera }: Props) {
             <p className="nota">Fama attuale: {carriera.famaAllenatore}. Decidi il futuro:</p>
             {incarico.esito !== 'fallito' && (
               <button className="bottone-primario" onClick={() => void restaCt()}>
-                🌍 Resta CT: nuovo ciclo con {incarico.nome}
+                Resta CT: nuovo ciclo con {incarico.nome}
               </button>
             )}
             {carriera.offerteSpeciali && carriera.offerteSpeciali.offerte.length > 0 && (
@@ -389,7 +390,7 @@ function SchermataCarriera({ db, carriera }: Props) {
         {/* crescita e declino della rosa (M8) */}
         {esitoStagione.crescita.length > 0 && (
           <div className="riquadro-esito">
-            <h3>📈 La rosa cresce (e invecchia)</h3>
+            <h3>La rosa cresce (e invecchia)</h3>
             <p className="nota">Potenziale, età, utilizzo e prestazioni muovono gli attributi a fine stagione.</p>
             <ul>
               {esitoStagione.crescita.slice(0, 5).map((n) => (
@@ -405,7 +406,7 @@ function SchermataCarriera({ db, carriera }: Props) {
         {/* le offerte di fascia superiore sbloccate dalla fama (M8, FRD §4.3) */}
         {offerte.length > 0 && (
           <div className="riquadro-esito">
-            <h3>📞 Ti cercano</h3>
+            <h3>Ti cercano</h3>
             <p className="nota">La tua fama ({carriera.famaAllenatore}) apre porte nuove. Decidi prima della nuova stagione.</p>
             <div className="menu">
               {offerte.map((o) => (
@@ -424,7 +425,7 @@ function SchermataCarriera({ db, carriera }: Props) {
         {/* la chiamata della federazione (M8 parte 3, fama alta) */}
         {carriera.offertaNazionale && (
           <div className="riquadro-esito">
-            <h3>🌍 Chiama la federazione</h3>
+            <h3>Chiama la federazione</h3>
             <p>
               La <strong>{carriera.offertaNazionale.nome}</strong> ti vuole come Commissario Tecnico.
               È un incarico esclusivo: lasceresti il club per il ciclo qualificazioni + torneo.
@@ -451,30 +452,73 @@ function SchermataCarriera({ db, carriera }: Props) {
 
   return (
     <section className="schermata">
-      <h2>{nomeClub} — {nomeCompetizione} {etichettaStagione(carriera.anno)}</h2>
+      {/* l'HUD della carriera (§6): la plancia d'inchiostro coi dati vivi,
+          tinta con i colori sociali del club dell'utente */}
+      <header
+        className="hud-carriera"
+        style={{
+          '--club-primary': coloriClub(carriera.clubId).primario,
+          '--club-secondary': coloriClub(carriera.clubId).secondario,
+        } as React.CSSProperties}
+      >
+        <span className="hud-club">
+          <span className="hud-casacca" aria-hidden />
+          {nomeClub}
+        </span>
+        <span className="hud-voce">
+          <span className="hud-etichetta">Stagione</span>
+          <span className="hud-valore">{nomeCompetizione} {etichettaStagione(carriera.anno)}</span>
+        </span>
+        <span className="hud-voce">
+          <span className="hud-etichetta">Giornata</span>
+          <span className="hud-valore">
+            {Math.min(carriera.giornata + 1, carriera.calendario.length)}/{carriera.calendario.length}
+          </span>
+        </span>
+        <span className="hud-voce">
+          <span className="hud-etichetta">Fama</span>
+          <span className="hud-valore">{carriera.famaAllenatore ?? 20}</span>
+        </span>
+        <span className="hud-voce">
+          <span className="hud-etichetta">Fiducia</span>
+          <span className="hud-valore">{carriera.fiducia ?? 55}</span>
+        </span>
+        {carriera.contrattoAllenatore && (
+          <span className="hud-voce">
+            <span className="hud-etichetta">Contratto</span>
+            <span className="hud-valore">fino al {carriera.contrattoAllenatore.scadenza}</span>
+          </span>
+        )}
+        <span className="hud-voce">
+          <span className="hud-etichetta">Obiettivo</span>
+          <span className="hud-valore">{DESCRIZIONE_OBIETTIVO[carriera.obiettivo]}</span>
+        </span>
+        {carriera.trofei && carriera.trofei.length > 0 && (
+          <span className="hud-voce">
+            <span className="hud-etichetta">Trofei</span>
+            <span className="hud-valore">{carriera.trofei.length}</span>
+          </span>
+        )}
+        <span className="hud-azioni">
+          <button
+            className="bottone-secondario"
+            title="Crea subito una copia di questa carriera come slot separato (utile prima di una decisione rischiosa). Il salvataggio automatico è sempre attivo."
+            onClick={async () => {
+              const etichetta = prompt(
+                'Nome della copia di sicurezza:',
+                `Prima della giornata ${Math.min(carriera.giornata + 1, carriera.calendario.length)}`,
+              )
+              if (etichetta === null) return
+              await salvaCarriera(duplicaCarriera(carriera, etichetta))
+              alert('Copia creata: la trovi in "Carica carriera".')
+            }}
+          >
+            Copia di sicurezza
+          </button>
+        </span>
+      </header>
       <p className="nota">
-        Allenatore: {carriera.allenatore.nome} (fama {carriera.famaAllenatore ?? 20}
-        {' '}· fiducia {carriera.fiducia ?? 55}
-        {carriera.contrattoAllenatore ? ` · contratto fino al ${carriera.contrattoAllenatore.scadenza}` : ''})
-        {carriera.trofei && carriera.trofei.length > 0 && <> · 🏆 {carriera.trofei.length}</>} ·
-        obiettivo: {DESCRIZIONE_OBIETTIVO[carriera.obiettivo]} ·
-        giornata {Math.min(carriera.giornata + 1, carriera.calendario.length)} di {carriera.calendario.length}
-        {' '}· salvataggio automatico attivo{' '}
-        <button
-          className="bottone-secondario"
-          title="Crea subito una copia di questa carriera come slot separato (utile prima di una decisione rischiosa)"
-          onClick={async () => {
-            const etichetta = prompt(
-              'Nome della copia di sicurezza:',
-              `Prima della giornata ${Math.min(carriera.giornata + 1, carriera.calendario.length)}`,
-            )
-            if (etichetta === null) return
-            await salvaCarriera(duplicaCarriera(carriera, etichetta))
-            alert('Copia creata: la trovi in "Carica carriera".')
-          }}
-        >
-          💾 Copia di sicurezza
-        </button>
+        Allenatore: {carriera.allenatore.nome} · salvataggio automatico attivo
       </p>
 
       {/* coerenza carriera ↔ database (FRD §11): se il DB attuale non è
@@ -502,7 +546,7 @@ function SchermataCarriera({ db, carriera }: Props) {
             onClick={() => setLinguetta(l)}
           >
             {l === 'partite' ? 'Partite' : l === 'classifica' ? 'Classifica'
-              : l === 'mercato' ? (carriera.mercato?.aperto ? 'Mercato 🟢' : 'Mercato')
+              : l === 'mercato' ? (carriera.mercato?.aperto ? 'Mercato — aperto' : 'Mercato')
               : l === 'tattica' ? 'Tattica' : 'Rosa'}
           </button>
         ))}
@@ -512,7 +556,7 @@ function SchermataCarriera({ db, carriera }: Props) {
         <>
           {!finita && carriera.mercato?.aperto && (
             <p className="avviso">
-              🟢 Il mercato {carriera.mercato.finestra === 'estiva' ? 'estivo' : 'invernale'} è aperto
+              Il mercato {carriera.mercato.finestra === 'estiva' ? 'estivo' : 'invernale'} è aperto
               ({carriera.mercato.giorniRimasti} giorni): il campionato riprende alla chiusura.
               Vai alla linguetta <strong>Mercato</strong> per operare o far scorrere i giorni.
             </p>
@@ -520,20 +564,20 @@ function SchermataCarriera({ db, carriera }: Props) {
           {!finita && !carriera.mercato?.aperto && (
             <div className="riga-bottoni">
               <button className="bottone-primario" onClick={() => setMatchDayAperto(true)}>
-                🎥 Match Day — giornata {carriera.giornata + 1}
+                Match Day — giornata {carriera.giornata + 1}
               </button>
               <button className="bottone-secondario" onClick={() => gioca(false)}>
-                ▶ Simula giornata
+                Simula giornata
               </button>
               <button className="bottone-secondario" onClick={() => gioca(true)}>
-                ⏩ Simula fino a fine stagione
+                Simula fino a fine stagione
               </button>
             </div>
           )}
           {finita && (
             <div className="riga-bottoni">
               <button className="bottone-primario" onClick={concludiStagione}>
-                🏁 Concludi la stagione (verdetti e nuova stagione)
+                Concludi la stagione (verdetti e nuova stagione)
               </button>
             </div>
           )}
@@ -541,7 +585,7 @@ function SchermataCarriera({ db, carriera }: Props) {
           {/* offerta della federazione ancora sul tavolo (dopo un ricaricamento) */}
           {carriera.offertaNazionale && (
             <div className="riquadro-esito">
-              <h3>🌍 La {carriera.offertaNazionale.nome} ti vuole CT</h3>
+              <h3>La {carriera.offertaNazionale.nome} ti vuole CT</h3>
               <button className="bottone-primario"
                 onClick={() => { void (async () => { accettaPanchinaNazionale(db, carriera); await salvaCarriera(carriera); setVersione((v) => v + 1) })() }}>
                 Accetta l'incarico
@@ -556,7 +600,7 @@ function SchermataCarriera({ db, carriera }: Props) {
           {/* offerte di fine stagione ancora sul tavolo (es. dopo un ricaricamento) */}
           {carriera.offerteSpeciali?.contesto === 'fine-stagione' && (
             <div className="riquadro-esito">
-              <h3>📞 Ti cercano</h3>
+              <h3>Ti cercano</h3>
               <div className="menu">
                 {carriera.offerteSpeciali.offerte.map((o) => (
                   <button key={o.clubId} className="voce-menu" onClick={() => void accettaOfferta(o)}>
@@ -574,7 +618,6 @@ function SchermataCarriera({ db, carriera }: Props) {
           {/* le coppe (M8): nazionale sempre, Europa solo se qualificati */}
           {[carriera.coppa, carriera.coppaEuropa].map((coppa) => {
             if (!coppa) return null
-            const europea = coppa.nome === 'Coppa Europa'
             const ultimoGiocato = [...coppa.turni].reverse()
               .find((t) => t.partite.some((p) => p.golCasa !== null))
             const miaUltima = ultimoGiocato?.partite.find(
@@ -585,7 +628,7 @@ function SchermataCarriera({ db, carriera }: Props) {
             const prossimoTurno = coppa.turni[coppa.prossimoTurno]
             return (
               <div className="riquadro-coppa" key={coppa.nome}>
-                <h3>{europea ? '🌍' : '🏆'} {coppa.nome}</h3>
+                <h3>{coppa.nome}</h3>
                 {coppa.vincitriceId !== null ? (
                   <p>{coppa.vincitriceId === carriera.clubId
                     ? <strong>COPPA VINTA! 🎉</strong>
@@ -611,10 +654,24 @@ function SchermataCarriera({ db, carriera }: Props) {
             )
           })}
 
+          {/* l'albo d'oro (§6): la bacheca dei trofei dell'allenatore */}
+          {carriera.trofei && carriera.trofei.length > 0 && (
+            <div className="albo-doro">
+              <h3>Albo d'oro</h3>
+              <ul>
+                {[...carriera.trofei].reverse().map((t, i) => (
+                  <li key={i}>
+                    <span className="trofeo-anno">{etichettaStagione(t.anno)}</span> {t.nome}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* lo spogliatoio: le reazioni dei giocatori (M7, FRD §7) */}
           {carriera.messaggi && carriera.messaggi.length > 0 && (
             <div className="spogliatoio">
-              <h3>📣 Spogliatoio</h3>
+              <h3>Spogliatoio</h3>
               {carriera.messaggi.slice(0, 6).map((msg, i) => (
                 <p key={i} className={`msg-spogliatoio ${msg.tono}`}>
                   <span className="nota">[g. {msg.giornata}]</span> <strong>{msg.giocatoreNome}</strong> {msg.testo}
@@ -662,6 +719,7 @@ function SchermataCarriera({ db, carriera }: Props) {
       )}
 
       {linguetta === 'classifica' && (
+        <>
         <table className="tabella">
           <thead>
             <tr>
@@ -671,8 +729,17 @@ function SchermataCarriera({ db, carriera }: Props) {
             </tr>
           </thead>
           <tbody>
-            {classifica.map((r, i) => (
-              <tr key={r.clubId} className={r.clubId === carriera.clubId ? 'riga-mia' : ''}>
+            {classifica.map((r, i) => {
+              // i filetti delle zone (§6): 3 su dalla seconda divisione,
+              // 3 giù dalla prima — come le regole del motore (motore.ts)
+              const livello = livelloUtente(carriera)
+              const classi = [
+                r.clubId === carriera.clubId ? 'riga-mia' : '',
+                livello === 2 && i < 3 ? 'riga-promozione' : '',
+                livello === 1 && i >= classifica.length - 3 ? 'riga-retrocessione' : '',
+              ].filter(Boolean).join(' ')
+              return (
+              <tr key={r.clubId} className={classi}>
                 <td className="num">{i + 1}</td>
                 <td className="grassetto">{r.nome}</td>
                 <td className="num grassetto">{r.punti}</td>
@@ -683,9 +750,16 @@ function SchermataCarriera({ db, carriera }: Props) {
                 <td className="num">{r.golFatti}</td>
                 <td className="num">{r.golSubiti}</td>
               </tr>
-            ))}
+              )
+            })}
           </tbody>
         </table>
+        <p className="nota">
+          {livelloUtente(carriera) === 2
+            ? 'Filetto verde: zona promozione (le prime 3 salgono).'
+            : 'Filetto rosso: zona retrocessione (le ultime 3 scendono).'}
+        </p>
+        </>
       )}
 
       {linguetta === 'mercato' && carriera.mercato && (
